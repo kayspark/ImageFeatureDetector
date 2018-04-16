@@ -1,16 +1,17 @@
 ## http://cmake.org/runningcmake
 ## http://doc.qt.io/qt-5/cmake-manual.html
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.11)
 
 project(imagefeaturedetector)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin) # http://stackoverflow.com/questions/18826789/cmake-output-build-directory
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
-# set(CMAKE_AUTORCC ON) # Not working. To much time invested on this.
-# set(CMAKE_AUTOUIC ON) # Not useful. It causes troubles with subdirectories, and with the linking order. Better use qt5_wrap_ui()
-
+#set(CMAKE_AUTORCC ON) # Not working. To much time invested on this.
+#set(CMAKE_AUTOUIC ON) # Not useful. It causes troubles with subdirectories, and with the linking order. Better use qt5_wrap_ui()
+include_directories(${CMAKE_SOURCE_DIR}/build/imagefeaturedetector_autogen)
 
 ## http://stackoverflow.com/questions/11783932/how-to-add-linker-or-compile-flag-in-cmake-file
 # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lz")

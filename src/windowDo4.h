@@ -10,28 +10,32 @@
 #ifndef WINDOWDO4_H
 #define WINDOWDO4_H
 
-#include "ui_windowDo4.h"
+#include <build/ui_windowDo4.h>
 #include "windowImage.h"
 
 using namespace std;
 
 class WindowDo4 : public QWidget, Ui::windowDo4 {
-  Q_OBJECT
-  public:
-	WindowDo4(QString windowTitle, WindowImage* harrisImage, WindowImage* fastImage, WindowImage* siftImage, WindowImage* surfImage);
+Q_OBJECT
+public:
+  WindowDo4(QString windowTitle,
+            WindowImage *harrisImage,
+            WindowImage *fastImage,
+            WindowImage *siftImage,
+            WindowImage *surfImage);
 
-  private:
-	void changeEvent(QEvent* event);
-	
-	WindowImage* mHarrisImage;
-	WindowImage* mFastImage;
-	WindowImage* mSiftImage;
-	WindowImage* mSurfImage;
-	
-	QTimer* mTimer;
+private:
+  void changeEvent(QEvent *event) override;
 
-  private slots:
-	void zoomBestFit();
+  WindowImage *mHarrisImage = nullptr;
+  WindowImage *mFastImage = nullptr;
+  WindowImage *mSiftImage = nullptr;
+  WindowImage *mSurfImage = nullptr;
+
+  QTimer *mTimer = nullptr;
+
+private slots:
+  void zoomBestFit();
 };
 
 #endif

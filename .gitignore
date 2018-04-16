@@ -67,3 +67,14 @@ install_manifest.txt
 *.kdev4
 .kdev4/
 
+# Clion
+.idea/
+CMakeLists.txt.user
+bin/
+build/
+msbuild/
+
+#vscode
+.vscode/
+.DS_Store
+.vs/

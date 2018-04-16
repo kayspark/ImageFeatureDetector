@@ -26,118 +26,118 @@
 #include "windowDo4.h"
 
 class WindowMain : public QMainWindow, public Ui::windowMain {
-  Q_OBJECT
-  public:
-	WindowMain();
-	void updateRecentFilesMenu();
-	void showWindowImage(WindowImage*);
+Q_OBJECT
+public:
+  WindowMain();
+  void updateRecentFilesMenu();
+  void showWindowImage(WindowImage *);
 
-	QToolButton* mToolButtonOpenRecent;
-	QMenu* mMenuRecentFiles;
-	int mCapturedWebcamImages;
-	int mTotalImages;
+  QToolButton *mToolButtonOpenRecent = nullptr;
+  QMenu *mMenuRecentFiles = nullptr;
+  int mCapturedWebcamImages;
+  int mTotalImages;
 
-  public slots:
-	void open();
-	void captureWebcam();
-	void openFastRT();
+public slots:
+  void open();
+  void captureWebcam();
+  void openFastRT();
 
-  private:
-	void applyCommonTasks();
-	void loadFile(QString);
-	void closeEvent(QCloseEvent*);
-	void saveSettings();
-	void setRecentFile(QString);
-	void removeRecentFile(QString);
+private:
+  void applyCommonTasks();
+  void loadFile(QString);
+  void closeEvent(QCloseEvent *) override;
+  void saveSettings();
+  void setRecentFile(QString);
+  void removeRecentFile(QString);
 
-	bool mSeparatorOpenWindowsAdded; // Adding the separator on Qt Designer doesn't work
-	QSettings* mSettings;
-	QAction* mActionExit;
-	QAction* mActionSeparatorRecentFiles;
-	QSignalMapper* mSignalMapper;
-	QActionGroup* mActionGroupZoom;
-	QActionGroup* mActionGroupFeatures;
-	QActionGroup* mActionGroupWindow;
-	enum { maxRecentFiles=8 };
-	QAction* mActionRecentFiles[maxRecentFiles];
-	QAction* mHarrisAction;
-	QAction* mFastAction;
-	QAction* mSiftAction;
-	QAction* mSurfAction;
-	QAction* mCurrentFeatureAction;
-	QList<QAction*>* mSubwindowActions;
-	Ui::barFeaturesHarris mUIHarris;
-	Ui::barFeaturesFast mUIFast;
-	Ui::barFeaturesSift mUISift;
-	Ui::barFeaturesSurf mUISurf;
-	QWidget* mHarrisToolBar;
-	QWidget* mSiftToolBar;
-	QWidget* mSurfToolBar;
-	QWidget* mFastToolBar;
+  bool mSeparatorOpenWindowsAdded; // Adding the separator on Qt Designer doesn't work
+  QSettings *mSettings = nullptr;
+  QAction *mActionExit = nullptr;
+  QAction *mActionSeparatorRecentFiles = nullptr;
+  QSignalMapper *mSignalMapper = nullptr;
+  QActionGroup *mActionGroupZoom = nullptr;
+  QActionGroup *mActionGroupFeatures = nullptr;
+  QActionGroup *mActionGroupWindow = nullptr;
+  enum { maxRecentFiles = 8 };
+  QAction *mActionRecentFiles[maxRecentFiles];
+  QAction *mHarrisAction = nullptr;
+  QAction *mFastAction = nullptr;
+  QAction *mSiftAction = nullptr;
+  QAction *mSurfAction = nullptr;
+  QAction *mCurrentFeatureAction = nullptr;
+  QList<QAction *> *mSubwindowActions = nullptr;
+  Ui::barFeaturesHarris mUIHarris;
+  Ui::barFeaturesFast mUIFast;
+  Ui::barFeaturesSift mUISift;
+  Ui::barFeaturesSurf mUISurf;
+  QWidget *mHarrisToolBar = nullptr;
+  QWidget *mSiftToolBar = nullptr;
+  QWidget *mSurfToolBar = nullptr;
+  QWidget *mFastToolBar = nullptr;
 
-	QMdiSubWindow* mActiveWindow;
-	WindowImage* mActiveWindowImage;
-	QIcon* mIconHarris;
-	QIcon* mIconFAST;
-	QIcon* mIconSIFT;
-	QIcon* mIconSURF;
-	QLabel* mStatusBarLabelZoom;
-	QLabel* mStatusBarLabelDimensions;
-	QLabel* mStatusBarLabelSize;
-	QLabel* mStatusBarLabelTime;
-	QLabel* mStatusBarLabelIcon;
-	QLabel* mStatusBarLabelKeypoints;
-	QLabel* mStatusBarLabelSpaceRight;
-	QLabel* mStatusBarLabelSpaceLeft;
-	QFrame* mStatusBarLine;
-	QFrame* mStatusBarLine2;
-	QFrame* mStatusBarLine3;
+  QMdiSubWindow *mActiveWindow = nullptr;
+  WindowImage *mActiveWindowImage = nullptr;
+  QIcon *mIconHarris = nullptr;
+  QIcon *mIconFAST = nullptr;
+  QIcon *mIconSIFT = nullptr;
+  QIcon *mIconSURF = nullptr;
+  QLabel *mStatusBarLabelZoom = nullptr;
+  QLabel *mStatusBarLabelDimensions = nullptr;
+  QLabel *mStatusBarLabelSize = nullptr;
+  QLabel *mStatusBarLabelTime = nullptr;
+  QLabel *mStatusBarLabelIcon = nullptr;
+  QLabel *mStatusBarLabelKeypoints = nullptr;
+  QLabel *mStatusBarLabelSpaceRight = nullptr;
+  QLabel *mStatusBarLabelSpaceLeft = nullptr;
+  QFrame *mStatusBarLine = nullptr;
+  QFrame *mStatusBarLine2 = nullptr;
+  QFrame *mStatusBarLine3 = nullptr;
 
-  private slots:
-	void saveCopyAs();
-	void preferences();
-	void exit();
-	
-	void copy();
-	void resetImage();
-	
-	void startupDialog();
-	void zoom();
-	
-	void showHarrisToolBar();
-	void applyHarris();
-	void saveHarrisParams();
-	void resetHarrisParams();
-	
-	void showFastToolBar();
-	void applyFast();
-	void saveFastParams();
-	void restFastParams();
-	
-	void showSiftToolBar();
-	void applySift();
-	void saveSiftParams();
-	void resetSiftParams();
-	
-	void showSurfToolBar();
-	void applySurf();
-	void saveSurfParams();
-	void resetSurfParams();
-	
-	void do4();
-	
-	void tile();
-	void cascade();
-	void duplicate();
-	void closeActiveSubWindow();
-	void closeAllSubWindows();
-	
-	void website();
-	void about();
+private slots:
+  void saveCopyAs();
+  void preferences();
+  void exit();
 
-	void updateWindowMenu(QMdiSubWindow*);
-	void openRecentFile();
-	void setActiveSubWindow(QWidget*);
+  void copy();
+  void resetImage();
+
+  void startupDialog();
+  void zoom();
+
+  void showHarrisToolBar();
+  void applyHarris();
+  void saveHarrisParams();
+  void resetHarrisParams();
+
+  void showFastToolBar();
+  void applyFast();
+  void saveFastParams();
+  void restFastParams();
+
+  void showSiftToolBar();
+  void applySift();
+  void saveSiftParams();
+  void resetSiftParams();
+
+  void showSurfToolBar();
+  void applySurf();
+  void saveSurfParams();
+  void resetSurfParams();
+
+  void do4();
+
+  void tile();
+  void cascade();
+  void duplicate();
+  void closeActiveSubWindow();
+  void closeAllSubWindows();
+
+  void website();
+  void about();
+
+  void updateWindowMenu(QMdiSubWindow *);
+  void openRecentFile();
+  void setActiveSubWindow(QWidget *);
 };
 
 #endif

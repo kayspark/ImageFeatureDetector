@@ -27,7 +27,7 @@ The program let you choose an image stored on your computer and apply one of the
 
 Pictures can be taken directly from a webcam within the program.
 
-<img align="center" src="https://github.com/AntonioRedondo/ImageFeatureDetector/raw/master/readmeImages/captureWebcam.png" />
+<img align="center" src="https://github.com/AntonioRedondo/ImageFeatureDetector/raw/master/readmeImages/webcam.png" />
 
 FAST features can be calculated in real time from the video stream of a webcam.
 

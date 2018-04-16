@@ -9,8 +9,7 @@
 #include "windowMain.h"
 
 int main(int argc, char *argv[]) {
-
-	QApplication app(argc, argv);
-	new WindowMain();
-	return app.exec();
+  QApplication app(argc, argv);
+  new WindowMain();
+  return app.exec();
 }
