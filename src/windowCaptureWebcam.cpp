@@ -4,8 +4,8 @@
 #include <QDialog>
 
 WindowCaptureWebcam::WindowCaptureWebcam(WindowMain *windowMain)
-    : mWindowMain(windowMain), QDialog(windowMain, Qt::Dialog),
-      mCamera(VideoCapture(0)), mTimer(nullptr) {
+    : QDialog(windowMain, Qt::Dialog), mWindowMain(windowMain),
+      mTimer(new QTimer()), mCamera(cv::VideoCapture(0)) {
   setupUi(this);
 
   setAttribute(Qt::WA_DeleteOnClose);
@@ -17,7 +17,6 @@ WindowCaptureWebcam::WindowCaptureWebcam(WindowMain *windowMain)
   connect(uiPushButtonCancel, &QAbstractButton::clicked, this,
           &WindowCaptureWebcam::close);
   if (mCamera.isOpened()) {
-    mTimer = new QTimer();
     mTimer->start(40); // 25fps
     connect(mTimer, &QTimer::timeout, this, &WindowCaptureWebcam::compute);
     uiPushButtonCapture->setEnabled(true);

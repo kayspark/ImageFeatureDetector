@@ -10,8 +10,8 @@
 #include "windowFastRealTime.h"
 
 WindowFastRealTime::WindowFastRealTime(WindowMain *windowMain)
-    : QDialog(windowMain, Qt::Dialog), mDetecting(false),
-      mCamera(VideoCapture(0)), mTimer(0) {
+    :  QDialog(windowMain, Qt::Dialog),
+      mCamera(cv::VideoCapture(0)), mTimer(new QTimer()), mDetecting(false)  {
   setupUi(this);
 
   setAttribute(Qt::WA_DeleteOnClose);
@@ -37,7 +37,6 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *windowMain)
 
   if (mCamera.isOpened()) {
     mPainter = new QPainter();
-    mTimer = new QTimer();
     mTimer->start(40); // 25fps
     connect(mTimer, &QTimer::timeout, this, &WindowFastRealTime::compute);
     uiPushButtonDetect->setEnabled(true);
@@ -87,17 +86,17 @@ void WindowFastRealTime::resetFastParams() {
 void WindowFastRealTime::compute() {
   mCamera >> mImageRT;
   if (mDetecting) {
-    Mat mImageGrey(mImageRT.rows, mImageRT.cols, CV_8UC1);
-    cvtColor(mImageRT, mImageGrey, CV_RGB2GRAY);
-    mTime = (float)getTickCount();
+          cv::Mat mImageGrey(mImageRT.rows, mImageRT.cols, CV_8UC1);
+          cv::cvtColor(mImageRT, mImageGrey, CV_RGB2GRAY);
+    mTime = (float)cv::getTickCount();
     FAST(mImageGrey, mKeypoints,
          mSettings->value("fastRT/threshold", true).toInt(),
          mSettings->value("fastRT/nonMaxSuppression", true).toBool());
     uiLabelTime->setText(
         QString("Detecting Time: ")
             .append(mLocale
-                        ->toString((float)((getTickCount() - mTime) /
-                                           (getTickFrequency() * 1000)),
+                        ->toString((float)((cv::getTickCount() - mTime) /
+                                           (cv::getTickFrequency() * 1000)),
                                    'f', 2)
                         .append(" ms")));
     uiLabelKeypoints->setText(

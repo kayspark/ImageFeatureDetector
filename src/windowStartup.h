@@ -6,9 +6,7 @@
 * Code under the terms of the GNU General Public License v3.
 *
 */
-
-#ifndef WINDOWSTARTUP_H
-#define WINDOWSTARTUP_H
+#pragma once
 
 #include "ui_windowStartup.h"
 #include "windowMain.h"
@@ -31,4 +29,3 @@ private slots:
   void saveSettings();
 };
 
-#endif

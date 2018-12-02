@@ -7,18 +7,15 @@
 *
 */
 
-#ifndef WINDOWDO4_H
-#define WINDOWDO4_H
+#pragma once
 
-#include <build/ui_windowDo4.h>
+#include "ui_windowDo4.h"
 #include "windowImage.h"
-
-using namespace std;
 
 class WindowDo4 : public QWidget, Ui::windowDo4 {
 Q_OBJECT
 public:
-  WindowDo4(QString windowTitle,
+  WindowDo4(const QString &windowTitle,
             WindowImage *harrisImage,
             WindowImage *fastImage,
             WindowImage *siftImage,
@@ -37,5 +34,3 @@ private:
 private slots:
   void zoomBestFit();
 };
-
-#endif

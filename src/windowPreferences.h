@@ -7,8 +7,7 @@
 *
 */
 
-#ifndef WINDOWPREFERENCES_H
-#define WINDOWPREFERENCES_H
+#pragma once
 
 #include "ui_windowPreferences.h"
 #include "windowMain.h"
@@ -30,5 +29,3 @@ private slots:
   void restore();
   void save();
 };
-
-#endif

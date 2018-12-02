@@ -7,8 +7,7 @@
 *
 */
 
-#ifndef WINDOWMAIN_H
-#define WINDOWMAIN_H
+#pragma once
 
 #include <QtCore>
 #include <QtWidgets>
@@ -139,5 +138,3 @@ private slots:
   void openRecentFile();
   void setActiveSubWindow(QWidget *);
 };
-
-#endif

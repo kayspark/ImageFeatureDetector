@@ -9,7 +9,7 @@
 
 #include "windowImage.h"
 
-WindowImage::WindowImage(QImage *image, QString windowTitle, int windowType)
+WindowImage::WindowImage(QImage *image, const QString& windowTitle, int windowType)
     : mImage(image), mWindowTitle(windowTitle), mWindowType(windowType), mImageN(0), mModified(false) {
   setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
@@ -101,23 +101,23 @@ void WindowImage::applyHarris(int sobelApertureSize,
   if (mModified)
     mPixmap = mPixmapOriginal;
 
-  Mat image(mImage->height(),
+  cv::Mat image(mImage->height(),
             mImage->width(),
             CV_8UC4,
             mImage->bits(),
             static_cast<size_t>(mImage->bytesPerLine())); // With CV_8UC3 it doesn't work
-  Mat imageGrey(mImage->height(), mImage->width(), CV_8UC1);
+  cv::Mat imageGrey(mImage->height(), mImage->width(), CV_8UC1);
   cvtColor(image, imageGrey, CV_RGB2GRAY);
 
-  Mat imageHarris(mImage->height(), mImage->width(), CV_8UC1);
-  auto time = (float) getTickCount();
+  cv::Mat imageHarris(mImage->height(), mImage->width(), CV_8UC1);
+  auto time = (float) cv::getTickCount();
   cornerHarris(imageGrey, imageHarris, harrisApertureSize, sobelApertureSize, kValue);
 
-  mImageTime = mLocale->toString((float) ((getTickCount() - time) * 1000 / getTickFrequency()), 'f', 2);
+  mImageTime = mLocale->toString((float) ((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f', 2);
 
   // Increases the contrast. If not only a nearly black image would be seen
-  Mat imageHarrisNorm;
-  normalize(imageHarris, imageHarrisNorm, 0, 255, NORM_MINMAX, CV_32FC1); // The same than the next five lines
+  cv::Mat imageHarrisNorm;
+  normalize(imageHarris, imageHarrisNorm, 0, 255, cv::NORM_MINMAX, CV_32FC1); // The same than the next five lines
 // 	double min=0, max=255, minVal, maxVal, scale, shift;
 // 	minMaxLoc(imageHarris, &minVal, &maxVal);
 // 	scale = (max-min)/(maxVal-minVal);
@@ -152,19 +152,19 @@ void WindowImage::applyFast(int threshold, bool nonMaxSuppression) {
   if (mModified)
     mPixmap = mPixmapOriginal;
 
-  Mat image(mImage->height(),
+  cv::Mat image(mImage->height(),
             mImage->width(),
             CV_8UC4,
             mImage->bits(),
             static_cast<size_t>(mImage->bytesPerLine())); // With CV_8UC3 it doesn't work
-  Mat imageGrey(mImage->height(), mImage->width(), CV_8UC1);
-  cvtColor(image, imageGrey, CV_RGB2GRAY);
+  cv::Mat imageGrey(mImage->height(), mImage->width(), CV_8UC1);
+  cv::cvtColor(image, imageGrey, CV_RGB2GRAY);
 
-  vector<KeyPoint> keypoints;
-  auto time = (float) getTickCount();
+  std::vector<cv::KeyPoint> keypoints;
+  auto time = (float) cv::getTickCount();
   FAST(imageGrey, keypoints, threshold, nonMaxSuppression);
 
-  mImageTime = mLocale->toString((float) ((getTickCount() - time) * 1000 / getTickFrequency()), 'f', 2);
+  mImageTime = mLocale->toString((float) ((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f', 2);
   mImageKeypoints = mLocale->toString((float) keypoints.size(), 'f', 0);
 
   mPainter->begin(&mPixmap);
@@ -191,20 +191,20 @@ void WindowImage::applySift(double threshold,
   if (mModified)
     mPixmap = mPixmapOriginal;
 
-  Mat image(mImage->height(),
+  cv::Mat image(mImage->height(),
             mImage->width(),
             CV_8UC4,
             mImage->bits(),
             static_cast<size_t>(mImage->bytesPerLine())); // With CV_8UC3 it doesn't work
-  Mat imageGrey(mImage->height(), mImage->width(), CV_8UC1);
-  cvtColor(image, imageGrey, CV_RGB2GRAY);
+  cv::Mat imageGrey(mImage->height(), mImage->width(), CV_8UC1);
+  cv::cvtColor(image, imageGrey, CV_RGB2GRAY);
 
-  vector<KeyPoint> keypoints;
-  auto time = (float) getTickCount();
-  Ptr<Feature2D> feature = SIFT::create(nOctaveLayers, nOctaves, threshold, edgeThreshold);
+  std::vector<cv::KeyPoint> keypoints;
+  auto time = (float) cv::getTickCount();
+  cv::Ptr<cv::Feature2D> feature = cv::xfeatures2d::SIFT::create(nOctaveLayers, nOctaves, threshold, edgeThreshold);
   feature->detect(imageGrey, keypoints);
 
-  mImageTime = mLocale->toString((float) ((getTickCount() - time) * 1000 / getTickFrequency()), 'f', 2);
+  mImageTime = mLocale->toString((float) ((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f', 2);
   mImageKeypoints = mLocale->toString((float) keypoints.size(), 'f', 0);
 
   QPoint center;
@@ -240,20 +240,20 @@ void WindowImage::applySurf(double threshold, int nOctaves, int nOctaveLayers, b
   if (mModified)
     mPixmap = mPixmapOriginal;
 
-  Mat image(mImage->height(),
+  cv::Mat image(mImage->height(),
             mImage->width(),
             CV_8UC4,
             mImage->bits(),
             static_cast<size_t>(mImage->bytesPerLine())); // With CV_8UC3 it doesn't work
-  Mat imageGrey(mImage->height(), mImage->width(), CV_8UC1);
-  cvtColor(image, imageGrey, CV_RGB2GRAY);
+  cv::Mat imageGrey(mImage->height(), mImage->width(), CV_8UC1);
+  cv::cvtColor(image, imageGrey, CV_RGB2GRAY);
 
-  vector<KeyPoint> keypoints;
-  float time = getTickCount();
-  Ptr<Feature2D> feature = SURF::create(threshold, nOctaves, nOctaveLayers, false, false);
+  std::vector<cv::KeyPoint> keypoints;
+  float time = cv::getTickCount();
+  cv::Ptr<cv::Feature2D> feature = cv::xfeatures2d::SURF::create(threshold, nOctaves, nOctaveLayers, false, false);
   feature->detect(imageGrey, keypoints);
 
-  mImageTime = mLocale->toString((float) ((getTickCount() - time) * 1000 / getTickFrequency()), 'f', 2);
+  mImageTime = mLocale->toString((float) ((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f', 2);
   mImageKeypoints = mLocale->toString((float) keypoints.size(), 'f', 0);
 
   QPoint center;
@@ -284,7 +284,7 @@ void WindowImage::applySurf(double threshold, int nOctaves, int nOctaveLayers, b
                                          Qt::SmoothTransformation));
 }
 
-void WindowImage::showProcessedImage(Mat processedImage) {
+void WindowImage::showProcessedImage(cv::Mat processedImage) {
   if (mFeatureType == WindowImage::harris) {
     mPixmap = QPixmap::fromImage(convertMat2QImage(processedImage)); // This should be faster than the below lines
 // 		Mat imageColor(mImage->height(), mImage->width(), CV_8UC4); // With CV_8UC3 it doesn't work
@@ -306,7 +306,7 @@ void WindowImage::resetImage() {
 }
 
 // http://stackoverflow.com/questions/5026965/how-to-convert-an-opencv-cvmat-to-qimage
-QImage WindowImage::convertMat2QImage(const Mat_<double> &src) {
+QImage WindowImage::convertMat2QImage(const cv::Mat_<double> &src) {
   double scale = 1; // Value for CV_32FC1 images. Use -255 for CV_8UC1 images.
   QImage dest(src.cols, src.rows, QImage::Format_RGB32);
   for (int y = 0; y < src.rows; ++y) {

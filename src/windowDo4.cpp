@@ -9,7 +9,7 @@
 
 #include "windowDo4.h"
 
-WindowDo4::WindowDo4(QString windowTitle, WindowImage *harrisImage,
+WindowDo4::WindowDo4(const QString& windowTitle, WindowImage *harrisImage,
                      WindowImage *fastImage, WindowImage *siftImage,
                      WindowImage *surfImage)
     : mHarrisImage(harrisImage), mFastImage(fastImage), mSiftImage(siftImage),
@@ -60,7 +60,7 @@ void WindowDo4::zoomBestFit() {
 
 void WindowDo4::changeEvent(QEvent *event) {
   if (event->type() == QEvent::WindowStateChange) {
-    auto *eventb = static_cast<QWindowStateChangeEvent *>(event);
+    auto *eventb = dynamic_cast<QWindowStateChangeEvent *>(event);
     if (eventb->oldState() == Qt::WindowMaximized &&
         this->windowState() == Qt::WindowNoState)
       mTimer->start();

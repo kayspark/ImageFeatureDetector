@@ -17,14 +17,10 @@
 #include "ui_windowImage.h"
 //#include "ui_windowImage.h"
 
-using namespace std;
-using namespace cv;
-using namespace xfeatures2d;
-
 class WindowImage : public QScrollArea, Ui::windowImage {
 Q_OBJECT
 public:
-  WindowImage(QImage *image, QString windowTitle, int windowType = normal);
+  WindowImage(QImage *image, const QString& windowTitle, int windowType = normal);
   void zoomIn();
   void zoomOut();
   void zoomOriginal();
@@ -61,7 +57,7 @@ protected:
   void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
-  void showProcessedImage(Mat processedImage);
+    void showProcessedImage(cv::Mat processedImage);
   void scaleImage();
   void adjustScrollBar(QScrollBar *scrollBar);
   QImage convertMat2QImage(const cv::Mat_<double> &src);

@@ -5,8 +5,6 @@
 #include "windowMain.h"
 #include <opencv2/opencv.hpp>
 
-using namespace cv;
-
 class
     WindowMain; // http://stackoverflow.com/questions/2133250/does-not-name-a-type-error-in-c
 
@@ -16,12 +14,12 @@ public:
   explicit WindowCaptureWebcam(WindowMain *);
   void closeEvent(QCloseEvent *) override;
 
-  WindowMain *mWindowMain;
+  WindowMain *mWindowMain = nullptr;
 
 private:
   QTimer *mTimer = nullptr;
-  VideoCapture mCamera;
-  Mat mImageRT;
+  cv::VideoCapture mCamera;
+  cv::Mat mImageRT;
 
 private slots:
   void capture();
