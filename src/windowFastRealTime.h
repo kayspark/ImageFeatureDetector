@@ -18,7 +18,7 @@
 class WindowFastRealTime : public QDialog, Ui::windowFastRealTime {
   Q_OBJECT
 public:
-  explicit WindowFastRealTime(WindowMain *);
+  explicit WindowFastRealTime(WindowMain *wmain);
   void closeEvent(QCloseEvent *) override;
 
 private:

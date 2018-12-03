@@ -11,7 +11,7 @@ class
 class WindowCaptureWebcam : public QDialog, private Ui::windowCaptureWebcam {
   Q_OBJECT
 public:
-  explicit WindowCaptureWebcam(WindowMain *);
+  explicit WindowCaptureWebcam(WindowMain * main);
   void closeEvent(QCloseEvent *) override;
 
   WindowMain *mWindowMain = nullptr;

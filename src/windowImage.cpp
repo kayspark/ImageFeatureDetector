@@ -160,20 +160,20 @@ void WindowImage::applyFast(int threshold, bool nonMaxSuppression) {
   cv::Mat imageGrey(mImage->height(), mImage->width(), CV_8UC1);
   cv::cvtColor(image, imageGrey, CV_RGB2GRAY);
 
-  std::vector<cv::KeyPoint> keypoints;
-  auto time = (float) cv::getTickCount();
-  FAST(imageGrey, keypoints, threshold, nonMaxSuppression);
+  std::vector<cv::KeyPoint> keyPoints;
+  auto time = cv::getTickCount();
+  FAST(imageGrey, keyPoints, threshold, nonMaxSuppression);
 
   mImageTime = mLocale->toString((float) ((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f', 2);
-  mImageKeypoints = mLocale->toString((float) keypoints.size(), 'f', 0);
+  mImageKeypoints = mLocale->toString((float) keyPoints.size(), 'f', 0);
 
   mPainter->begin(&mPixmap);
   QPen pen(QColor::fromRgb(255, 0, 0));
   pen.setWidth(2);
   mPainter->setPen(pen);
   mPainter->setRenderHint(QPainter::Antialiasing);
-  for (auto &keypoint : keypoints)
-    mPainter->drawEllipse((int) keypoint.pt.x, (int) keypoint.pt.y, 4, 4);
+  for (const auto &point : keyPoints)
+    mPainter->drawEllipse((int) point.pt.x, (int) point.pt.y, 4, 4);
   mPainter->end();
 
   mModified = true;
@@ -210,18 +210,18 @@ void WindowImage::applySift(double threshold,
   QPoint center;
   mPainter->begin(&mPixmap);
   mPainter->setRenderHint(QPainter::Antialiasing);
-  for (auto &keypoint : keyPoints) {
-    center.setX((int) keypoint.pt.x);
-    center.setY((int) keypoint.pt.y);
-    auto radius = (int) (keypoint.size); // radius = (int)(keyPoints->at(n).size*1.2/9.*2); = 0.266666
+  for (auto &point : keyPoints) {
+    center.setX((int) point.pt.x);
+    center.setY((int) point.pt.y);
+    auto radius = (int) (point.size); // radius = (int)(keyPoints->at(n).size*1.2/9.*2); = 0.266666
     if (showOrientation) {
       mPainter->setPen(QColor::fromRgb(255, 0, 0));
-      mPainter->drawLine(QLineF(keypoint.pt.x,
-                                keypoint.pt.y,
-                                keypoint.pt.x
-                                    + keypoint.size * qCos(keypoint.angle * 3.14159265 / 180),
-                                keypoint.pt.y
-                                    + keypoint.size * qSin(keypoint.angle * 3.14159265 / 180)));
+      mPainter->drawLine(QLineF(point.pt.x,
+                                point.pt.y,
+                                point.pt.x
+                                    + point.size * qCos(point.angle * 3.14159265 / 180),
+                                point.pt.y
+                                    + point.size * qSin(point.angle * 3.14159265 / 180)));
     }
     mPainter->setPen(QColor::fromRgb(0, 0, 255));
     mPainter->drawEllipse(center, radius, radius);

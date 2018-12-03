@@ -3,22 +3,22 @@
 #include "windowMain.h"
 #include <QDialog>
 
-WindowCaptureWebcam::WindowCaptureWebcam(WindowMain *windowMain)
-    : QDialog(windowMain, Qt::Dialog), mWindowMain(windowMain),
+WindowCaptureWebcam::WindowCaptureWebcam(WindowMain *main)
+    : QDialog(main, Qt::Dialog), mWindowMain(main),
       mTimer(new QTimer()), mCamera(cv::VideoCapture(0)) {
   setupUi(this);
 
   setAttribute(Qt::WA_DeleteOnClose);
 
-  connect(uiPushButtonCapture, &QAbstractButton::clicked, this,
+  QObject::connect(uiPushButtonCapture, &QAbstractButton::clicked, this,
           &WindowCaptureWebcam::capture);
-  connect(uiPushButtonOK, &QAbstractButton::clicked, this,
+  QObject::connect(uiPushButtonOK, &QAbstractButton::clicked, this,
           &WindowCaptureWebcam::ok);
-  connect(uiPushButtonCancel, &QAbstractButton::clicked, this,
+  QObject::connect(uiPushButtonCancel, &QAbstractButton::clicked, this,
           &WindowCaptureWebcam::close);
   if (mCamera.isOpened()) {
     mTimer->start(40); // 25fps
-    connect(mTimer, &QTimer::timeout, this, &WindowCaptureWebcam::compute);
+    QObject::connect(mTimer, &QTimer::timeout, this, &WindowCaptureWebcam::compute);
     uiPushButtonCapture->setEnabled(true);
     // 		qDebug() << "Frame format: " << mCamera.get(CV_CAP_PROP_FORMAT);
     // 		qDebug() << "Frame count: " <<
@@ -30,7 +30,7 @@ WindowCaptureWebcam::WindowCaptureWebcam(WindowMain *windowMain)
   } else {
     uiLabelRealTime->setText(
         "There is some problem with the cam.\nCannot get images.");
-    uiLabelCaptured->setText("Damn!");
+    uiLabelCaptured->setText("Please check camera");
   }
 
   show();

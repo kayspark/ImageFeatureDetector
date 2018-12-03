@@ -23,13 +23,13 @@ WindowPreferences::WindowPreferences(WindowMain *windowMain)
   uiCheckBoxBestFit->setChecked(mSettings->value("bestFit", true).toBool());
   uiCheckBoxRecentFiles->setChecked(mSettings->value("rememberRecentFiles", true).toBool());
 
-  connect(uiPushButtonClearRecentFiles, &QAbstractButton::clicked, this, &WindowPreferences::clearRecentFilesPrompt);
-  connect(uiDialogButtonBox->button(QDialogButtonBox::RestoreDefaults),
+  QObject::connect(uiPushButtonClearRecentFiles, &QAbstractButton::clicked, this, &WindowPreferences::clearRecentFilesPrompt);
+  QObject::connect(uiDialogButtonBox->button(QDialogButtonBox::RestoreDefaults),
           &QAbstractButton::clicked,
           this,
           &WindowPreferences::restore);
-  connect(uiDialogButtonBox, &QDialogButtonBox::accepted, this, &WindowPreferences::save);
-  connect(uiDialogButtonBox, &QDialogButtonBox::rejected, this, &WindowPreferences::close);
+  QObject::connect(uiDialogButtonBox, &QDialogButtonBox::accepted, this, &WindowPreferences::save);
+  QObject::connect(uiDialogButtonBox, &QDialogButtonBox::rejected, this, &WindowPreferences::close);
 
   show();
 }

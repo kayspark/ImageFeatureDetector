@@ -43,7 +43,7 @@ target_link_libraries(imagefeaturedetector Qt5::Core Qt5::Widgets ${OpenCV_LIBS}
 ## http://stackoverflow.com/questions/13429656/cmake-how-to-copy-contents-of-a-directory-into-build-directory-after-make
 add_custom_command(TARGET imagefeaturedetector POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/icons $<TARGET_FILE_DIR:imagefeaturedetector>/icons)
 
-
+include(clang-tidy.cmake)
 ## http://www.cmake.org/Wiki/CMake:Install_Commands
 ## Icons won't be shown because the loading path is relative to the command shell path at the moment of calling ./imagefeaturedetector
 # install (TARGETS imagefeaturedetector DESTINATION bin)

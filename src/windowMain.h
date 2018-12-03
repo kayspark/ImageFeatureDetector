@@ -43,11 +43,11 @@ public slots:
 
 private:
   void applyCommonTasks();
-  void loadFile(QString);
+  void loadFile(const QString& filepath);
   void closeEvent(QCloseEvent *) override;
   void saveSettings();
-  void setRecentFile(QString);
-  void removeRecentFile(QString);
+  void setRecentFile(const QString & filepath);
+  void removeRecentFile(const QString & filepath);
 
   bool mSeparatorOpenWindowsAdded; // Adding the separator on Qt Designer doesn't work
   QSettings *mSettings = nullptr;
@@ -58,7 +58,7 @@ private:
   QActionGroup *mActionGroupFeatures = nullptr;
   QActionGroup *mActionGroupWindow = nullptr;
   enum { maxRecentFiles = 8 };
-  QAction *mActionRecentFiles[maxRecentFiles];
+  std::array<QAction *, maxRecentFiles> mActionRecentFiles;
   QAction *mHarrisAction = nullptr;
   QAction *mFastAction = nullptr;
   QAction *mSiftAction = nullptr;

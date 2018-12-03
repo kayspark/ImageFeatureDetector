@@ -24,12 +24,12 @@ WindowStartup::WindowStartup(WindowMain *windowMain)
   QMenu *recentFiles = mWindowMain->mMenuRecentFiles;
   uiToolButtonOpenRecent->setMenu(recentFiles);
 
-  connect(uiCommandLinkButtonOpen, &QAbstractButton::clicked, this, &WindowStartup::open);
-  connect(uiCommandLinkButtonCaptureWebcam, &QAbstractButton::clicked, this, &WindowStartup::webcam);
-  connect(uiCommandLinkButtonFastRT, &QAbstractButton::clicked, this, &WindowStartup::fastRT);
-  connect(uiCheckBoxStartup, &QAbstractButton::clicked, this, &WindowStartup::saveSettings);
-  connect(recentFiles, &QMenu::triggered, this, &WindowStartup::close);
-  connect(recentFiles, &QMenu::aboutToHide, this, &WindowStartup::close);
+  QObject::connect(uiCommandLinkButtonOpen, &QAbstractButton::clicked, this, &WindowStartup::open);
+  QObject::connect(uiCommandLinkButtonCaptureWebcam, &QAbstractButton::clicked, this, &WindowStartup::webcam);
+  QObject::connect(uiCommandLinkButtonFastRT, &QAbstractButton::clicked, this, &WindowStartup::fastRT);
+  QObject::connect(uiCheckBoxStartup, &QAbstractButton::clicked, this, &WindowStartup::saveSettings);
+  QObject::connect(recentFiles, &QMenu::triggered, this, &WindowStartup::close);
+  QObject::connect(recentFiles, &QMenu::aboutToHide, this, &WindowStartup::close);
 
   show();
 }

@@ -33,9 +33,9 @@ WindowDo4::WindowDo4(const QString& windowTitle, WindowImage *harrisImage,
   uiSurfTimeLabel->setText(mSurfImage->mImageTime);
   uiSurfKPLabel->setText(mSurfImage->mImageKeypoints);
 
-  connect(uiPushButtonZoomBestFit, &QPushButton::released, this,
+  QObject::connect(uiPushButtonZoomBestFit, &QPushButton::released, this,
           &WindowDo4::zoomBestFit);
-  connect(mTimer, &QTimer::timeout, this, &WindowDo4::zoomBestFit);
+  QObject::connect(mTimer, &QTimer::timeout, this, &WindowDo4::zoomBestFit);
 
   // http://wiki.qt.io/Center_a_Window_on_the_Screen
   setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size(),
@@ -60,11 +60,11 @@ void WindowDo4::zoomBestFit() {
 
 void WindowDo4::changeEvent(QEvent *event) {
   if (event->type() == QEvent::WindowStateChange) {
-    auto *eventb = dynamic_cast<QWindowStateChangeEvent *>(event);
-    if (eventb->oldState() == Qt::WindowMaximized &&
+    auto *pEvent = dynamic_cast<QWindowStateChangeEvent *>(event);
+    if (pEvent->oldState() == Qt::WindowMaximized &&
         this->windowState() == Qt::WindowNoState)
       mTimer->start();
-    else if (eventb->oldState() == Qt::WindowNoState &&
+    else if (pEvent->oldState() == Qt::WindowNoState &&
              this->windowState() == Qt::WindowMaximized)
       mTimer->start();
   }

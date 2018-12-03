@@ -9,8 +9,8 @@
 
 #include "windowFastRealTime.h"
 
-WindowFastRealTime::WindowFastRealTime(WindowMain *windowMain)
-    :  QDialog(windowMain, Qt::Dialog),
+WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
+    :  QDialog(wmain, Qt::Dialog),
       mCamera(cv::VideoCapture(0)), mTimer(new QTimer()), mDetecting(false)  {
   setupUi(this);
 
@@ -24,21 +24,21 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *windowMain)
   uiPushButtonNonMaxFAST->setChecked(
       mSettings->value("fastRT/nonMaxSuppression", true).toBool());
 
-  connect(uiPushButtonNonMaxFAST, &QPushButton::toggled, this,
+  QObject::connect(uiPushButtonNonMaxFAST, &QPushButton::toggled, this,
           &WindowFastRealTime::saveFastParams);
-  connect(uiSpinBoxThresholdFAST, &QSpinBox::editingFinished, this,
+  QObject::connect(uiSpinBoxThresholdFAST, &QSpinBox::editingFinished, this,
           &WindowFastRealTime::saveFastParams);
-  connect(uiPushButtonResetFAST, &QAbstractButton::clicked, this,
+  QObject::connect(uiPushButtonResetFAST, &QAbstractButton::clicked, this,
           &WindowFastRealTime::resetFastParams);
-  connect(uiPushButtonDetect, &QAbstractButton::clicked, this,
+  QObject::connect(uiPushButtonDetect, &QAbstractButton::clicked, this,
           &WindowFastRealTime::detect);
-  connect(uiPushButtonCancel, &QAbstractButton::clicked, this,
+  QObject::connect(uiPushButtonCancel, &QAbstractButton::clicked, this,
           &WindowFastRealTime::close);
 
   if (mCamera.isOpened()) {
     mPainter = new QPainter();
     mTimer->start(40); // 25fps
-    connect(mTimer, &QTimer::timeout, this, &WindowFastRealTime::compute);
+    QObject::connect(mTimer, &QTimer::timeout, this, &WindowFastRealTime::compute);
     uiPushButtonDetect->setEnabled(true);
   } else {
     uiLabelRealTime->setText(
