@@ -199,22 +199,21 @@ void WindowImage::applySift(double threshold,
   cv::Mat imageGrey(mImage->height(), mImage->width(), CV_8UC1);
   cv::cvtColor(image, imageGrey, CV_RGB2GRAY);
 
-  std::vector<cv::KeyPoint> keypoints;
+  std::vector<cv::KeyPoint> keyPoints;
   auto time = (float) cv::getTickCount();
   cv::Ptr<cv::Feature2D> feature = cv::xfeatures2d::SIFT::create(nOctaveLayers, nOctaves, threshold, edgeThreshold);
-  feature->detect(imageGrey, keypoints);
+  feature->detect(imageGrey, keyPoints);
 
   mImageTime = mLocale->toString((float) ((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f', 2);
-  mImageKeypoints = mLocale->toString((float) keypoints.size(), 'f', 0);
+  mImageKeypoints = mLocale->toString((float) keyPoints.size(), 'f', 0);
 
   QPoint center;
-  int radius;
   mPainter->begin(&mPixmap);
   mPainter->setRenderHint(QPainter::Antialiasing);
-  for (auto &keypoint : keypoints) {
+  for (auto &keypoint : keyPoints) {
     center.setX((int) keypoint.pt.x);
     center.setY((int) keypoint.pt.y);
-    radius = (int) (keypoint.size); // radius = (int)(keypoints->at(n).size*1.2/9.*2); = 0.266666
+    auto radius = (int) (keypoint.size); // radius = (int)(keyPoints->at(n).size*1.2/9.*2); = 0.266666
     if (showOrientation) {
       mPainter->setPen(QColor::fromRgb(255, 0, 0));
       mPainter->drawLine(QLineF(keypoint.pt.x,
@@ -248,30 +247,29 @@ void WindowImage::applySurf(double threshold, int nOctaves, int nOctaveLayers, b
   cv::Mat imageGrey(mImage->height(), mImage->width(), CV_8UC1);
   cv::cvtColor(image, imageGrey, CV_RGB2GRAY);
 
-  std::vector<cv::KeyPoint> keypoints;
+  std::vector<cv::KeyPoint> keyPoints;
   float time = cv::getTickCount();
   cv::Ptr<cv::Feature2D> feature = cv::xfeatures2d::SURF::create(threshold, nOctaves, nOctaveLayers, false, false);
-  feature->detect(imageGrey, keypoints);
+  feature->detect(imageGrey, keyPoints);
 
-  mImageTime = mLocale->toString((float) ((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f', 2);
-  mImageKeypoints = mLocale->toString((float) keypoints.size(), 'f', 0);
+  mImageTime = mLocale->toString( ((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'd', 2);
+  mImageKeypoints = mLocale->toString((float) keyPoints.size(), 'd', 0);
 
   QPoint center;
-  int radius;
   mPainter->begin(&mPixmap);
   mPainter->setRenderHint(QPainter::Antialiasing);
-  for (auto &keypoint : keypoints) {
-    center.setX((int) keypoint.pt.x);
-    center.setY((int) keypoint.pt.y);
-    radius = (int) keypoint.size; // radius = (int)(keypoints->at(n).size*1.2/9.*2); = 0.266666
+  for (auto &point : keyPoints) {
+    center.setX((int) point.pt.x);
+    center.setY((int) point.pt.y);
+    auto radius = (int) point.size; // radius = (int)(keyPoints->at(n).size*1.2/9.*2); = 0.266666
     if (showOrientation) {
       mPainter->setPen(QColor::fromRgb(255, 0, 0));
-      mPainter->drawLine(QLineF(keypoint.pt.x,
-                                keypoint.pt.y,
-                                keypoint.pt.x
-                                    + keypoint.size * qCos(keypoint.angle * 3.14159265 / 180),
-                                keypoint.pt.y
-                                    + keypoint.size * qSin(keypoint.angle * 3.14159265 / 180)));
+      mPainter->drawLine(QLineF(point.pt.x,
+                                point.pt.y,
+                                point.pt.x
+                                    + point.size * qCos(point.angle * 3.14159265 / 180),
+                                point.pt.y
+                                    + point.size * qSin(point.angle * 3.14159265 / 180)));
     }
     mPainter->setPen(QColor::fromRgb(0, 0, 255));
     mPainter->drawEllipse(center, radius, radius);
@@ -284,7 +282,7 @@ void WindowImage::applySurf(double threshold, int nOctaves, int nOctaveLayers, b
                                          Qt::SmoothTransformation));
 }
 
-void WindowImage::showProcessedImage(cv::Mat processedImage) {
+void WindowImage::showProcessedImage(cv::Mat& processedImage) {
   if (mFeatureType == WindowImage::harris) {
     mPixmap = QPixmap::fromImage(convertMat2QImage(processedImage)); // This should be faster than the below lines
 // 		Mat imageColor(mImage->height(), mImage->width(), CV_8UC4); // With CV_8UC3 it doesn't work
@@ -310,11 +308,11 @@ QImage WindowImage::convertMat2QImage(const cv::Mat_<double> &src) {
   double scale = 1; // Value for CV_32FC1 images. Use -255 for CV_8UC1 images.
   QImage dest(src.cols, src.rows, QImage::Format_RGB32);
   for (int y = 0; y < src.rows; ++y) {
-    const double *srcrow = src[y];
-    QRgb *destrow = (QRgb *) dest.scanLine(y);
+    const auto pDouble = src[y];
+    auto line = dest.scanLine(y);
     for (int x = 0; x < src.cols; ++x) {
-      auto color = static_cast<unsigned int>(srcrow[x] * scale);
-      destrow[x] = qRgb(color, color, color);
+      auto color = static_cast<unsigned int>(pDouble[x] * scale);
+      line[x] = static_cast<uchar>(qRgb(color, color, color));
     }
   }
   return dest;

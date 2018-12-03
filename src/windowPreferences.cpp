@@ -10,7 +10,7 @@
 #include "windowPreferences.h"
 
 WindowPreferences::WindowPreferences(WindowMain *windowMain)
-    : mWindowMain(windowMain), QDialog::QDialog(windowMain, Qt::Dialog) {
+    :  QDialog::QDialog(windowMain, Qt::Dialog), mWindowMain(windowMain){
   setupUi(this);
 
   setAttribute(Qt::WA_DeleteOnClose);

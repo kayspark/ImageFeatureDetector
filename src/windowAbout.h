@@ -7,21 +7,17 @@
 *
 */
 
-#ifndef WINDOWABOUT_H
-#define WINDOWABOUT_H
-
+#pragma once
 #include <QDialog>
 #include "ui_windowAbout.h"
 
 class WindowAbout : public QDialog, private Ui::windowAbout {
 Q_OBJECT
 public:
-  WindowAbout() {}
+  WindowAbout() = default;
   explicit WindowAbout(QWidget *windowMain) : QDialog(windowMain, Qt::Dialog) {
     setupUi(this);
 // 		setWindowFlags(Qt::Dialog);
     show();
   }
 };
-
-#endif

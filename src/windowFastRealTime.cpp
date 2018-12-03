@@ -88,14 +88,14 @@ void WindowFastRealTime::compute() {
   if (mDetecting) {
           cv::Mat mImageGrey(mImageRT.rows, mImageRT.cols, CV_8UC1);
           cv::cvtColor(mImageRT, mImageGrey, CV_RGB2GRAY);
-    mTime = (float)cv::getTickCount();
+    mTime = cv::getTickCount();
     FAST(mImageGrey, mKeypoints,
          mSettings->value("fastRT/threshold", true).toInt(),
          mSettings->value("fastRT/nonMaxSuppression", true).toBool());
     uiLabelTime->setText(
         QString("Detecting Time: ")
             .append(mLocale
-                        ->toString((float)((cv::getTickCount() - mTime) /
+                        ->toString(((cv::getTickCount() - mTime) /
                                            (cv::getTickFrequency() * 1000)),
                                    'f', 2)
                         .append(" ms")));

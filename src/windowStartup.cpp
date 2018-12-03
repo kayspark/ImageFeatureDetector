@@ -10,7 +10,7 @@
 #include "windowStartup.h"
 
 WindowStartup::WindowStartup(WindowMain *windowMain)
-    : mWindowMain(windowMain), QDialog::QDialog(windowMain, Qt::Dialog) {
+    :  QDialog::QDialog(windowMain, Qt::Dialog), mWindowMain(windowMain){
   setupUi(this);
 
   mSettings = new QSettings("imageFeatureDetectorSettings.ini", QSettings::IniFormat);

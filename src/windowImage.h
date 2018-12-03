@@ -7,9 +7,7 @@
 *
 */
 
-#ifndef WINDOWIMAGE_H
-#define WINDOWIMAGE_H
-
+#pragma once
 #include <QtWidgets>
 #include <opencv2/opencv.hpp>
 #include <opencv2/xfeatures2d.hpp>
@@ -48,7 +46,7 @@ public:
   QString mUid;
   QString mOriginalUid;
   int mWindowType, mFeatureType, mImageN;
-  float mCurrentFactor;
+  double mCurrentFactor;
 
 protected:
   void mousePressEvent(QMouseEvent *event) override;
@@ -57,7 +55,7 @@ protected:
   void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
-    void showProcessedImage(cv::Mat processedImage);
+    void showProcessedImage(cv::Mat &processedImage);
   void scaleImage();
   void adjustScrollBar(QScrollBar *scrollBar);
   QImage convertMat2QImage(const cv::Mat_<double> &src);
@@ -69,7 +67,6 @@ private:
   QPainter *mPainter = nullptr;
   bool mModified;
   int mOriginalWidth, mOiginalHeight;
-  float mScaleFactorAbove100, mScaleFactorUnder100, mFactorIncrement;
+  double mScaleFactorAbove100, mScaleFactorUnder100, mFactorIncrement;
 };
 
-#endif

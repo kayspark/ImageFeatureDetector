@@ -31,7 +31,7 @@ private:
   cv::Mat mImageRT;
   std::vector<cv::KeyPoint> mKeypoints;
   bool mDetecting;
-  float mTime;
+  double mTime;
 
 private slots:
   void detect();

@@ -597,18 +597,18 @@ void WindowMain::openFastRT() { new WindowFastRealTime(this); }
 void WindowMain::tile() {
   uiMdiArea->tileSubWindows();
   if (mSettings->value("bestFit").toBool()) {
-    QList<QMdiSubWindow *> subwindows = uiMdiArea->subWindowList();
-    for (const auto &subwindow : subwindows)
-      qobject_cast<WindowImage *>(subwindow->widget())->zoomBestFit();
+    auto list = uiMdiArea->subWindowList();
+    for (const auto &item : list)
+      qobject_cast<WindowImage *>(item->widget())->zoomBestFit();
   }
 }
 
 void WindowMain::cascade() {
   uiMdiArea->cascadeSubWindows();
   if (mSettings->value("bestFit").toBool()) {
-    QList<QMdiSubWindow *> subwindows = uiMdiArea->subWindowList();
-    for (const auto &subwindow : subwindows)
-      qobject_cast<WindowImage *>(subwindow->widget())->zoomBestFit();
+    auto list = uiMdiArea->subWindowList();
+    for (const auto &item : list)
+      qobject_cast<WindowImage *>(item->widget())->zoomBestFit();
   }
 }
 
@@ -631,7 +631,7 @@ void WindowMain::closeAllSubWindows() { uiMdiArea->closeAllSubWindows(); }
 
 void WindowMain::website() {
   QDesktopServices::openUrl(QUrl::fromEncoded(
-      "https://github.com/AntonioRedondo/ImageFeatureDetector"));
+      "https://github.com/kayspark/ImageFeatureDetector"));
 }
 
 void WindowMain::about() { new WindowAbout(this); }
@@ -704,25 +704,19 @@ void WindowMain::updateWindowMenu(QMdiSubWindow *mdiSubWindow) {
     mStatusBarLabelSize->setText(mActiveWindowImage->mImageSize);
     mStatusBarLine->setVisible(true);
 
-    QList<QMdiSubWindow *> subwindows = uiMdiArea->subWindowList();
-    for (int n = 0; n < subwindows.size(); ++n) {
+    auto list = uiMdiArea->subWindowList();
+    for (int n = 0; n < list.size(); ++n) {
       auto *windowImage =
-          qobject_cast<WindowImage *>(subwindows.at(n)->widget());
+          qobject_cast<WindowImage *>(list.at(n)->widget());
       QString actionName;
-      if (n < 9)
-        actionName = tr("&%1 %2").arg(n + 1).arg(windowImage->windowTitle());
-      else
-        actionName = tr("%1 %2").arg(n + 1).arg(windowImage->windowTitle());
-      auto actionSubwindow = uiMenuWindow->addAction(actionName);
-      mSubwindowActions->append(actionSubwindow);
-      actionSubwindow->setCheckable(true);
-      if (uiMdiArea->activeSubWindow())
-        actionSubwindow->setChecked(windowImage == mActiveWindowImage);
-      else
-        actionSubwindow->setChecked(false);
-      mActionGroupWindow->addAction(actionSubwindow);
-      mSignalMapper->setMapping(actionSubwindow, subwindows.at(n));
-      connect(actionSubwindow, &QAction::triggered, mSignalMapper,
+      actionName = tr(n < 9 ? "&%1 %2" : "%1 %2").arg(n + 1).arg(windowImage->windowTitle());
+      auto action = uiMenuWindow->addAction(actionName);
+      mSubwindowActions->append(action);
+      action->setCheckable(true);
+      action->setChecked(uiMdiArea->activeSubWindow() ? mActiveWindowImage == windowImage : false);
+      mActionGroupWindow->addAction(action);
+      mSignalMapper->setMapping(action, list.at(n));
+      connect(action, &QAction::triggered, mSignalMapper,
               static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
     }
   } else {
@@ -821,11 +815,11 @@ void WindowMain::updateRecentFilesMenu() {
 }
 
 void WindowMain::openRecentFile() {
-  loadFile(qobject_cast<QAction *>(sender())->data().toString());
+  loadFile(dynamic_cast<QAction *>(sender())->data().toString());
 }
 
 void WindowMain::setActiveSubWindow(QWidget *subWindow) {
-  uiMdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(subWindow));
+  uiMdiArea->setActiveSubWindow(dynamic_cast<QMdiSubWindow *>(subWindow));
 }
 
 void WindowMain::closeEvent(QCloseEvent *eventConstr) {
