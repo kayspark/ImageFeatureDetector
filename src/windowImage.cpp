@@ -15,8 +15,8 @@ WindowImage::WindowImage(std::shared_ptr<QImage> image, QString windowTitle,
                          int windowType)
     : mImage(std::move(image)), mWindowTitle(std::move(windowTitle)), mWindowType(windowType),
       mImageN(0), mModified(false), mFeatureType(0),
-      mPainter(std::move(std::make_unique<QPainter>())),
-      mLocale(std::move(std::make_unique<QLocale>(QLocale::English))) {
+      mPainter(std::make_unique<QPainter>()),
+      mLocale(std::make_unique<QLocale>(QLocale::English)) {
   setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
 

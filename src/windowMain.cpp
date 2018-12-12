@@ -10,12 +10,14 @@
 #include "windowMain.h"
 
 WindowMain::WindowMain() : mTotalImages(0),
+                           mCapturedWebcamImages(0),
                            mSettings(
                                std::make_unique<QSettings>("imageFeatureDetectorSettings.ini", QSettings::IniFormat)),
-                           mSubwindowActions(std::make_unique<QList<QAction *> >()),
                            mSeparatorOpenWindowsAdded(false),
+                           mSubwindowActions(std::vector<QAction *>()),
                            mMenuRecentFiles(std::make_unique<QMenu>(this)),
-                           mToolButtonOpenRecent(std::make_unique<QToolButton>(this)) {
+                           mToolButtonOpenRecent(std::make_unique<QToolButton>(this)
+                           ) {
   setupUi(this);
   mIconHarris = new QIcon("icons/Harris.png");
   mIconFAST = new QIcon("icons/Fast.png");
@@ -632,12 +634,12 @@ void WindowMain::updateWindowMenu(QMdiSubWindow *mdiSubWindow) {
     uiMenuWindow->addSeparator();
     mSeparatorOpenWindowsAdded = true;
   }
-  for (auto &aAction : *mSubwindowActions) {
+  for (auto &aAction : mSubwindowActions) {
     // 		uiMenuWindow->removeAction(mSubwindowActions->at(n)); // Makes not
     // to trigger new actions added
     aAction->setVisible(false);
   }
-  mSubwindowActions->clear();
+  mSubwindowActions.clear();
 
   if (mdiSubWindow != nullptr) {
     mActiveWindow = mdiSubWindow;
@@ -694,12 +696,12 @@ void WindowMain::updateWindowMenu(QMdiSubWindow *mdiSubWindow) {
 
     auto list = uiMdiArea->subWindowList();
     for (int n = 0; n < list.size(); ++n) {
-      auto *windowImage =
+      auto windowImage =
           qobject_cast<WindowImage *>(list.at(n)->widget());
       QString actionName;
       actionName = tr(n < 9 ? "&%1 %2" : "%1 %2").arg(n + 1).arg(windowImage->windowTitle());
       auto action = uiMenuWindow->addAction(actionName);
-      mSubwindowActions->append(action);
+      mSubwindowActions.push_back(action);
       action->setCheckable(true);
       action->setChecked(uiMdiArea->activeSubWindow() ? mActiveWindowImage == windowImage : false);
       mActionGroupWindow->addAction(action);

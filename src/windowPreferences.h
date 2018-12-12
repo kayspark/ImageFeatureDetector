@@ -20,7 +20,7 @@ public:
   explicit WindowPreferences(WindowMain *windowMain);
 
 private:
-  std::shared_ptr<WindowMain> mWindowMain;
+  WindowMain *mWindowMain = nullptr;
 
 private slots:
   void clearRecentFilesPrompt();

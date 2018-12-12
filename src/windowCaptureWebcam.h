@@ -14,7 +14,7 @@ public:
   explicit WindowCaptureWebcam(WindowMain * main);
   void closeEvent(QCloseEvent *) override;
 
-  std::shared_ptr<WindowMain> mWindowMain;
+  WindowMain *mWindowMain = nullptr;
 
 private:
   std::unique_ptr<QTimer> mTimer;

@@ -50,3 +50,4 @@ void WindowStartup::fastRT() {
 void WindowStartup::saveSettings() {
   mWindowMain->getMSettings()->setValue("startupDialog", uiCheckBoxStartup->isChecked());
 }
+

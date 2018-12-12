@@ -67,7 +67,7 @@ private:
   QAction *mSiftAction = nullptr;
   QAction *mSurfAction = nullptr;
   QAction *mCurrentFeatureAction = nullptr;
-  std::unique_ptr<QList<QAction *>> mSubwindowActions;
+  std::vector<QAction *> mSubwindowActions;
   Ui::barFeaturesHarris mUIHarris;
   Ui::barFeaturesFast mUIFast;
   Ui::barFeaturesSift mUISift;

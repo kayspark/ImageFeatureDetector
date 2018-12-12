@@ -19,7 +19,7 @@ public:
   explicit WindowStartup(WindowMain *windowMain);
 
 private:
-  std::shared_ptr<WindowMain> mWindowMain;
+  WindowMain *mWindowMain = nullptr;
 
 private slots:
   void open() override;
