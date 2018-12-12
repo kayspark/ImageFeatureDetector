@@ -20,8 +20,7 @@ public:
   explicit WindowPreferences(WindowMain *windowMain);
 
 private:
-  WindowMain *mWindowMain = nullptr;
-  QSettings *mSettings = nullptr;
+  std::shared_ptr<WindowMain> mWindowMain;
 
 private slots:
   void clearRecentFilesPrompt();

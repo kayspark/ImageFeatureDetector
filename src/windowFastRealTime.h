@@ -23,11 +23,11 @@ public:
 
 private:
   QSettings *mSettings = nullptr;
-  QLocale *mLocale = nullptr;
+  std::unique_ptr<QLocale> mLocale;
   cv::VideoCapture mCamera;
-  QTimer *mTimer = nullptr;
+  std::unique_ptr<QTimer> mTimer;
   QPixmap mPixmap;
-  QPainter *mPainter = nullptr;
+  std::unique_ptr<QPainter> mPainter;
   cv::Mat mImageRT;
   std::vector<cv::KeyPoint> mKeypoints;
   bool mDetecting;

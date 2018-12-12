@@ -16,20 +16,20 @@ class WindowDo4 : public QWidget, Ui::windowDo4 {
 Q_OBJECT
 public:
   WindowDo4(const QString &windowTitle,
-            WindowImage *harrisImage,
-            WindowImage *fastImage,
-            WindowImage *siftImage,
-            WindowImage *surfImage);
+            std::unique_ptr<WindowImage> harrisImage,
+            std::unique_ptr<WindowImage> fastImage,
+            std::unique_ptr<WindowImage> siftImage,
+            std::unique_ptr<WindowImage> surfImage);
 
 private:
   void changeEvent(QEvent *event) override;
 
-  WindowImage *mHarrisImage = nullptr;
-  WindowImage *mFastImage = nullptr;
-  WindowImage *mSiftImage = nullptr;
-  WindowImage *mSurfImage = nullptr;
+  std::unique_ptr<WindowImage> mHarrisImage;
+  std::unique_ptr<WindowImage> mFastImage;
+  std::unique_ptr<WindowImage> mSiftImage;
+  std::unique_ptr<WindowImage> mSurfImage;
 
-  QTimer *mTimer = nullptr;
+  std::unique_ptr<QTimer> mTimer;
 
 private slots:
   void zoomBestFit();

@@ -9,17 +9,19 @@
 
 #include "windowMain.h"
 
-WindowMain::WindowMain() : mTotalImages(0) {
+WindowMain::WindowMain() : mTotalImages(0),
+                           mSettings(
+                               std::make_unique<QSettings>("imageFeatureDetectorSettings.ini", QSettings::IniFormat)),
+                           mSubwindowActions(std::make_unique<QList<QAction *> >()),
+                           mSeparatorOpenWindowsAdded(false),
+                           mMenuRecentFiles(std::make_unique<QMenu>(this)),
+                           mToolButtonOpenRecent(std::make_unique<QToolButton>(this)) {
   setupUi(this);
-  mSubwindowActions = new QList<QAction *>();
-  mSeparatorOpenWindowsAdded = false;
   mIconHarris = new QIcon("icons/Harris.png");
   mIconFAST = new QIcon("icons/Fast.png");
   mIconSIFT = new QIcon("icons/Sift.png");
   mIconSURF = new QIcon("icons/Surf.png");
   setContextMenuPolicy(Qt::PreventContextMenu);
-  mSettings =
-      new QSettings("imageFeatureDetectorSettings.ini", QSettings::IniFormat);
   resize(mSettings->value("size", QSize(700, 480)).toSize());
   move(mSettings->value("pos", QPoint(150, 40)).toPoint());
   uiToolBarFile->setVisible(mSettings->value("uiToolBarFile", true).toBool());
@@ -27,7 +29,6 @@ WindowMain::WindowMain() : mTotalImages(0) {
   uiToolBarFeatures->setVisible(
       mSettings->value("uiToolBarFeatures", true).toBool());
 
-  mMenuRecentFiles = new QMenu(this);
   for (auto &mActionRecentFile : mActionRecentFiles) {
     mActionRecentFile = new QAction(this);
     mActionRecentFile->setVisible(false);
@@ -46,14 +47,13 @@ WindowMain::WindowMain() : mTotalImages(0) {
   mActionExit->setIcon(QIcon("icons/window-close.svg"));
   uiMenuFile->addAction(mActionExit);
 
-  mToolButtonOpenRecent = new QToolButton(this);
   mToolButtonOpenRecent->setFocusPolicy(Qt::NoFocus);
   mToolButtonOpenRecent->setPopupMode(QToolButton::MenuButtonPopup);
-  mToolButtonOpenRecent->setMenu(mMenuRecentFiles);
+  mToolButtonOpenRecent->setMenu(mMenuRecentFiles.get());
   mToolButtonOpenRecent->setToolButtonStyle(Qt::ToolButtonIconOnly);
   mToolButtonOpenRecent->setAutoRaise(true);
   mToolButtonOpenRecent->setDefaultAction(uiActionOpen);
-  uiToolBarFile->insertWidget(uiActionCaptureWebcam, mToolButtonOpenRecent);
+  uiToolBarFile->insertWidget(uiActionCaptureWebcam, mToolButtonOpenRecent.get());
 
   mActionGroupZoom = new QActionGroup(this);
   mActionGroupZoom->setEnabled(false);
@@ -373,7 +373,8 @@ void WindowMain::applyHarris() {
   case 2:sobelApertureSize = 5;
     break;
   case 3:sobelApertureSize = 7;
-  break; default:break;
+    break;
+  default:break;
   }
   mActiveWindowImage->applyHarris(
       sobelApertureSize,
@@ -532,14 +533,14 @@ void WindowMain::resetImage() {
 }
 
 void WindowMain::do4() {
-  auto harrisImage = new WindowImage(mActiveWindowImage->mImage,
-                                      mActiveWindowImage->mWindowTitle);
-  auto fastImage = new WindowImage(mActiveWindowImage->mImage,
-                                    mActiveWindowImage->mWindowTitle);
-  auto siftImage = new WindowImage(mActiveWindowImage->mImage,
-                                    mActiveWindowImage->mWindowTitle);
-  auto surfImage = new WindowImage(mActiveWindowImage->mImage,
-                                    mActiveWindowImage->mWindowTitle);
+  auto harrisImage = std::make_unique<WindowImage>(mActiveWindowImage->mImage,
+                                                   mActiveWindowImage->mWindowTitle);
+  auto fastImage = std::make_unique<WindowImage>(mActiveWindowImage->mImage,
+                                                 mActiveWindowImage->mWindowTitle);
+  auto siftImage = std::make_unique<WindowImage>(mActiveWindowImage->mImage,
+                                                 mActiveWindowImage->mWindowTitle);
+  auto surfImage = std::make_unique<WindowImage>(mActiveWindowImage->mImage,
+                                                 mActiveWindowImage->mWindowTitle);
 
   auto sobelApertureSize = 0;
   switch (mSettings->value("harris/sobelApertureSize", 1).toInt()) {
@@ -550,7 +551,7 @@ void WindowMain::do4() {
   case 2:sobelApertureSize = 5;
     break;
   case 3:sobelApertureSize = 7;
-  break;
+    break;
   default:break;
   }
   harrisImage->applyHarris(
@@ -575,8 +576,9 @@ void WindowMain::do4() {
                        mSettings->value("surf/layers", 3).toInt(),
                        mSettings->value("surf/showOrientation", true).toBool());
 
-  new WindowDo4(mActiveWindowImage->mWindowTitle, harrisImage, fastImage,
-                siftImage, surfImage);
+  auto do4 = new WindowDo4(mActiveWindowImage->mWindowTitle, std::move(harrisImage), std::move(fastImage),
+                           std::move(siftImage), std::move(surfImage));
+  do4->show();
 }
 
 void WindowMain::openFastRT() { new WindowFastRealTime(this); }
@@ -604,7 +606,7 @@ void WindowMain::duplicate() {
       QString(mActiveWindowImage->mOriginalUid));
   ++imageOriginal->mImageN;
   WindowImage *imageDuplicated = new WindowImage(
-      mActiveWindowImage->mImage,
+      std::move(mActiveWindowImage->mImage),
       imageOriginal->mWindowTitle +
           QString(" (Duplicated %1)").arg(imageOriginal->mImageN),
       WindowImage::duplicated);
@@ -630,10 +632,10 @@ void WindowMain::updateWindowMenu(QMdiSubWindow *mdiSubWindow) {
     uiMenuWindow->addSeparator();
     mSeparatorOpenWindowsAdded = true;
   }
-  for (auto mSubwindowAction : *mSubwindowActions) {
+  for (auto &aAction : *mSubwindowActions) {
     // 		uiMenuWindow->removeAction(mSubwindowActions->at(n)); // Makes not
     // to trigger new actions added
-    mSubwindowAction->setVisible(false);
+    aAction->setVisible(false);
   }
   mSubwindowActions->clear();
 
@@ -703,7 +705,7 @@ void WindowMain::updateWindowMenu(QMdiSubWindow *mdiSubWindow) {
       mActionGroupWindow->addAction(action);
       mSignalMapper->setMapping(action, list.at(n));
       QObject::connect(action, &QAction::triggered, mSignalMapper,
-                                static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
+                       static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
     }
   } else {
     if (uiMdiArea->subWindowList().empty()) {
@@ -730,7 +732,7 @@ void WindowMain::updateWindowMenu(QMdiSubWindow *mdiSubWindow) {
 
 void WindowMain::loadFile(const QString &filepath) {
   if (!filepath.isEmpty()) {
-    auto *image = new QImage(filepath);
+    auto image = std::make_shared<QImage>(filepath);
     if (!image->isNull()) {
       setRecentFile(filepath);
       showWindowImage(new WindowImage(image, filepath));
@@ -762,7 +764,7 @@ void WindowMain::showWindowImage(WindowImage *windowImage) {
   uiToolBarParameters->setEnabled(true);
 }
 
-void WindowMain::setRecentFile(const QString& filepath) {
+void WindowMain::setRecentFile(const QString &filepath) {
   if (mSettings->value("rememberRecentFiles", true).toBool()) {
     QStringList files = mSettings->value("recentFiles").toStringList();
     files.removeAll(filepath);
@@ -774,7 +776,7 @@ void WindowMain::setRecentFile(const QString& filepath) {
   }
 }
 
-void WindowMain::removeRecentFile(const QString& filePath) {
+void WindowMain::removeRecentFile(const QString &filePath) {
   QStringList files = mSettings->value("recentFiles").toStringList();
   files.removeAll(filePath);
   mSettings->setValue("recentFiles", files);
@@ -789,17 +791,18 @@ void WindowMain::updateRecentFilesMenu() {
     numRecentFiles = files.size();
   mActionSeparatorRecentFiles->setVisible(numRecentFiles > 0);
   mMenuRecentFiles->clear();
-
-  for (int n = 0; n < maxRecentFiles ; ++n) {
+  int n = 0;
+  for (const auto &file : mActionRecentFiles) {
     if (n < numRecentFiles) {
-      mActionRecentFiles[n]->setText(
+      file->setText(
           tr("&%1 %2").arg(n + 1).arg(QFileInfo(files[n]).fileName()));
-      mActionRecentFiles[n]->setData(files[n]);
-      mActionRecentFiles[n]->setVisible(true);
-      mMenuRecentFiles->addAction(mActionRecentFiles[n]);
+      file->setData(files[n]);
+      file->setVisible(true);
+      mMenuRecentFiles->addAction(file);
     } else {
-      mActionRecentFiles[n]->setVisible(false);
+      file->setVisible(false);
     }
+    n++;
   }
 }
 
@@ -822,4 +825,7 @@ void WindowMain::saveSettings() {
     mSettings->setValue("pos", pos());
     mSettings->setValue("size", size());
   }
+}
+QSettings *WindowMain::getMSettings() {
+  return mSettings.get();
 }

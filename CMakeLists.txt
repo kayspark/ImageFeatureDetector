@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.11)
 
 project(imagefeaturedetector)
 
+SET(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin) # http://stackoverflow.com/questions/18826789/cmake-output-build-directory
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -20,6 +21,9 @@ include_directories(${CMAKE_SOURCE_DIR}/build/imagefeaturedetector_autogen)
 ## http://www.cmake.org/Wiki/CMake:How_To_Find_Libraries
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
+if (win32)
+    set(OpenCV_DIR "C:/Users/kspark/opencv")
+endif ()
 find_package(OpenCV REQUIRED)
 # find_package(Threads REQUIRED) # http://stackoverflow.com/questions/1620918/cmake-and-libpthread (if not 'libpthread.so.0: DSO missing from command line' error will be thrown at linking time)
 # find_package(ZLIB REQUIRED) # http://stackoverflow.com/questions/6173915/need-help-trying-to-make-cmake-find-third-party-libraries

@@ -5,28 +5,31 @@
 
 WindowCaptureWebcam::WindowCaptureWebcam(WindowMain *main)
     : QDialog(main, Qt::Dialog), mWindowMain(main),
-      mTimer(new QTimer()), mCamera(cv::VideoCapture(0)) {
+      mCamera(cv::VideoCapture(0)) {
   setupUi(this);
 
   setAttribute(Qt::WA_DeleteOnClose);
 
   QObject::connect(uiPushButtonCapture, &QAbstractButton::clicked, this,
-          &WindowCaptureWebcam::capture);
+                   &WindowCaptureWebcam::capture);
   QObject::connect(uiPushButtonOK, &QAbstractButton::clicked, this,
-          &WindowCaptureWebcam::ok);
+                   &WindowCaptureWebcam::ok);
   QObject::connect(uiPushButtonCancel, &QAbstractButton::clicked, this,
-          &WindowCaptureWebcam::close);
+                   &WindowCaptureWebcam::close);
   if (mCamera.isOpened()) {
+    mTimer = std::make_unique<QTimer>();
     mTimer->start(40); // 25fps
-    QObject::connect(mTimer, &QTimer::timeout, this, &WindowCaptureWebcam::compute);
+    QObject::connect(mTimer.get(), &QTimer::timeout, this,
+                     &WindowCaptureWebcam::compute);
     uiPushButtonCapture->setEnabled(true);
     // 		qDebug() << "Frame format: " << mCamera.get(CV_CAP_PROP_FORMAT);
     // 		qDebug() << "Frame count: " <<
-    // mCamera.get(CV_CAP_PROP_FRAME_COUNT); 		qDebug() << "Frame mode: " <<
+    // mCamera.get(CV_CAP_PROP_FRAME_COUNT); 		qDebug() << "Frame mode: "
+    // <<
     // mCamera.get(CV_CAP_PROP_MODE); 		qDebug() << "Frame rate: " <<
     // mCamera.get(CV_CAP_PROP_FPS); 		qDebug() << "Frame width: " <<
-    // mCamera.get(CV_CAP_PROP_FRAME_WIDTH); 		qDebug() << "Frame height: " <<
-    // mCamera.get(CV_CAP_PROP_FRAME_HEIGHT);
+    // mCamera.get(CV_CAP_PROP_FRAME_WIDTH); 		qDebug() << "Frame height: "
+    // << mCamera.get(CV_CAP_PROP_FRAME_HEIGHT);
   } else {
     uiLabelRealTime->setText(
         "There is some problem with the cam.\nCannot get images.");
@@ -53,7 +56,7 @@ void WindowCaptureWebcam::capture() {
 
 void WindowCaptureWebcam::ok() {
   mWindowMain->showWindowImage(new WindowImage(
-      new QImage(uiLabelCaptured->pixmap()->toImage()),
+      std::make_shared<QImage>(uiLabelCaptured->pixmap()->toImage()),
       tr("WebCam Captured Image %1").arg(++mWindowMain->mCapturedWebcamImages),
       WindowImage::fromWebcam));
   close();
@@ -62,7 +65,8 @@ void WindowCaptureWebcam::ok() {
 void WindowCaptureWebcam::close() {
   if (mTimer)
     mTimer->stop();
-  mCamera.release();
+  if (mCamera.isOpened())
+    mCamera.release();
   QWidget::close();
 }
 
@@ -73,7 +77,7 @@ void WindowCaptureWebcam::closeEvent(QCloseEvent *closeEvent) {
 
 void WindowCaptureWebcam::compute() {
   mCamera >> mImageRT;
-  cvtColor(mImageRT, mImageRT, CV_BGR2RGB);
+  cvtColor(mImageRT, mImageRT, cv::COLOR_BGR2RGB);
   uiLabelRealTime->setPixmap(QPixmap::fromImage(
       QImage(mImageRT.data, mImageRT.cols, mImageRT.rows,
              static_cast<int>(mImageRT.step),

@@ -23,16 +23,17 @@
 #include "windowStartup.h"
 #include "windowFastRealTime.h"
 #include "windowDo4.h"
+#include <memory>
 
 class WindowMain : public QMainWindow, public Ui::windowMain {
 Q_OBJECT
 public:
   WindowMain();
   void updateRecentFilesMenu();
-  void showWindowImage(WindowImage *);
+  void showWindowImage(WindowImage *windowImage);
 
-  QToolButton *mToolButtonOpenRecent = nullptr;
-  QMenu *mMenuRecentFiles = nullptr;
+  std::unique_ptr<QToolButton> mToolButtonOpenRecent;
+  std::unique_ptr<QMenu> mMenuRecentFiles;
   int mCapturedWebcamImages;
   int mTotalImages;
 
@@ -40,7 +41,6 @@ public slots:
   void open();
   void captureWebcam();
   void openFastRT();
-
 private:
   void applyCommonTasks();
   void loadFile(const QString& filepath);
@@ -49,8 +49,11 @@ private:
   void setRecentFile(const QString & filepath);
   void removeRecentFile(const QString & filepath);
 
+  std::unique_ptr<QSettings> mSettings;
+public:
+  QSettings *getMSettings();
+private:
   bool mSeparatorOpenWindowsAdded; // Adding the separator on Qt Designer doesn't work
-  QSettings *mSettings = nullptr;
   QAction *mActionExit = nullptr;
   QAction *mActionSeparatorRecentFiles = nullptr;
   QSignalMapper *mSignalMapper = nullptr;
@@ -64,7 +67,7 @@ private:
   QAction *mSiftAction = nullptr;
   QAction *mSurfAction = nullptr;
   QAction *mCurrentFeatureAction = nullptr;
-  QList<QAction *> *mSubwindowActions = nullptr;
+  std::unique_ptr<QList<QAction *>> mSubwindowActions;
   Ui::barFeaturesHarris mUIHarris;
   Ui::barFeaturesFast mUIFast;
   Ui::barFeaturesSift mUISift;

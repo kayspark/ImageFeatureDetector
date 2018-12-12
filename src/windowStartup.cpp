@@ -13,15 +13,13 @@ WindowStartup::WindowStartup(WindowMain *windowMain)
     :  QDialog::QDialog(windowMain, Qt::Dialog), mWindowMain(windowMain){
   setupUi(this);
 
-  mSettings = new QSettings("imageFeatureDetectorSettings.ini", QSettings::IniFormat);
-
-  uiCheckBoxStartup->setChecked(mSettings->value("startupDialog", true).toBool());
-  if (mSettings->value("recentFiles").toStringList().isEmpty()) {
+  uiCheckBoxStartup->setChecked(mWindowMain->getMSettings()->value("startupDialog", true).toBool());
+  if (mWindowMain->getMSettings()->value("recentFiles").toStringList().isEmpty()) {
     uiToolButtonOpenRecent->setEnabled(false);
     uiToolButtonOpenRecent->setText("There Is No Recent Files");
   }
 
-  QMenu *recentFiles = mWindowMain->mMenuRecentFiles;
+  QMenu *recentFiles = mWindowMain->mMenuRecentFiles.get();
   uiToolButtonOpenRecent->setMenu(recentFiles);
 
   QObject::connect(uiCommandLinkButtonOpen, &QAbstractButton::clicked, this, &WindowStartup::open);
@@ -50,5 +48,5 @@ void WindowStartup::fastRT() {
 }
 
 void WindowStartup::saveSettings() {
-  mSettings->setValue("startupDialog", uiCheckBoxStartup->isChecked());
+  mWindowMain->getMSettings()->setValue("startupDialog", uiCheckBoxStartup->isChecked());
 }

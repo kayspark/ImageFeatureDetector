@@ -14,14 +14,13 @@ WindowPreferences::WindowPreferences(WindowMain *windowMain)
   setupUi(this);
 
   setAttribute(Qt::WA_DeleteOnClose);
-  mSettings = new QSettings("./imageFeatureDetectorSettings.ini", QSettings::IniFormat);
-  if (mSettings->value("recentFiles").toStringList().isEmpty()) {
+  if (mWindowMain->getMSettings()->value("recentFiles").toStringList().isEmpty()) {
     uiPushButtonClearRecentFiles->setEnabled(false);
     uiPushButtonClearRecentFiles->setText("Recent Files List Is Empty");
   }
-  uiCheckBoxStartupDialog->setChecked(mSettings->value("startupDialog", true).toBool());
-  uiCheckBoxBestFit->setChecked(mSettings->value("bestFit", true).toBool());
-  uiCheckBoxRecentFiles->setChecked(mSettings->value("rememberRecentFiles", true).toBool());
+  uiCheckBoxStartupDialog->setChecked(mWindowMain->getMSettings()->value("startupDialog", true).toBool());
+  uiCheckBoxBestFit->setChecked(mWindowMain->getMSettings()->value("bestFit", true).toBool());
+  uiCheckBoxRecentFiles->setChecked(mWindowMain->getMSettings()->value("rememberRecentFiles", true).toBool());
 
   QObject::connect(uiPushButtonClearRecentFiles, &QAbstractButton::clicked, this, &WindowPreferences::clearRecentFilesPrompt);
   QObject::connect(uiDialogButtonBox->button(QDialogButtonBox::RestoreDefaults),
@@ -42,9 +41,9 @@ void WindowPreferences::clearRecentFilesPrompt() {
 }
 
 void WindowPreferences::clearRecentFiles() {
-  QStringList files = mSettings->value("recentFiles").toStringList();
+  QStringList files = mWindowMain->getMSettings()->value("recentFiles").toStringList();
   files.clear();
-  mSettings->setValue("recentFiles", files);
+  mWindowMain->getMSettings()->setValue("recentFiles", files);
   uiPushButtonClearRecentFiles->setEnabled(false);
   uiPushButtonClearRecentFiles->setText("Recent File List Cleared");
   mWindowMain->updateRecentFilesMenu();
@@ -59,8 +58,8 @@ void WindowPreferences::restore() {
 void WindowPreferences::save() {
   if (!uiCheckBoxRecentFiles->isChecked())
     clearRecentFiles();
-  mSettings->setValue("rememberRecentFiles", uiCheckBoxRecentFiles->isChecked());
-  mSettings->setValue("bestFit", uiCheckBoxBestFit->isChecked());
-  mSettings->setValue("startupDialog", uiCheckBoxStartupDialog->isChecked());
+  mWindowMain->getMSettings()->setValue("rememberRecentFiles", uiCheckBoxRecentFiles->isChecked());
+  mWindowMain->getMSettings()->setValue("bestFit", uiCheckBoxBestFit->isChecked());
+  mWindowMain->getMSettings()->setValue("startupDialog", uiCheckBoxStartupDialog->isChecked());
   close();
 }

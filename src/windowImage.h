@@ -18,7 +18,7 @@
 class WindowImage : public QScrollArea, Ui::windowImage {
 Q_OBJECT
 public:
-  WindowImage(QImage *image, const QString& windowTitle, int windowType = normal);
+  WindowImage(std::shared_ptr<QImage> image, QString windowTitle, int windowType = normal);
   void zoomIn();
   void zoomOut();
   void zoomOriginal();
@@ -35,7 +35,7 @@ public:
 
   enum windowType { normal = 0, duplicated = 1, fromWebcam = 2, do4 = 3 };
   enum featureType { none = 0, harris = 1, fast = 2, sift = 3, surf = 4 };
-  QImage *mImage = nullptr;
+  std::shared_ptr<QImage> mImage;
   QPixmap mPixmap;
   QString mImageZoom;
   QString mImageTime;
@@ -63,8 +63,8 @@ private:
   QPixmap mPixmapOriginal;
   QSize mOriginalSize;
   QPoint mLastPoint;
-  QLocale *mLocale = nullptr;
-  QPainter *mPainter = nullptr;
+  std::unique_ptr<QLocale> mLocale;
+  std::unique_ptr<QPainter> mPainter;
   bool mModified;
   int mOriginalWidth, mOiginalHeight;
   double mScaleFactorAbove100, mScaleFactorUnder100, mFactorIncrement;

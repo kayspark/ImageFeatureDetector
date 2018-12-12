@@ -10,35 +10,32 @@
 #include "windowFastRealTime.h"
 
 WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
-    :  QDialog(wmain, Qt::Dialog),
-      mCamera(cv::VideoCapture(0)), mTimer(new QTimer()), mDetecting(false)  {
+    : QDialog(wmain, Qt::Dialog), mCamera(cv::VideoCapture(0)),
+      mTimer(std::make_unique<QTimer>()), mDetecting(false), mTime(0.0), mSettings(wmain->getMSettings()),
+      mLocale(std::make_unique<QLocale>(QLocale::English)),
+      mPainter(std::make_unique<QPainter>()) {
   setupUi(this);
-
   setAttribute(Qt::WA_DeleteOnClose);
-  mSettings =
-      new QSettings("imageFeatureDetectorSettings.ini", QSettings::IniFormat);
-  mLocale = new QLocale(QLocale::English);
-
   uiSpinBoxThresholdFAST->setValue(
       mSettings->value("fastRT/threshold", 25).toInt());
   uiPushButtonNonMaxFAST->setChecked(
       mSettings->value("fastRT/nonMaxSuppression", true).toBool());
 
   QObject::connect(uiPushButtonNonMaxFAST, &QPushButton::toggled, this,
-          &WindowFastRealTime::saveFastParams);
+                   &WindowFastRealTime::saveFastParams);
   QObject::connect(uiSpinBoxThresholdFAST, &QSpinBox::editingFinished, this,
-          &WindowFastRealTime::saveFastParams);
+                   &WindowFastRealTime::saveFastParams);
   QObject::connect(uiPushButtonResetFAST, &QAbstractButton::clicked, this,
-          &WindowFastRealTime::resetFastParams);
+                   &WindowFastRealTime::resetFastParams);
   QObject::connect(uiPushButtonDetect, &QAbstractButton::clicked, this,
-          &WindowFastRealTime::detect);
+                   &WindowFastRealTime::detect);
   QObject::connect(uiPushButtonCancel, &QAbstractButton::clicked, this,
-          &WindowFastRealTime::close);
+                   &WindowFastRealTime::close);
 
   if (mCamera.isOpened()) {
-    mPainter = new QPainter();
     mTimer->start(40); // 25fps
-    QObject::connect(mTimer, &QTimer::timeout, this, &WindowFastRealTime::compute);
+    QObject::connect(mTimer.get(), &QTimer::timeout, this,
+                     &WindowFastRealTime::compute);
     uiPushButtonDetect->setEnabled(true);
   } else {
     uiLabelRealTime->setText(
@@ -86,8 +83,8 @@ void WindowFastRealTime::resetFastParams() {
 void WindowFastRealTime::compute() {
   mCamera >> mImageRT;
   if (mDetecting) {
-          cv::Mat mImageGrey(mImageRT.rows, mImageRT.cols, CV_8UC1);
-          cv::cvtColor(mImageRT, mImageGrey, CV_RGB2GRAY);
+    cv::Mat mImageGrey(mImageRT.rows, mImageRT.cols, CV_8UC1);
+    cv::cvtColor(mImageRT, mImageGrey, cv::COLOR_RGB2GRAY);
     mTime = cv::getTickCount();
     FAST(mImageGrey, mKeypoints,
          mSettings->value("fastRT/threshold", true).toInt(),
@@ -96,12 +93,12 @@ void WindowFastRealTime::compute() {
         QString("Detecting Time: ")
             .append(mLocale
                         ->toString(((cv::getTickCount() - mTime) /
-                                           (cv::getTickFrequency() * 1000)),
+                                       (cv::getTickFrequency() * 1000)),
                                    'f', 2)
                         .append(" ms")));
     uiLabelKeypoints->setText(
         QString("Key points: ")
-            .append(mLocale->toString((float)mKeypoints.size(), 'f', 0)));
+            .append(mLocale->toString((float) mKeypoints.size(), 'f', 0)));
 
     mPixmap = QPixmap::fromImage(
         QImage(mImageRT.data, mImageRT.cols, mImageRT.rows,
@@ -113,7 +110,7 @@ void WindowFastRealTime::compute() {
     mPainter->setPen(pen);
     mPainter->setRenderHint(QPainter::Antialiasing);
     for (auto &keyPoint : mKeypoints)
-      mPainter->drawEllipse((int)keyPoint.pt.x, (int)keyPoint.pt.y, 4, 4);
+      mPainter->drawEllipse((int) keyPoint.pt.x, (int) keyPoint.pt.y, 4, 4);
     mPainter->end();
     uiLabelRealTime->setPixmap(mPixmap);
   } else {

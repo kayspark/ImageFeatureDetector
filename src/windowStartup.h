@@ -19,8 +19,7 @@ public:
   explicit WindowStartup(WindowMain *windowMain);
 
 private:
-  WindowMain *mWindowMain = nullptr;
-  QSettings *mSettings = nullptr;
+  std::shared_ptr<WindowMain> mWindowMain;
 
 private slots:
   void open() override;
