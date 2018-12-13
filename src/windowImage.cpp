@@ -170,22 +170,26 @@ void WindowImage::applyHarris(int sobelApertureSize, int harrisApertureSize,
   // 	scale = (max-min)/(maxVal-minVal);
   // 	shift = -minVal*scale+min;
   // 	imageHarris.convertTo(imageHarrisNorm, CV_32FC1, scale, shift);
+  std::vector<cv::Point2i> keyPoints;
+  if (imageHarrisNorm.isContinuous())
+    imageHarrisNorm.forEach<float>([this, &threshold, &keyPoints](const float pixel, const int *position) -> void {
+                                     if (pixel > threshold) {
+                                       keyPoints.emplace_back(cv::Point2i(position[0], position[1]));
+                                     }
+                                   }
+    ); //parallel execution and painting together seems not work
 
-  int keypoints = 0;
   mPainter->begin(&mPixmap);
   QPen pen(QColor::fromRgb(255, 0, 0));
   pen.setWidth(2);
   mPainter->setPen(pen);
   mPainter->setRenderHint(QPainter::Antialiasing);
-  for (int j = 0; j < imageHarrisNorm.rows; j++)
-    for (int i = 0; i < imageHarrisNorm.cols; i++)
-      if ((int) imageHarrisNorm.at<float>(j, i) > threshold) {
-        mPainter->drawEllipse(i, j, 4, 4);
-        ++keypoints;
-      }
+  std::for_each(keyPoints.cbegin(), keyPoints.cend(), [this](const auto &point) {
+    mPainter->drawEllipse(point.y, point.x, 4, 4);
+  });
 
   mPainter->end();
-  mImageKeypoints = mLocale->toString((float) keypoints, 'f', 0);
+  mImageKeypoints = mLocale->toString((int) keyPoints.size());
 
   if (showProcessed)
     showProcessedImage(imageHarrisNorm);
