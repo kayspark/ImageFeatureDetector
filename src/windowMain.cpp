@@ -16,8 +16,8 @@ WindowMain::WindowMain() : mTotalImages(0),
                            mSeparatorOpenWindowsAdded(false),
                            mSubwindowActions(std::vector<QAction *>()),
                            mMenuRecentFiles(std::make_unique<QMenu>(this)),
-                           mToolButtonOpenRecent(std::make_unique<QToolButton>(this)
-                           ) {
+                           mToolButtonOpenRecent(std::make_unique<QToolButton>(this)),
+                           mActionExit(std::make_unique<QAction>(this)) {
   setupUi(this);
   mIconHarris = new QIcon("icons/Harris.png");
   mIconFAST = new QIcon("icons/Fast.png");
@@ -31,23 +31,22 @@ WindowMain::WindowMain() : mTotalImages(0),
   uiToolBarFeatures->setVisible(
       mSettings->value("uiToolBarFeatures", true).toBool());
 
-  for (auto &mActionRecentFile : mActionRecentFiles) {
-    mActionRecentFile = new QAction(this);
-    mActionRecentFile->setVisible(false);
-    QObject::connect(mActionRecentFile, &QAction::triggered, this,
+  for (auto &recentFile : mActionRecentFiles) {
+    recentFile = std::make_unique<QAction>(this);
+    recentFile->setVisible(false);
+    QObject::connect(recentFile.get(), &QAction::triggered, this,
                      &WindowMain::openRecentFile);
-    uiMenuFile->addAction(mActionRecentFile);
+    uiMenuFile->addAction(recentFile.get());
   }
   mActionSeparatorRecentFiles = uiMenuFile->addSeparator();
   mActionSeparatorRecentFiles->setVisible(false);
   updateRecentFilesMenu();
-  mActionExit = new QAction(this);
   mActionExit->setObjectName(QString::fromUtf8("actionExit"));
   mActionExit->setText(QApplication::translate("mainWindow", "Exit", nullptr));
   mActionExit->setShortcut(
       QApplication::translate("mainWindow", "Ctrl+Q", nullptr));
   mActionExit->setIcon(QIcon("icons/window-close.svg"));
-  uiMenuFile->addAction(mActionExit);
+  uiMenuFile->addAction(mActionExit.get());
 
   mToolButtonOpenRecent->setFocusPolicy(Qt::NoFocus);
   mToolButtonOpenRecent->setPopupMode(QToolButton::MenuButtonPopup);
@@ -252,7 +251,7 @@ WindowMain::WindowMain() : mTotalImages(0),
                    &WindowMain::saveCopyAs);
   QObject::connect(uiActionPreferences, &QAction::triggered, this,
                    &WindowMain::preferences);
-  QObject::connect(mActionExit, &QAction::triggered, this, &WindowMain::exit);
+  QObject::connect(mActionExit.get(), &QAction::triggered, this, &WindowMain::exit);
   QObject::connect(uiActionCopy, &QAction::triggered, this, &WindowMain::copy);
   QObject::connect(uiActionResetImage, &QAction::triggered, this,
                    &WindowMain::resetImage);
@@ -304,7 +303,7 @@ WindowMain::WindowMain() : mTotalImages(0),
 
 void WindowMain::open() {
   loadFile(QFileDialog::getOpenFileName(this, tr("Open File"), "/home",
-                                        tr("Images (*.png *.bmp *.jpg)")));
+                                        tr("Images (*.png *.bmp *.jpg *.avi *.mp4 *.mov)")));
 }
 
 void WindowMain::captureWebcam() { new WindowCaptureWebcam(this); }
@@ -734,14 +733,19 @@ void WindowMain::updateWindowMenu(QMdiSubWindow *mdiSubWindow) {
 
 void WindowMain::loadFile(const QString &filepath) {
   if (!filepath.isEmpty()) {
-    auto image = std::make_shared<QImage>(filepath);
-    if (!image->isNull()) {
+    if (filepath.contains(".avi") || filepath.contains(".mp4") || filepath.contains(".mov")) {
       setRecentFile(filepath);
-      showWindowImage(new WindowImage(image, filepath));
+      showWindowImage(new WindowImage(filepath, filepath));
     } else {
-      removeRecentFile(filepath);
-      QMessageBox::warning(this, tr("Image Feature Detector"),
-                           tr("Cannot open %1.").arg(filepath));
+      auto image = std::make_shared<QImage>(filepath);
+      if (!image->isNull()) {
+        setRecentFile(filepath);
+        showWindowImage(new WindowImage(image, filepath));
+      } else {
+        removeRecentFile(filepath);
+        QMessageBox::warning(this, tr("Image Feature Detector"),
+                             tr("Cannot open %1.").arg(filepath));
+      }
     }
   }
 }
@@ -800,7 +804,7 @@ void WindowMain::updateRecentFilesMenu() {
           tr("&%1 %2").arg(n + 1).arg(QFileInfo(files[n]).fileName()));
       file->setData(files[n]);
       file->setVisible(true);
-      mMenuRecentFiles->addAction(file);
+      mMenuRecentFiles->addAction(file.get());
     } else {
       file->setVisible(false);
     }

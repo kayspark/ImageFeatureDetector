@@ -109,7 +109,7 @@ void WindowFastRealTime::compute() {
     pen.setWidth(2);
     mPainter->setPen(pen);
     mPainter->setRenderHint(QPainter::Antialiasing);
-    for (auto &keyPoint : mKeypoints)
+    for (const auto &keyPoint : mKeypoints)
       mPainter->drawEllipse((int) keyPoint.pt.x, (int) keyPoint.pt.y, 4, 4);
     mPainter->end();
     uiLabelRealTime->setPixmap(mPixmap);

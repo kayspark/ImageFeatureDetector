@@ -31,7 +31,6 @@ public:
   WindowMain();
   void updateRecentFilesMenu();
   void showWindowImage(WindowImage *windowImage);
-
   std::unique_ptr<QToolButton> mToolButtonOpenRecent;
   std::unique_ptr<QMenu> mMenuRecentFiles;
   int mCapturedWebcamImages;
@@ -54,14 +53,14 @@ public:
   QSettings *getMSettings();
 private:
   bool mSeparatorOpenWindowsAdded; // Adding the separator on Qt Designer doesn't work
-  QAction *mActionExit = nullptr;
+  std::unique_ptr<QAction> mActionExit;
   QAction *mActionSeparatorRecentFiles = nullptr;
   QSignalMapper *mSignalMapper = nullptr;
   QActionGroup *mActionGroupZoom = nullptr;
   QActionGroup *mActionGroupFeatures = nullptr;
   QActionGroup *mActionGroupWindow = nullptr;
   enum { maxRecentFiles = 8 };
-  std::array<QAction *, maxRecentFiles> mActionRecentFiles;
+  std::array<std::unique_ptr<QAction>, maxRecentFiles> mActionRecentFiles;
   QAction *mHarrisAction = nullptr;
   QAction *mFastAction = nullptr;
   QAction *mSiftAction = nullptr;

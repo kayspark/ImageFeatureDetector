@@ -1,7 +1,5 @@
 
 #include "windowCaptureWebcam.h"
-#include "windowMain.h"
-#include <QDialog>
 
 WindowCaptureWebcam::WindowCaptureWebcam(WindowMain *main)
     : QDialog(main, Qt::Dialog), mWindowMain(main),

@@ -11,6 +11,47 @@
 
 #include "windowImage.h"
 
+WindowImage::WindowImage(QString fileName, QString windowTitle,
+                         int windowType)
+    : mCamera(cv::VideoCapture(fileName.toStdString())),
+      mWindowTitle(std::move(windowTitle)), mWindowType(windowType),
+      mImageN(0), mModified(false), mFeatureType(0),
+      mPainter(std::make_unique<QPainter>()),
+      mLocale(std::make_unique<QLocale>(QLocale::English)) {
+  setupUi(this);
+  setAttribute(Qt::WA_DeleteOnClose);
+
+  setWindowTitle(mWindowTitle);
+
+  uiScrollAreaWidgetContents->setSizePolicy(
+      QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+
+  if (mCamera.isOpened()) {
+    // setup default values
+    compute();
+    float sizeInKiB = mImage->byteCount() / (float) 1024;
+    if (sizeInKiB > 1024)
+      mImageSize =
+          mLocale->toString(sizeInKiB / (float) 1024, 'f', 2).append(" MiB");
+    else
+      mImageSize = mLocale->toString(sizeInKiB, 'f', 2).append(" KiB");
+    // For async refresh
+    timer = std::make_unique<QTimer>();
+    timer->start(40); // 25fps
+    QObject::connect(timer.get(), &QTimer::timeout, this,
+                     &WindowImage::compute);
+  } else {
+    uiLabelImage->setText(
+        "There is some problem with the cam.\nCannot get images.");
+    uiLabelImage->setText("Please check camera");
+  }
+
+  mScaleFactorAbove100 = 0.5;
+  mScaleFactorUnder100 = 0.25;
+  mFactorIncrement = 0;
+  mCurrentFactor = 1.0;
+
+}
 WindowImage::WindowImage(std::shared_ptr<QImage> image, QString windowTitle,
                          int windowType)
     : mImage(std::move(image)), mWindowTitle(std::move(windowTitle)), mWindowType(windowType),
@@ -366,4 +407,23 @@ void WindowImage::mouseDoubleClickEvent(QMouseEvent *event) {
     zoomIn();
   else
     zoomOut();
+}
+
+void WindowImage::compute() {
+  mCamera >> mImageRT;
+  if (!mImageRT.empty()) {
+    cvtColor(mImageRT, mImageRT, cv::COLOR_BGR2RGB);
+    mImage = std::make_unique<QImage>(mImageRT.data, mImageRT.cols, mImageRT.rows,
+                                      static_cast<int>(mImageRT.step),
+                                      QImage::Format_RGB888);
+    mPixmapOriginal = QPixmap::fromImage(*mImage);
+    uiLabelImage->setPixmap(mPixmapOriginal); // With RGB32 doesn't work
+    mOriginalSize = mImage->size();
+    mOriginalWidth = mImage->width();
+    mOiginalHeight = mImage->height();
+
+    mImageZoom = tr("%1%").arg((int) (mCurrentFactor * 100));
+    mImageDimensions = tr("%1x%2 px").arg(mOriginalWidth).arg(mOiginalHeight);
+
+  }
 }

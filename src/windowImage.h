@@ -13,17 +13,18 @@
 #include <opencv2/xfeatures2d.hpp>
 #include <opencv2/xfeatures2d/nonfree.hpp>
 #include "ui_windowImage.h"
-//#include "ui_windowImage.h"
 
 class WindowImage : public QScrollArea, Ui::windowImage {
 Q_OBJECT
 public:
+  WindowImage(QString fileName, QString windowTitle, int windowType = normal);
   WindowImage(std::shared_ptr<QImage> image, QString windowTitle, int windowType = normal);
   void zoomIn();
   void zoomOut();
   void zoomOriginal();
   void zoomBestFit();
   void resetImage();
+  void compute();
   void applyHarris(int sobelApertureSize,
                    int harrisApertureSize,
                    double kValue,
@@ -36,7 +37,10 @@ public:
   enum windowType { normal = 0, duplicated = 1, fromWebcam = 2, do4 = 3 };
   enum featureType { none = 0, harris = 1, fast = 2, sift = 3, surf = 4 };
   std::shared_ptr<QImage> mImage;
+  cv::Mat mImageRT;
   QPixmap mPixmap;
+  cv::VideoCapture mCamera;
+  std::unique_ptr<QTimer> timer;
   QString mImageZoom;
   QString mImageTime;
   QString mImageKeypoints;
