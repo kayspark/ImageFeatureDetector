@@ -17,7 +17,7 @@
 class WindowImage : public QScrollArea, Ui::windowImage {
 Q_OBJECT
 public:
-  WindowImage(QString fileName, QString windowTitle, int windowType = normal);
+  WindowImage(const QString &fileName, QString windowTitle, int windowType = normal);
   WindowImage(std::shared_ptr<QImage> image, QString windowTitle, int windowType = normal);
   void zoomIn();
   void zoomOut();

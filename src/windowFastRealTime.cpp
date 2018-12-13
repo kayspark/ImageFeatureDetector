@@ -11,7 +11,8 @@
 
 WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
     : QDialog(wmain, Qt::Dialog), mCamera(cv::VideoCapture(0)),
-      mTimer(std::make_unique<QTimer>()), mDetecting(false), mTime(0.0), mSettings(wmain->getMSettings()),
+      mTimer(std::make_unique<QTimer>()), mDetecting(false), mTime(0.0),
+      mSettings(wmain->getMSettings()),
       mLocale(std::make_unique<QLocale>(QLocale::English)),
       mPainter(std::make_unique<QPainter>()) {
   setupUi(this);

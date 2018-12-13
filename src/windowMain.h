@@ -1,28 +1,28 @@
 /*
-* 2010-2015 (C) Antonio Redondo
-* http://antonioredondo.com
-* https://github.com/AntonioRedondo/ImageFeatureDetector
-*
-* Code under the terms of the GNU General Public License v3.
-*
-*/
+ * 2010-2015 (C) Antonio Redondo
+ * http://antonioredondo.com
+ * https://github.com/AntonioRedondo/ImageFeatureDetector
+ *
+ * Code under the terms of the GNU General Public License v3.
+ *
+ */
 
 #pragma once
 
-#include <QtCore>
-#include <QtWidgets>
-#include "ui_windowMain.h"
-#include "ui_barFeaturesHarris.h"
 #include "ui_barFeaturesFast.h"
+#include "ui_barFeaturesHarris.h"
 #include "ui_barFeaturesSift.h"
 #include "ui_barFeaturesSurf.h"
-#include "windowImage.h"
-#include "windowCaptureWebcam.h"
-#include "windowPreferences.h"
+#include "ui_windowMain.h"
 #include "windowAbout.h"
-#include "windowStartup.h"
-#include "windowFastRealTime.h"
+#include "windowCaptureWebcam.h"
 #include "windowDo4.h"
+#include "windowFastRealTime.h"
+#include "windowImage.h"
+#include "windowPreferences.h"
+#include "windowStartup.h"
+#include <QtCore>
+#include <QtWidgets>
 #include <memory>
 
 class WindowMain : public QMainWindow, public Ui::windowMain {
@@ -40,25 +40,30 @@ public slots:
   void open();
   void captureWebcam();
   void openFastRT();
+
 private:
   void applyCommonTasks();
-  void loadFile(const QString& filepath);
+  void loadFile(const QString &filepath);
   void closeEvent(QCloseEvent *) override;
   void saveSettings();
-  void setRecentFile(const QString & filepath);
-  void removeRecentFile(const QString & filepath);
+  void setRecentFile(const QString &filepath);
+  void removeRecentFile(const QString &filepath);
 
   std::unique_ptr<QSettings> mSettings;
+
 public:
   QSettings *getMSettings();
+
 private:
-  bool mSeparatorOpenWindowsAdded; // Adding the separator on Qt Designer doesn't work
+  bool mSeparatorOpenWindowsAdded; // Adding the separator on Qt Designer
+  // doesn't work
   std::unique_ptr<QAction> mActionExit;
   QAction *mActionSeparatorRecentFiles = nullptr;
-  QSignalMapper *mSignalMapper = nullptr;
-  QActionGroup *mActionGroupZoom = nullptr;
-  QActionGroup *mActionGroupFeatures = nullptr;
-  QActionGroup *mActionGroupWindow = nullptr;
+  std::unique_ptr<QSignalMapper> mSignalMapper;
+
+  std::unique_ptr<QActionGroup> mActionGroupZoom;
+  std::unique_ptr<QActionGroup> mActionGroupFeatures;
+  std::unique_ptr<QActionGroup> mActionGroupWindow;
   enum { maxRecentFiles = 8 };
   std::array<std::unique_ptr<QAction>, maxRecentFiles> mActionRecentFiles;
   QAction *mHarrisAction = nullptr;
@@ -67,32 +72,34 @@ private:
   QAction *mSurfAction = nullptr;
   QAction *mCurrentFeatureAction = nullptr;
   std::vector<QAction *> mSubwindowActions;
-  Ui::barFeaturesHarris mUIHarris;
-  Ui::barFeaturesFast mUIFast;
-  Ui::barFeaturesSift mUISift;
-  Ui::barFeaturesSurf mUISurf;
-  QWidget *mHarrisToolBar = nullptr;
-  QWidget *mSiftToolBar = nullptr;
-  QWidget *mSurfToolBar = nullptr;
-  QWidget *mFastToolBar = nullptr;
+  Ui::barFeaturesHarris mUIHarris{};
+  Ui::barFeaturesFast mUIFast{};
+  Ui::barFeaturesSift mUISift{};
+  Ui::barFeaturesSurf mUISurf{};
+  std::unique_ptr<QWidget> mHarrisToolBar;
+  std::unique_ptr<QWidget> mSiftToolBar;
+  std::unique_ptr<QWidget> mSurfToolBar;
+  std::unique_ptr<QWidget> mFastToolBar;
 
   QMdiSubWindow *mActiveWindow = nullptr;
   WindowImage *mActiveWindowImage = nullptr;
-  QIcon *mIconHarris = nullptr;
-  QIcon *mIconFAST = nullptr;
-  QIcon *mIconSIFT = nullptr;
-  QIcon *mIconSURF = nullptr;
-  QLabel *mStatusBarLabelZoom = nullptr;
-  QLabel *mStatusBarLabelDimensions = nullptr;
-  QLabel *mStatusBarLabelSize = nullptr;
-  QLabel *mStatusBarLabelTime = nullptr;
-  QLabel *mStatusBarLabelIcon = nullptr;
-  QLabel *mStatusBarLabelKeypoints = nullptr;
-  QLabel *mStatusBarLabelSpaceRight = nullptr;
-  QLabel *mStatusBarLabelSpaceLeft = nullptr;
-  QFrame *mStatusBarLine = nullptr;
-  QFrame *mStatusBarLine2 = nullptr;
-  QFrame *mStatusBarLine3 = nullptr;
+  std::unique_ptr<QIcon> mIconHarris;
+  std::unique_ptr<QIcon> mIconFAST;
+  std::unique_ptr<QIcon> mIconSIFT;
+  std::unique_ptr<QIcon> mIconSURF;
+
+  std::unique_ptr<QLabel> mStatusBarLabelZoom;
+  std::unique_ptr<QLabel> mStatusBarLabelDimensions;
+  std::unique_ptr<QLabel> mStatusBarLabelSize;
+  std::shared_ptr<QLabel> mStatusBarLabelTime;
+  std::unique_ptr<QLabel> mStatusBarLabelIcon;
+  std::unique_ptr<QLabel> mStatusBarLabelKeypoints;
+  std::unique_ptr<QLabel> mStatusBarLabelSpaceRight;
+  std::unique_ptr<QLabel> mStatusBarLabelSpaceLeft;
+
+  std::unique_ptr<QFrame> mStatusBarLine;
+  std::unique_ptr<QFrame> mStatusBarLine2;
+  std::unique_ptr<QFrame> mStatusBarLine3;
 
 private slots:
   void saveCopyAs();

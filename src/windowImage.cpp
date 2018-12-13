@@ -11,12 +11,11 @@
 
 #include "windowImage.h"
 
-WindowImage::WindowImage(QString fileName, QString windowTitle,
+WindowImage::WindowImage(const QString &fileName, QString windowTitle,
                          int windowType)
     : mCamera(cv::VideoCapture(fileName.toStdString())),
-      mWindowTitle(std::move(windowTitle)), mWindowType(windowType),
-      mImageN(0), mModified(false), mFeatureType(0),
-      mPainter(std::make_unique<QPainter>()),
+      mWindowTitle(std::move(windowTitle)), mWindowType(windowType), mImageN(0),
+      mModified(false), mFeatureType(0), mPainter(std::make_unique<QPainter>()),
       mLocale(std::make_unique<QLocale>(QLocale::English)) {
   setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
@@ -50,12 +49,11 @@ WindowImage::WindowImage(QString fileName, QString windowTitle,
   mScaleFactorUnder100 = 0.25;
   mFactorIncrement = 0;
   mCurrentFactor = 1.0;
-
 }
 WindowImage::WindowImage(std::shared_ptr<QImage> image, QString windowTitle,
                          int windowType)
-    : mImage(std::move(image)), mWindowTitle(std::move(windowTitle)), mWindowType(windowType),
-      mImageN(0), mModified(false), mFeatureType(0),
+    : mImage(std::move(image)), mWindowTitle(std::move(windowTitle)),
+      mWindowType(windowType), mImageN(0), mModified(false), mFeatureType(0),
       mPainter(std::make_unique<QPainter>()),
       mLocale(std::make_unique<QLocale>(QLocale::English)) {
   setupUi(this);
@@ -164,9 +162,8 @@ void WindowImage::applyHarris(int sobelApertureSize, int harrisApertureSize,
 
   // Increases the contrast. If not only a nearly black image would be seen
   cv::Mat imageHarrisNorm;
-  normalize(
-      imageHarris, imageHarrisNorm, 0, 255, cv::NORM_MINMAX,
-      CV_32FC1); // The same than the next five lines
+  normalize(imageHarris, imageHarrisNorm, 0, 255, cv::NORM_MINMAX,
+            CV_32FC1); // The same than the next five lines
   // 	double min=0, max=255, minVal, maxVal, scale, shift;
   // 	minMaxLoc(imageHarris, &minVal, &maxVal);
   // 	scale = (max-min)/(maxVal-minVal);
@@ -361,10 +358,10 @@ QImage WindowImage::convertMat2QImage(const cv::Mat_<double> &src) {
   double scale = 1; // Value for CV_32FC1 images. Use -255 for CV_8UC1 images.
   QImage dest(src.cols, src.rows, QImage::Format_RGB32);
   for (int y = 0; y < src.rows; ++y) {
-    const auto pDouble = src[y];
+    const auto &pDouble = src[y];
     auto line = dest.scanLine(y);
     for (int x = 0; x < src.cols; ++x) {
-      auto color = static_cast<unsigned int>(pDouble[x] * scale);
+      const auto &color = static_cast<unsigned int>(pDouble[x] * scale);
       line[x] = static_cast<uchar>(qRgb(color, color, color));
     }
   }
@@ -400,7 +397,7 @@ void WindowImage::mouseMoveEvent(QMouseEvent *event) {
   mLastPoint = myPos;
 }
 
-void WindowImage::mouseReleaseEvent(QMouseEvent *event) { unsetCursor(); }
+void WindowImage::mouseReleaseEvent(QMouseEvent * /*event*/) { unsetCursor(); }
 
 void WindowImage::mouseDoubleClickEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton)
@@ -413,9 +410,9 @@ void WindowImage::compute() {
   mCamera >> mImageRT;
   if (!mImageRT.empty()) {
     cvtColor(mImageRT, mImageRT, cv::COLOR_BGR2RGB);
-    mImage = std::make_unique<QImage>(mImageRT.data, mImageRT.cols, mImageRT.rows,
-                                      static_cast<int>(mImageRT.step),
-                                      QImage::Format_RGB888);
+    mImage = std::make_unique<QImage>(
+        mImageRT.data, mImageRT.cols, mImageRT.rows,
+        static_cast<int>(mImageRT.step), QImage::Format_RGB888);
     mPixmapOriginal = QPixmap::fromImage(*mImage);
     uiLabelImage->setPixmap(mPixmapOriginal); // With RGB32 doesn't work
     mOriginalSize = mImage->size();
@@ -424,6 +421,5 @@ void WindowImage::compute() {
 
     mImageZoom = tr("%1%").arg((int) (mCurrentFactor * 100));
     mImageDimensions = tr("%1x%2 px").arg(mOriginalWidth).arg(mOiginalHeight);
-
   }
 }

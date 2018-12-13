@@ -9,20 +9,44 @@
 
 #include "windowMain.h"
 
-WindowMain::WindowMain() : mTotalImages(0),
-                           mCapturedWebcamImages(0),
-                           mSettings(
-                               std::make_unique<QSettings>("imageFeatureDetectorSettings.ini", QSettings::IniFormat)),
-                           mSeparatorOpenWindowsAdded(false),
-                           mSubwindowActions(std::vector<QAction *>()),
-                           mMenuRecentFiles(std::make_unique<QMenu>(this)),
-                           mToolButtonOpenRecent(std::make_unique<QToolButton>(this)),
-                           mActionExit(std::make_unique<QAction>(this)) {
+WindowMain::WindowMain()
+    : mTotalImages(0), mCapturedWebcamImages(0),
+      mSettings(std::make_unique<QSettings>("imageFeatureDetectorSettings.ini",
+                                            QSettings::IniFormat)),
+      mSeparatorOpenWindowsAdded(false),
+      mMenuRecentFiles(std::make_unique<QMenu>(this)),
+      mToolButtonOpenRecent(std::make_unique<QToolButton>(this)),
+      mIconHarris(std::make_unique<QIcon>("icons/Harris.png")),
+      mIconFAST(std::make_unique<QIcon>("icons/Fast.png")),
+      mIconSIFT(std::make_unique<QIcon>("icons/Sift.png")),
+      mIconSURF(std::make_unique<QIcon>("icons/Surf.png")),
+      mSignalMapper(std::make_unique<QSignalMapper>(
+          this)), // for the Open Windows menu entries
+      mHarrisToolBar(std::make_unique<QWidget>()),
+      mSiftToolBar(std::make_unique<QWidget>()),
+      mSurfToolBar(std::make_unique<QWidget>()),
+      mFastToolBar(std::make_unique<QWidget>()),
+      mActionGroupZoom(std::make_unique<QActionGroup>(this)),
+      mActionGroupFeatures(std::make_unique<QActionGroup>(this)),
+      mActionGroupWindow(std::make_unique<QActionGroup>(this)),
+      mActionExit(std::make_unique<QAction>(this)) {
+
   setupUi(this);
-  mIconHarris = new QIcon("icons/Harris.png");
-  mIconFAST = new QIcon("icons/Fast.png");
-  mIconSIFT = new QIcon("icons/Sift.png");
-  mIconSURF = new QIcon("icons/Surf.png");
+  // below initialization is depends on uiStatusBar. So must be done at here, not above initialization list.
+
+  mStatusBarLine = std::make_unique<QFrame>(uiStatusBar);
+  mStatusBarLabelDimensions = std::make_unique<QLabel>(uiStatusBar);
+  mStatusBarLabelSize = std::make_unique<QLabel>(uiStatusBar);
+  mStatusBarLabelTime = std::make_unique<QLabel>(uiStatusBar);
+  mStatusBarLabelIcon = std::make_unique<QLabel>(uiStatusBar);
+  mStatusBarLabelKeypoints = std::make_unique<QLabel>(uiStatusBar);
+  mStatusBarLabelSpaceRight = std::make_unique<QLabel>(uiStatusBar);
+  mStatusBarLabelSpaceLeft = std::make_unique<QLabel>(uiStatusBar);
+  mStatusBarLabelZoom = std::make_unique<QLabel>(uiStatusBar);
+  mStatusBarLine2 =
+      std::make_unique<QFrame>(mStatusBarLabelTime.get());
+  mStatusBarLine3 =
+      std::make_unique<QFrame>(mStatusBarLabelTime.get());
   setContextMenuPolicy(Qt::PreventContextMenu);
   resize(mSettings->value("size", QSize(700, 480)).toSize());
   move(mSettings->value("pos", QPoint(150, 40)).toPoint());
@@ -54,16 +78,15 @@ WindowMain::WindowMain() : mTotalImages(0),
   mToolButtonOpenRecent->setToolButtonStyle(Qt::ToolButtonIconOnly);
   mToolButtonOpenRecent->setAutoRaise(true);
   mToolButtonOpenRecent->setDefaultAction(uiActionOpen);
-  uiToolBarFile->insertWidget(uiActionCaptureWebcam, mToolButtonOpenRecent.get());
+  uiToolBarFile->insertWidget(uiActionCaptureWebcam,
+                              mToolButtonOpenRecent.get());
 
-  mActionGroupZoom = new QActionGroup(this);
   mActionGroupZoom->setEnabled(false);
   mActionGroupZoom->addAction(uiActionZoomIn);
   mActionGroupZoom->addAction(uiActionZoomOut);
   mActionGroupZoom->addAction(uiActionZoomOriginal);
   mActionGroupZoom->addAction(uiActionZoomBestFit);
 
-  mActionGroupFeatures = new QActionGroup(this);
   mActionGroupFeatures->setEnabled(false);
   mActionGroupFeatures->addAction(uiActionSIFT);
   mActionGroupFeatures->addAction(uiActionSURF);
@@ -71,7 +94,6 @@ WindowMain::WindowMain() : mTotalImages(0),
   mActionGroupFeatures->addAction(uiActionFAST);
   mActionGroupFeatures->addAction(uiActionDo4);
 
-  mActionGroupWindow = new QActionGroup(this);
   mActionGroupWindow->setEnabled(false);
   mActionGroupWindow->addAction(uiActionTile);
   mActionGroupWindow->addAction(uiActionCascade);
@@ -81,19 +103,14 @@ WindowMain::WindowMain() : mTotalImages(0),
   mActionGroupWindow->addAction(uiActionClose);
   mActionGroupWindow->addAction(uiActionCloseAll);
 
-  mStatusBarLabelZoom = new QLabel(uiStatusBar);
   mStatusBarLabelZoom->setFrameShape(QFrame::NoFrame);
   mStatusBarLabelZoom->setAlignment(Qt::AlignHCenter);
-  mStatusBarLabelDimensions = new QLabel(uiStatusBar);
   mStatusBarLabelDimensions->setFrameShape(QFrame::NoFrame);
   mStatusBarLabelDimensions->setAlignment(Qt::AlignHCenter);
-  mStatusBarLabelSize = new QLabel(uiStatusBar);
   mStatusBarLabelSize->setFrameShape(QFrame::NoFrame);
   mStatusBarLabelSize->setAlignment(Qt::AlignHCenter);
-  mStatusBarLabelTime = new QLabel(uiStatusBar);
   mStatusBarLabelTime->setFrameShape(QFrame::NoFrame);
   mStatusBarLabelTime->setAlignment(Qt::AlignHCenter);
-  mStatusBarLabelIcon = new QLabel(uiStatusBar);
   mStatusBarLabelIcon->setSizePolicy(
       QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
   mStatusBarLabelIcon->setMinimumSize(QSize(16, 16));
@@ -101,39 +118,34 @@ WindowMain::WindowMain() : mTotalImages(0),
   mStatusBarLabelIcon->setScaledContents(true);
   mStatusBarLabelIcon->setAlignment(Qt::AlignHCenter);
   mStatusBarLabelIcon->setVisible(false);
-  mStatusBarLabelKeypoints = new QLabel(uiStatusBar);
   mStatusBarLabelKeypoints->setAlignment(Qt::AlignHCenter);
-  mStatusBarLabelSpaceRight = new QLabel(uiStatusBar);
   mStatusBarLabelSpaceRight->setMinimumSize(0, 1);
-  mStatusBarLabelSpaceLeft = new QLabel(uiStatusBar);
   mStatusBarLabelSpaceLeft->setMinimumSize(0, 1);
-  mStatusBarLine = new QFrame(uiStatusBar);
+
   mStatusBarLine->setVisible(false);
   mStatusBarLine->setFrameShape(QFrame::VLine);
   mStatusBarLine->setFrameShadow(QFrame::Sunken);
-  mStatusBarLine2 = new QFrame(mStatusBarLabelTime);
   mStatusBarLine2->setFrameShape(QFrame::VLine);
   mStatusBarLine2->setFrameShadow(QFrame::Sunken);
   mStatusBarLine2->setVisible(false);
-  mStatusBarLine3 = new QFrame(mStatusBarLabelTime);
+
   mStatusBarLine3->setFrameShape(QFrame::VLine);
   mStatusBarLine3->setFrameShadow(QFrame::Sunken);
   mStatusBarLine3->setVisible(false);
-  uiStatusBar->addWidget(mStatusBarLabelSpaceLeft);
-  uiStatusBar->addWidget(mStatusBarLabelZoom);
-  uiStatusBar->addPermanentWidget(mStatusBarLabelTime);
-  uiStatusBar->addPermanentWidget(mStatusBarLine2);
-  uiStatusBar->addPermanentWidget(mStatusBarLabelIcon);
-  uiStatusBar->addPermanentWidget(mStatusBarLabelKeypoints);
-  uiStatusBar->addPermanentWidget(mStatusBarLine3);
-  uiStatusBar->addPermanentWidget(mStatusBarLabelDimensions);
-  uiStatusBar->addPermanentWidget(mStatusBarLine);
-  uiStatusBar->addPermanentWidget(mStatusBarLabelSize);
-  uiStatusBar->addPermanentWidget(mStatusBarLabelSpaceRight);
+  uiStatusBar->addWidget(mStatusBarLabelSpaceLeft.get());
+  uiStatusBar->addWidget(mStatusBarLabelZoom.get());
+  uiStatusBar->addPermanentWidget(mStatusBarLabelTime.get());
+  uiStatusBar->addPermanentWidget(mStatusBarLine2.get());
+  uiStatusBar->addPermanentWidget(mStatusBarLabelIcon.get());
+  uiStatusBar->addPermanentWidget(mStatusBarLabelKeypoints.get());
+  uiStatusBar->addPermanentWidget(mStatusBarLine3.get());
+  uiStatusBar->addPermanentWidget(mStatusBarLabelDimensions.get());
+  uiStatusBar->addPermanentWidget(mStatusBarLine.get());
+  uiStatusBar->addPermanentWidget(mStatusBarLabelSize.get());
+  uiStatusBar->addPermanentWidget(mStatusBarLabelSpaceRight.get());
 
-  mHarrisToolBar = new QWidget();
   mHarrisToolBar->setVisible(false);
-  mUIHarris.setupUi(mHarrisToolBar);
+  mUIHarris.setupUi(mHarrisToolBar.get());
   mUIHarris.uiComboBoxSobelApertureSize->setCurrentIndex(
       mSettings->value("harris/sobelApertureSize", 1).toInt());
   mUIHarris.uiSpinBoxHarrisApertureSize->setValue(
@@ -146,26 +158,26 @@ WindowMain::WindowMain() : mTotalImages(0),
       mSettings->value("harris/showProcessedImage", false).toBool());
   // http://stackoverflow.com/questions/16794695/qt5-overloaded-signals-and-slots
   QObject::connect<void (QComboBox::*)(int)>(
-      mUIHarris.uiComboBoxSobelApertureSize,
-      &QComboBox::currentIndexChanged,
+      mUIHarris.uiComboBoxSobelApertureSize, &QComboBox::currentIndexChanged,
       this, &WindowMain::saveHarrisParams);
-  QObject::connect(mUIHarris.uiSpinBoxHarrisApertureSize, &QSpinBox::editingFinished,
+  QObject::connect(mUIHarris.uiSpinBoxHarrisApertureSize,
+                   &QSpinBox::editingFinished, this,
+                   &WindowMain::saveHarrisParams);
+  QObject::connect(mUIHarris.uiDoubleSpinBoxKValue, &QSpinBox::editingFinished,
                    this, &WindowMain::saveHarrisParams);
-  QObject::connect(mUIHarris.uiDoubleSpinBoxKValue, &QSpinBox::editingFinished, this,
-                   &WindowMain::saveHarrisParams);
-  QObject::connect(mUIHarris.uiSpinBoxThreshold, &QSpinBox::editingFinished, this,
-                   &WindowMain::saveHarrisParams);
-  QObject::connect(mUIHarris.uiPushButtonShowProcessedImage, &QPushButton::toggled, this,
-                   &WindowMain::saveHarrisParams);
+  QObject::connect(mUIHarris.uiSpinBoxThreshold, &QSpinBox::editingFinished,
+                   this, &WindowMain::saveHarrisParams);
+  QObject::connect(mUIHarris.uiPushButtonShowProcessedImage,
+                   &QPushButton::toggled, this, &WindowMain::saveHarrisParams);
   QObject::connect(mUIHarris.uiButtonBox->button(QDialogButtonBox::Apply),
                    &QAbstractButton::clicked, this, &WindowMain::applyHarris);
   QObject::connect(mUIHarris.uiButtonBox->button(QDialogButtonBox::Reset),
-                   &QAbstractButton::clicked, this, &WindowMain::resetHarrisParams);
-  mHarrisAction = uiToolBarParameters->addWidget(mHarrisToolBar);
+                   &QAbstractButton::clicked, this,
+                   &WindowMain::resetHarrisParams);
+  mHarrisAction = uiToolBarParameters->addWidget(mHarrisToolBar.get());
 
-  mFastToolBar = new QWidget();
   mFastToolBar->setVisible(false);
-  mUIFast.setupUi(mFastToolBar);
+  mUIFast.setupUi(mFastToolBar.get());
   mUIFast.uiSpinBoxThreshold->setValue(
       mSettings->value("fast/threshold", 50).toInt());
   mUIFast.uiPushButtonNonMax->setChecked(
@@ -177,12 +189,12 @@ WindowMain::WindowMain() : mTotalImages(0),
   QObject::connect(mUIFast.uiButtonBox->button(QDialogButtonBox::Apply),
                    &QAbstractButton::clicked, this, &WindowMain::applyFast);
   QObject::connect(mUIFast.uiButtonBox->button(QDialogButtonBox::Reset),
-                   &QAbstractButton::clicked, this, &WindowMain::restFastParams);
-  mFastAction = uiToolBarParameters->addWidget(mFastToolBar);
+                   &QAbstractButton::clicked, this,
+                   &WindowMain::restFastParams);
+  mFastAction = uiToolBarParameters->addWidget(mFastToolBar.get());
 
-  mSiftToolBar = new QWidget();
   mSiftToolBar->setVisible(false);
-  mUISift.setupUi(mSiftToolBar);
+  mUISift.setupUi(mSiftToolBar.get());
   mUISift.uiDoubleSpinBoxThreshold->setValue(
       mSettings->value("sift/threshold", 0.04).toDouble());
   mUISift.uiDoubleSpinBoxEdgeThreshold->setValue(
@@ -192,25 +204,26 @@ WindowMain::WindowMain() : mTotalImages(0),
   mUISift.uiSpinBoxLayers->setValue(mSettings->value("sift/layers", 3).toInt());
   mUISift.uiPushButtonShowOrientation->setChecked(
       mSettings->value("sift/showOrientation", true).toBool());
-  QObject::connect(mUISift.uiDoubleSpinBoxThreshold, &QSpinBox::editingFinished, this,
-                   &WindowMain::saveSiftParams);
-  QObject::connect(mUISift.uiDoubleSpinBoxEdgeThreshold, &QSpinBox::editingFinished,
+  QObject::connect(mUISift.uiDoubleSpinBoxThreshold, &QSpinBox::editingFinished,
                    this, &WindowMain::saveSiftParams);
+  QObject::connect(mUISift.uiDoubleSpinBoxEdgeThreshold,
+                   &QSpinBox::editingFinished, this,
+                   &WindowMain::saveSiftParams);
   QObject::connect(mUISift.uiSpinBoxFeatures, &QSpinBox::editingFinished, this,
                    &WindowMain::saveSiftParams);
   QObject::connect(mUISift.uiSpinBoxLayers, &QSpinBox::editingFinished, this,
                    &WindowMain::saveSiftParams);
-  QObject::connect(mUISift.uiPushButtonShowOrientation, &QPushButton::toggled, this,
-                   &WindowMain::saveSiftParams);
+  QObject::connect(mUISift.uiPushButtonShowOrientation, &QPushButton::toggled,
+                   this, &WindowMain::saveSiftParams);
   QObject::connect(mUISift.uiButtonBox->button(QDialogButtonBox::Apply),
                    &QAbstractButton::clicked, this, &WindowMain::applySift);
   QObject::connect(mUISift.uiButtonBox->button(QDialogButtonBox::Reset),
-                   &QAbstractButton::clicked, this, &WindowMain::resetSiftParams);
-  mSiftAction = uiToolBarParameters->addWidget(mSiftToolBar);
+                   &QAbstractButton::clicked, this,
+                   &WindowMain::resetSiftParams);
+  mSiftAction = uiToolBarParameters->addWidget(mSiftToolBar.get());
 
-  mSurfToolBar = new QWidget();
   mSurfToolBar->setVisible(false);
-  mUISurf.setupUi(mSurfToolBar);
+  mUISurf.setupUi(mSurfToolBar.get());
   mUISurf.uiSpinBoxThreshold->setValue(
       mSettings->value("surf/threshold", 100).toInt());
   mUISurf.uiSpinBoxOctaves->setValue(
@@ -230,7 +243,7 @@ WindowMain::WindowMain() : mTotalImages(0),
           &QAbstractButton::clicked, this, &WindowMain::applySurf);
   connect(mUISurf.uiButtonBox->button(QDialogButtonBox::Reset),
           &QAbstractButton::clicked, this, &WindowMain::resetSurfParams);
-  mSurfAction = uiToolBarParameters->addWidget(mSurfToolBar);
+  mSurfAction = uiToolBarParameters->addWidget(mSurfToolBar.get());
 
   switch (mSettings->value("startupParameters", 0).toInt()) {
   case 0:showHarrisToolBar();
@@ -251,16 +264,21 @@ WindowMain::WindowMain() : mTotalImages(0),
                    &WindowMain::saveCopyAs);
   QObject::connect(uiActionPreferences, &QAction::triggered, this,
                    &WindowMain::preferences);
-  QObject::connect(mActionExit.get(), &QAction::triggered, this, &WindowMain::exit);
+  QObject::connect(mActionExit.get(), &QAction::triggered, this,
+                   &WindowMain::exit);
   QObject::connect(uiActionCopy, &QAction::triggered, this, &WindowMain::copy);
   QObject::connect(uiActionResetImage, &QAction::triggered, this,
                    &WindowMain::resetImage);
   QObject::connect(uiActionStartupDialog, &QAction::triggered, this,
                    &WindowMain::startupDialog);
-  QObject::connect(uiActionZoomIn, &QAction::triggered, this, &WindowMain::zoom);
-  QObject::connect(uiActionZoomOut, &QAction::triggered, this, &WindowMain::zoom);
-  QObject::connect(uiActionZoomOriginal, &QAction::triggered, this, &WindowMain::zoom);
-  QObject::connect(uiActionZoomBestFit, &QAction::triggered, this, &WindowMain::zoom);
+  QObject::connect(uiActionZoomIn, &QAction::triggered, this,
+                   &WindowMain::zoom);
+  QObject::connect(uiActionZoomOut, &QAction::triggered, this,
+                   &WindowMain::zoom);
+  QObject::connect(uiActionZoomOriginal, &QAction::triggered, this,
+                   &WindowMain::zoom);
+  QObject::connect(uiActionZoomBestFit, &QAction::triggered, this,
+                   &WindowMain::zoom);
   QObject::connect(uiActionHarris, &QAction::triggered, this,
                    &WindowMain::showHarrisToolBar);
   QObject::connect(uiActionFAST, &QAction::triggered, this,
@@ -270,25 +288,29 @@ WindowMain::WindowMain() : mTotalImages(0),
   QObject::connect(uiActionSURF, &QAction::triggered, this,
                    &WindowMain::showSurfToolBar);
   QObject::connect(uiActionDo4, &QAction::triggered, this, &WindowMain::do4);
-  QObject::connect(uiActionFastRT, &QAction::triggered, this, &WindowMain::openFastRT);
+  QObject::connect(uiActionFastRT, &QAction::triggered, this,
+                   &WindowMain::openFastRT);
   QObject::connect(uiActionTile, &QAction::triggered, this, &WindowMain::tile);
-  QObject::connect(uiActionCascade, &QAction::triggered, this, &WindowMain::cascade);
+  QObject::connect(uiActionCascade, &QAction::triggered, this,
+                   &WindowMain::cascade);
   QObject::connect(uiActionNext, &QAction::triggered, uiMdiArea,
                    &QMdiArea::activateNextSubWindow);
   QObject::connect(uiActionPrevious, &QAction::triggered, uiMdiArea,
                    &QMdiArea::activatePreviousSubWindow);
-  QObject::connect(uiActionDuplicate, &QAction::triggered, this, &WindowMain::duplicate);
+  QObject::connect(uiActionDuplicate, &QAction::triggered, this,
+                   &WindowMain::duplicate);
   QObject::connect(uiActionClose, &QAction::triggered, this,
                    &WindowMain::closeActiveSubWindow);
   QObject::connect(uiActionCloseAll, &QAction::triggered, this,
                    &WindowMain::closeAllSubWindows);
-  QObject::connect(uiActionWebsite, &QAction::triggered, this, &WindowMain::website);
-  QObject::connect(uiActionAbout, &QAction::triggered, this, &WindowMain::about);
+  QObject::connect(uiActionWebsite, &QAction::triggered, this,
+                   &WindowMain::website);
+  QObject::connect(uiActionAbout, &QAction::triggered, this,
+                   &WindowMain::about);
   QObject::connect(uiMdiArea, &QMdiArea::subWindowActivated, this,
                    &WindowMain::updateWindowMenu);
-  mSignalMapper = new QSignalMapper(this); // for the Open Windows menu entries
   QObject::connect(
-      mSignalMapper,
+      mSignalMapper.get(),
       static_cast<void (QSignalMapper::*)(QWidget *)>(&QSignalMapper::mapped),
       this, &WindowMain::setActiveSubWindow);
 
@@ -302,8 +324,9 @@ WindowMain::WindowMain() : mTotalImages(0),
 }
 
 void WindowMain::open() {
-  loadFile(QFileDialog::getOpenFileName(this, tr("Open File"), "/home",
-                                        tr("Images (*.png *.bmp *.jpg *.avi *.mp4 *.mov)")));
+  loadFile(QFileDialog::getOpenFileName(
+      this, tr("Open File"), "/home",
+      tr("Images (*.png *.bmp *.jpg *.avi *.mp4 *.mov)")));
 }
 
 void WindowMain::captureWebcam() { new WindowCaptureWebcam(this); }
@@ -534,14 +557,14 @@ void WindowMain::resetImage() {
 }
 
 void WindowMain::do4() {
-  auto harrisImage = std::make_unique<WindowImage>(mActiveWindowImage->mImage,
-                                                   mActiveWindowImage->mWindowTitle);
-  auto fastImage = std::make_unique<WindowImage>(mActiveWindowImage->mImage,
-                                                 mActiveWindowImage->mWindowTitle);
-  auto siftImage = std::make_unique<WindowImage>(mActiveWindowImage->mImage,
-                                                 mActiveWindowImage->mWindowTitle);
-  auto surfImage = std::make_unique<WindowImage>(mActiveWindowImage->mImage,
-                                                 mActiveWindowImage->mWindowTitle);
+  auto harrisImage = std::make_unique<WindowImage>(
+      mActiveWindowImage->mImage, mActiveWindowImage->mWindowTitle);
+  auto fastImage = std::make_unique<WindowImage>(
+      mActiveWindowImage->mImage, mActiveWindowImage->mWindowTitle);
+  auto siftImage = std::make_unique<WindowImage>(
+      mActiveWindowImage->mImage, mActiveWindowImage->mWindowTitle);
+  auto surfImage = std::make_unique<WindowImage>(
+      mActiveWindowImage->mImage, mActiveWindowImage->mWindowTitle);
 
   auto sobelApertureSize = 0;
   switch (mSettings->value("harris/sobelApertureSize", 1).toInt()) {
@@ -577,7 +600,8 @@ void WindowMain::do4() {
                        mSettings->value("surf/layers", 3).toInt(),
                        mSettings->value("surf/showOrientation", true).toBool());
 
-  auto do4 = new WindowDo4(mActiveWindowImage->mWindowTitle, std::move(harrisImage), std::move(fastImage),
+  auto do4 = new WindowDo4(mActiveWindowImage->mWindowTitle,
+                           std::move(harrisImage), std::move(fastImage),
                            std::move(siftImage), std::move(surfImage));
   do4->show();
 }
@@ -620,8 +644,8 @@ void WindowMain::closeActiveSubWindow() { uiMdiArea->closeActiveSubWindow(); }
 void WindowMain::closeAllSubWindows() { uiMdiArea->closeAllSubWindows(); }
 
 void WindowMain::website() {
-  QDesktopServices::openUrl(QUrl::fromEncoded(
-      "https://github.com/kayspark/ImageFeatureDetector"));
+  QDesktopServices::openUrl(
+      QUrl::fromEncoded("https://github.com/kayspark/ImageFeatureDetector"));
 }
 
 void WindowMain::about() { new WindowAbout(this); }
@@ -634,8 +658,8 @@ void WindowMain::updateWindowMenu(QMdiSubWindow *mdiSubWindow) {
     mSeparatorOpenWindowsAdded = true;
   }
   for (auto &aAction : mSubwindowActions) {
-    // 		uiMenuWindow->removeAction(mSubwindowActions->at(n)); // Makes not
-    // to trigger new actions added
+    // 		uiMenuWindow->removeAction(mSubwindowActions->at(n)); // Makes
+    // not to trigger new actions added
     aAction->setVisible(false);
   }
   mSubwindowActions.clear();
@@ -695,18 +719,22 @@ void WindowMain::updateWindowMenu(QMdiSubWindow *mdiSubWindow) {
 
     auto list = uiMdiArea->subWindowList();
     for (int n = 0; n < list.size(); ++n) {
-      auto windowImage =
-          qobject_cast<WindowImage *>(list.at(n)->widget());
+      auto windowImage = qobject_cast<WindowImage *>(list.at(n)->widget());
       QString actionName;
-      actionName = tr(n < 9 ? "&%1 %2" : "%1 %2").arg(n + 1).arg(windowImage->windowTitle());
+      actionName = tr(n < 9 ? "&%1 %2" : "%1 %2")
+          .arg(n + 1)
+          .arg(windowImage->windowTitle());
       auto action = uiMenuWindow->addAction(actionName);
       mSubwindowActions.push_back(action);
       action->setCheckable(true);
-      action->setChecked(uiMdiArea->activeSubWindow() ? mActiveWindowImage == windowImage : false);
+      action->setChecked(uiMdiArea->activeSubWindow()
+                         ? mActiveWindowImage == windowImage
+                         : false);
       mActionGroupWindow->addAction(action);
       mSignalMapper->setMapping(action, list.at(n));
-      QObject::connect(action, &QAction::triggered, mSignalMapper,
-                       static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
+      QObject::connect(
+          action, &QAction::triggered, mSignalMapper.get(),
+          static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
     }
   } else {
     if (uiMdiArea->subWindowList().empty()) {
@@ -733,7 +761,8 @@ void WindowMain::updateWindowMenu(QMdiSubWindow *mdiSubWindow) {
 
 void WindowMain::loadFile(const QString &filepath) {
   if (!filepath.isEmpty()) {
-    if (filepath.contains(".avi") || filepath.contains(".mp4") || filepath.contains(".mov")) {
+    if (filepath.contains(".avi") || filepath.contains(".mp4") ||
+        filepath.contains(".mov")) {
       setRecentFile(filepath);
       showWindowImage(new WindowImage(filepath, filepath));
     } else {
@@ -832,6 +861,4 @@ void WindowMain::saveSettings() {
     mSettings->setValue("size", size());
   }
 }
-QSettings *WindowMain::getMSettings() {
-  return mSettings.get();
-}
+QSettings *WindowMain::getMSettings() { return mSettings.get(); }
