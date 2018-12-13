@@ -1,38 +1,39 @@
 /*
-* 2010-2015 (C) Antonio Redondo
-* http://antonioredondo.com
-* https://github.com/AntonioRedondo/ImageFeatureDetector
-*
-* Code under the terms of the GNU General Public License v3.
-*
-*/
+ * 2010-2015 (C) Antonio Redondo
+ * http://antonioredondo.com
+ * https://github.com/AntonioRedondo/ImageFeatureDetector
+ *
+ * Code under the terms of the GNU General Public License v3.
+ *
+ */
 
 #pragma once
+#include "ui_windowImage.h"
 #include <QtWidgets>
 #include <opencv2/opencv.hpp>
 #include <opencv2/xfeatures2d.hpp>
 #include <opencv2/xfeatures2d/nonfree.hpp>
-#include "ui_windowImage.h"
 
 class WindowImage : public QScrollArea, Ui::windowImage {
 Q_OBJECT
 public:
-  WindowImage(const QString &fileName, QString windowTitle, int windowType = normal);
-  WindowImage(std::shared_ptr<QImage> image, QString windowTitle, int windowType = normal);
+  WindowImage(const QString &fileName, QString windowTitle,
+              int windowType = normal);
+  WindowImage(std::shared_ptr<QImage> image, QString windowTitle,
+              int windowType = normal);
   void zoomIn();
   void zoomOut();
   void zoomOriginal();
   void zoomBestFit();
   void resetImage();
   void compute();
-  void applyHarris(int sobelApertureSize,
-                   int harrisApertureSize,
-                   double kValue,
-                   int threshold,
-                   bool showProcessedImage);
+  void applyHarris(int sobelApertureSize, int harrisApertureSize, double kValue,
+                   int threshold, bool showProcessedImage);
   void applyFast(int threshold, bool nonMaxSuppression);
-  void applySift(double threshold, double edgeThreshold, int nOctaves, int nOctaveLayers, bool showOrientation);
-  void applySurf(double threshold, int nOctaves, int nOctaveLayers, bool showOrientation);
+  void applySift(double threshold, double edgeThreshold, int nOctaves,
+                 int nOctaveLayers, bool showOrientation);
+  void applySurf(double threshold, int nOctaves, int nOctaveLayers,
+                 bool showOrientation);
 
   enum windowType { normal = 0, duplicated = 1, fromWebcam = 2, do4 = 3 };
   enum featureType { none = 0, harris = 1, fast = 2, sift = 3, surf = 4 };
@@ -59,7 +60,7 @@ protected:
   void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
-    void showProcessedImage(cv::Mat &processedImage);
+  void showProcessedImage(cv::Mat &processedImage);
   void scaleImage();
   void adjustScrollBar(QScrollBar *scrollBar);
   QImage convertMat2QImage(const cv::Mat_<double> &src);
@@ -70,7 +71,6 @@ private:
   std::unique_ptr<QLocale> mLocale;
   std::unique_ptr<QPainter> mPainter;
   bool mModified;
-  int mOriginalWidth, mOiginalHeight;
+  int mOriginalWidth, mOriginalHeight;
   double mScaleFactorAbove100, mScaleFactorUnder100, mFactorIncrement;
 };
-

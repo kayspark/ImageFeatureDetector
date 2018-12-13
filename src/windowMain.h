@@ -91,7 +91,7 @@ private:
   std::unique_ptr<QLabel> mStatusBarLabelZoom;
   std::unique_ptr<QLabel> mStatusBarLabelDimensions;
   std::unique_ptr<QLabel> mStatusBarLabelSize;
-  std::shared_ptr<QLabel> mStatusBarLabelTime;
+  std::unique_ptr<QLabel> mStatusBarLabelTime;
   std::unique_ptr<QLabel> mStatusBarLabelIcon;
   std::unique_ptr<QLabel> mStatusBarLabelKeypoints;
   std::unique_ptr<QLabel> mStatusBarLabelSpaceRight;

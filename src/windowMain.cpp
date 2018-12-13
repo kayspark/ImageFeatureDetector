@@ -717,13 +717,14 @@ void WindowMain::updateWindowMenu(QMdiSubWindow *mdiSubWindow) {
     mStatusBarLabelSize->setText(mActiveWindowImage->mImageSize);
     mStatusBarLine->setVisible(true);
 
-    auto list = uiMdiArea->subWindowList();
-    for (int n = 0; n < list.size(); ++n) {
-      auto windowImage = qobject_cast<WindowImage *>(list.at(n)->widget());
+    int n = 0;
+    for (auto &w : uiMdiArea->subWindowList()) {
+      auto windowImage = qobject_cast<WindowImage *>(w->widget());
       QString actionName;
       actionName = tr(n < 9 ? "&%1 %2" : "%1 %2")
           .arg(n + 1)
           .arg(windowImage->windowTitle());
+      n++;
       auto action = uiMenuWindow->addAction(actionName);
       mSubwindowActions.push_back(action);
       action->setCheckable(true);
@@ -731,7 +732,7 @@ void WindowMain::updateWindowMenu(QMdiSubWindow *mdiSubWindow) {
                          ? mActiveWindowImage == windowImage
                          : false);
       mActionGroupWindow->addAction(action);
-      mSignalMapper->setMapping(action, list.at(n));
+      mSignalMapper->setMapping(action, w);
       QObject::connect(
           action, &QAction::triggered, mSignalMapper.get(),
           static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));

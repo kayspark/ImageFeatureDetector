@@ -15,7 +15,8 @@ WindowImage::WindowImage(const QString &fileName, QString windowTitle,
                          int windowType)
     : mCamera(cv::VideoCapture(fileName.toStdString())),
       mWindowTitle(std::move(windowTitle)), mWindowType(windowType), mImageN(0),
-      mModified(false), mFeatureType(0), mPainter(std::make_unique<QPainter>()),
+      mOriginalWidth(0), mOriginalHeight(0), mModified(false), mFeatureType(0),
+      mPainter(std::make_unique<QPainter>()),
       mLocale(std::make_unique<QLocale>(QLocale::English)) {
   setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
@@ -75,10 +76,10 @@ WindowImage::WindowImage(std::shared_ptr<QImage> image, QString windowTitle,
 
   mOriginalSize = mImage->size();
   mOriginalWidth = mImage->width();
-  mOiginalHeight = mImage->height();
+  mOriginalHeight = mImage->height();
 
   mImageZoom = tr("%1%").arg((int) (mCurrentFactor * 100));
-  mImageDimensions = tr("%1x%2 px").arg(mOriginalWidth).arg(mOiginalHeight);
+  mImageDimensions = tr("%1x%2 px").arg(mOriginalWidth).arg(mOriginalHeight);
   float sizeInKiB = mImage->byteCount() / (float) 1024;
   if (sizeInKiB > 1024)
     mImageSize =
@@ -116,10 +117,10 @@ void WindowImage::zoomBestFit() {
   int scrollHeight = height();
 
   float relationScroll = scrollWidth / (float) scrollHeight;
-  float relationImage = mOriginalWidth / (float) mOiginalHeight;
+  float relationImage = mOriginalWidth / (float) mOriginalHeight;
 
   float scaleWidth = scrollWidth / (float) mOriginalWidth;
-  float scaleHeight = scrollHeight / (float) mOiginalHeight;
+  float scaleHeight = scrollHeight / (float) mOriginalHeight;
 
   if (relationScroll > relationImage) {
     mFactorIncrement = correctF * scaleHeight / mCurrentFactor;
@@ -161,7 +162,7 @@ void WindowImage::applyHarris(int sobelApertureSize, int harrisApertureSize,
       2);
 
   // Increases the contrast. If not only a nearly black image would be seen
-  cv::Mat imageHarrisNorm;
+  cv::Mat imageHarrisNorm(imageHarris.size(), CV_32FC1);
   normalize(imageHarris, imageHarrisNorm, 0, 255, cv::NORM_MINMAX,
             CV_32FC1); // The same than the next five lines
   // 	double min=0, max=255, minVal, maxVal, scale, shift;
@@ -182,6 +183,7 @@ void WindowImage::applyHarris(int sobelApertureSize, int harrisApertureSize,
         mPainter->drawEllipse(i, j, 4, 4);
         ++keypoints;
       }
+
   mPainter->end();
   mImageKeypoints = mLocale->toString((float) keypoints, 'f', 0);
 
@@ -417,9 +419,9 @@ void WindowImage::compute() {
     uiLabelImage->setPixmap(mPixmapOriginal); // With RGB32 doesn't work
     mOriginalSize = mImage->size();
     mOriginalWidth = mImage->width();
-    mOiginalHeight = mImage->height();
+    mOriginalHeight = mImage->height();
 
     mImageZoom = tr("%1%").arg((int) (mCurrentFactor * 100));
-    mImageDimensions = tr("%1x%2 px").arg(mOriginalWidth).arg(mOiginalHeight);
+    mImageDimensions = tr("%1x%2 px").arg(mOriginalWidth).arg(mOriginalHeight);
   }
 }
