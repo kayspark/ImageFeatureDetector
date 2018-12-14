@@ -1,7 +1,7 @@
 /*
-* 2010-2015 (C) Antonio Redondo
-* http://antonioredondo.com
-* https://github.com/AntonioRedondo/ImageFeatureDetector
+* 2018(C) kayspark , 2010-2015 (C) Antonio Redondo
+*
+* https://github.com/kayspark/ImageFeatureDetector
 *
 * Code under the terms of the GNU General Public License v3.
 *
