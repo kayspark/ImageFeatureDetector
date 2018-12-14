@@ -174,7 +174,7 @@ void WindowImage::applyHarris(int sobelApertureSize, int harrisApertureSize,
   if (imageHarrisNorm.isContinuous())
     imageHarrisNorm.forEach<float>([this, &threshold, &keyPoints](const float pixel, const int *position) -> void {
                                      if (pixel > threshold) {
-                                       keyPoints.emplace_back(cv::Point2i(position[0], position[1]));
+                                       keyPoints.emplace_back(cv::Point2i(position[1], position[0]));
                                      }
                                    }
     ); //parallel execution and painting together seems not work
@@ -185,7 +185,7 @@ void WindowImage::applyHarris(int sobelApertureSize, int harrisApertureSize,
   mPainter->setPen(pen);
   mPainter->setRenderHint(QPainter::Antialiasing);
   std::for_each(keyPoints.cbegin(), keyPoints.cend(), [this](const auto &point) {
-    mPainter->drawEllipse(point.y, point.x, 4, 4);
+    mPainter->drawEllipse(point.x, point.y, 4, 4);
   });
 
   mPainter->end();
