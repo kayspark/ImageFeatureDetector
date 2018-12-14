@@ -32,7 +32,8 @@ WindowMain::WindowMain()
       mActionExit(std::make_unique<QAction>(this)) {
 
   setupUi(this);
-  // below initialization is depends on uiStatusBar. So must be done at here, not above initialization list.
+  // below initialization is depends on uiStatusBar. So must be done at here,
+  // not above initialization list.
 
   mStatusBarLine = std::make_unique<QFrame>(uiStatusBar);
   mStatusBarLabelDimensions = std::make_unique<QLabel>(uiStatusBar);
@@ -43,10 +44,8 @@ WindowMain::WindowMain()
   mStatusBarLabelSpaceRight = std::make_unique<QLabel>(uiStatusBar);
   mStatusBarLabelSpaceLeft = std::make_unique<QLabel>(uiStatusBar);
   mStatusBarLabelZoom = std::make_unique<QLabel>(uiStatusBar);
-  mStatusBarLine2 =
-      std::make_unique<QFrame>(mStatusBarLabelTime.get());
-  mStatusBarLine3 =
-      std::make_unique<QFrame>(mStatusBarLabelTime.get());
+  mStatusBarLine2 = std::make_unique<QFrame>(mStatusBarLabelTime.get());
+  mStatusBarLine3 = std::make_unique<QFrame>(mStatusBarLabelTime.get());
   setContextMenuPolicy(Qt::PreventContextMenu);
   resize(mSettings->value("size", QSize(700, 480)).toSize());
   move(mSettings->value("pos", QPoint(150, 40)).toPoint());
@@ -246,15 +245,20 @@ WindowMain::WindowMain()
   mSurfAction = uiToolBarParameters->addWidget(mSurfToolBar.get());
 
   switch (mSettings->value("startupParameters", 0).toInt()) {
-  case 0:showHarrisToolBar();
+  case 0:
+    showHarrisToolBar();
     break;
-  case 1:showFastToolBar();
+  case 1:
+    showFastToolBar();
     break;
-  case 2:showSiftToolBar();
+  case 2:
+    showSiftToolBar();
     break;
-  case 3:showSurfToolBar();
+  case 3:
+    showSurfToolBar();
     break;
-  default:break;
+  default:
+    break;
   }
 
   QObject::connect(uiActionOpen, &QAction::triggered, this, &WindowMain::open);
@@ -390,15 +394,20 @@ void WindowMain::resetHarrisParams() {
 void WindowMain::applyHarris() {
   int sobelApertureSize = 0;
   switch (mSettings->value("harris/sobelApertureSize", 1).toInt()) {
-  case 0:sobelApertureSize = 1;
+  case 0:
+    sobelApertureSize = 1;
     break;
-  case 1:sobelApertureSize = 3;
+  case 1:
+    sobelApertureSize = 3;
     break;
-  case 2:sobelApertureSize = 5;
+  case 2:
+    sobelApertureSize = 5;
     break;
-  case 3:sobelApertureSize = 7;
+  case 3:
+    sobelApertureSize = 7;
     break;
-  default:break;
+  default:
+    break;
   }
   mActiveWindowImage->applyHarris(
       sobelApertureSize,
@@ -538,7 +547,7 @@ void WindowMain::applyCommonTasks() {
   uiActionResetImage->setEnabled(true);
   mStatusBarLabelTime->setText(mActiveWindowImage->mImageTime + " ms");
   mStatusBarLabelKeypoints->setText(mActiveWindowImage->mImageKeypoints +
-      " keypoints");
+                                    " keypoints");
   mStatusBarLabelIcon->setVisible(true);
   mStatusBarLine2->setVisible(true);
   mStatusBarLine3->setVisible(true);
@@ -558,25 +567,30 @@ void WindowMain::resetImage() {
 
 void WindowMain::do4() {
   auto harrisImage = std::make_unique<WindowImage>(
-      mActiveWindowImage->mImage, mActiveWindowImage->mWindowTitle);
+      mActiveWindowImage->_image, mActiveWindowImage->mWindowTitle);
   auto fastImage = std::make_unique<WindowImage>(
-      mActiveWindowImage->mImage, mActiveWindowImage->mWindowTitle);
+      mActiveWindowImage->_image, mActiveWindowImage->mWindowTitle);
   auto siftImage = std::make_unique<WindowImage>(
-      mActiveWindowImage->mImage, mActiveWindowImage->mWindowTitle);
+      mActiveWindowImage->_image, mActiveWindowImage->mWindowTitle);
   auto surfImage = std::make_unique<WindowImage>(
-      mActiveWindowImage->mImage, mActiveWindowImage->mWindowTitle);
+      mActiveWindowImage->_image, mActiveWindowImage->mWindowTitle);
 
   auto sobelApertureSize = 0;
   switch (mSettings->value("harris/sobelApertureSize", 1).toInt()) {
-  case 0:sobelApertureSize = 1;
+  case 0:
+    sobelApertureSize = 1;
     break;
-  case 1:sobelApertureSize = 3;
+  case 1:
+    sobelApertureSize = 3;
     break;
-  case 2:sobelApertureSize = 5;
+  case 2:
+    sobelApertureSize = 5;
     break;
-  case 3:sobelApertureSize = 7;
+  case 3:
+    sobelApertureSize = 7;
     break;
-  default:break;
+  default:
+    break;
   }
   harrisImage->applyHarris(
       sobelApertureSize,
@@ -631,7 +645,7 @@ void WindowMain::duplicate() {
       QString(mActiveWindowImage->mOriginalUid));
   ++imageOriginal->mImageN;
   WindowImage *imageDuplicated = new WindowImage(
-      std::move(mActiveWindowImage->mImage),
+      std::move(mActiveWindowImage->_image),
       imageOriginal->mWindowTitle +
           QString(" (Duplicated %1)").arg(imageOriginal->mImageN),
       WindowImage::duplicated);
@@ -695,12 +709,13 @@ void WindowMain::updateWindowMenu(QMdiSubWindow *mdiSubWindow) {
         mStatusBarLabelIcon->setPixmap(
             QPixmap::fromImage(QImage(":/icons/Surf.png")));
         break;
-      default:break;
+      default:
+        break;
       }
       mStatusBarLabelIcon->setVisible(true);
       mStatusBarLabelTime->setText(mActiveWindowImage->mImageTime + " ms");
       mStatusBarLabelKeypoints->setText(mActiveWindowImage->mImageKeypoints +
-          " keypoints");
+                                        " keypoints");
       mStatusBarLine2->setVisible(true);
       mStatusBarLine3->setVisible(true);
     } else {
@@ -722,15 +737,15 @@ void WindowMain::updateWindowMenu(QMdiSubWindow *mdiSubWindow) {
       auto windowImage = qobject_cast<WindowImage *>(w->widget());
       QString actionName;
       actionName = tr(n < 9 ? "&%1 %2" : "%1 %2")
-          .arg(n + 1)
-          .arg(windowImage->windowTitle());
+                       .arg(n + 1)
+                       .arg(windowImage->windowTitle());
       n++;
       auto action = uiMenuWindow->addAction(actionName);
       mSubwindowActions.push_back(action);
       action->setCheckable(true);
       action->setChecked(uiMdiArea->activeSubWindow()
-                         ? mActiveWindowImage == windowImage
-                         : false);
+                             ? mActiveWindowImage == windowImage
+                             : false);
       mActionGroupWindow->addAction(action);
       mSignalMapper->setMapping(action, w);
       QObject::connect(
@@ -787,13 +802,13 @@ void WindowMain::showWindowImage(WindowImage *windowImage) {
   windowImage->setObjectName(QString(mTotalImages));
   uiMdiArea->addSubWindow(windowImage);
   windowImage->parentWidget()->setGeometry(
-      0, 0, windowImage->mImage->width() + 8,
-      windowImage->mImage->height() + 31); // 8 and 31 are hardcoded values for
+      0, 0, windowImage->_image->width() + 8,
+      windowImage->_image->height() + 31); // 8 and 31 are hardcoded values for
   // the decorations of the subwindow
-  if (windowImage->mImage->width() > uiMdiArea->width())
+  if (windowImage->_image->width() > uiMdiArea->width())
     windowImage->parentWidget()->setGeometry(
         0, 0, uiMdiArea->width(), windowImage->parentWidget()->height());
-  if (windowImage->mImage->height() > uiMdiArea->height())
+  if (windowImage->_image->height() > uiMdiArea->height())
     windowImage->parentWidget()->setGeometry(
         0, 0, windowImage->parentWidget()->width(), uiMdiArea->height());
   windowImage->show();

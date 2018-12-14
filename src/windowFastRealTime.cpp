@@ -10,8 +10,10 @@
 #include "windowFastRealTime.h"
 
 WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
-    : QDialog(wmain, Qt::Dialog), mCamera(cv::VideoCapture(0)),
+    : QDialog(wmain, Qt::Dialog), mCamera(vlc_capture("RV24", 800, 600)),
       mTimer(std::make_unique<QTimer>()), mDetecting(false), mTime(0.0),
+      _data_file("./dataset/cascade.xml"), _tracking_algorithm("CSRT"),
+      _predator(nm_detector(this->_data_file, this->_tracking_algorithm)),
       mSettings(wmain->getMSettings()),
       mLocale(std::make_unique<QLocale>(QLocale::English)),
       mPainter(std::make_unique<QPainter>()) {
@@ -33,6 +35,7 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   QObject::connect(uiPushButtonCancel, &QAbstractButton::clicked, this,
                    &WindowFastRealTime::close);
 
+  mCamera.open("rtsp://canon:adminadmin@223.171.38.5:80/rtpstream/config5=r");
   if (mCamera.isOpened()) {
     mTimer->start(40); // 25fps
     QObject::connect(mTimer.get(), &QTimer::timeout, this,
@@ -82,24 +85,35 @@ void WindowFastRealTime::resetFastParams() {
 }
 
 void WindowFastRealTime::compute() {
-  mCamera >> mImageRT;
+  mCamera.read(mImageRT);
   if (mDetecting) {
-    cv::Mat mImageGrey(mImageRT.rows, mImageRT.cols, CV_8UC1);
-    cv::cvtColor(mImageRT, mImageGrey, cv::COLOR_RGB2GRAY);
+    if (!mImageRT.empty()) {
+      cv::Mat gray;
+      cv::cvtColor(mImageRT, gray, cv::COLOR_BGR2GRAY);
+      _predator.update_tracker(gray, mImageRT);
+      cvtColor(mImageRT, mImageRT, cv::COLOR_BGR2RGB);
+      mPixmap = QPixmap::fromImage(
+          QImage(mImageRT.data, mImageRT.cols, mImageRT.rows,
+                 static_cast<int>(mImageRT.step), QImage::Format_RGB888)
+              .rgbSwapped());
+    }
+
+/*     cv::Mat imgGray(mImageRT.rows, mImageRT.cols, CV_8UC1);
+    cv::cvtColor(mImageRT, imgGray, cv::COLOR_RGB2GRAY);
     mTime = cv::getTickCount();
-    FAST(mImageGrey, mKeypoints,
+    FAST(imgGray, mKeypoints,
          mSettings->value("fastRT/threshold", true).toInt(),
          mSettings->value("fastRT/nonMaxSuppression", true).toBool());
     uiLabelTime->setText(
         QString("Detecting Time: ")
             .append(mLocale
                         ->toString(((cv::getTickCount() - mTime) /
-                                       (cv::getTickFrequency() * 1000)),
+                                    (cv::getTickFrequency() * 1000)),
                                    'f', 2)
                         .append(" ms")));
     uiLabelKeypoints->setText(
         QString("Key points: ")
-            .append(mLocale->toString((float) mKeypoints.size(), 'f', 0)));
+            .append(mLocale->toString((float)mKeypoints.size(), 'f', 0)));
 
     mPixmap = QPixmap::fromImage(
         QImage(mImageRT.data, mImageRT.cols, mImageRT.rows,
@@ -111,15 +125,15 @@ void WindowFastRealTime::compute() {
     mPainter->setPen(pen);
     mPainter->setRenderHint(QPainter::Antialiasing);
     for (const auto &keyPoint : mKeypoints)
-      mPainter->drawEllipse((int) keyPoint.pt.x, (int) keyPoint.pt.y, 4, 4);
+      mPainter->drawEllipse((int)keyPoint.pt.x, (int)keyPoint.pt.y, 4, 4);
     mPainter->end();
     uiLabelRealTime->setPixmap(mPixmap);
-  } else {
-    uiLabelRealTime->setPixmap(QPixmap::fromImage(
-        QImage(mImageRT.data, mImageRT.cols, mImageRT.rows,
-               static_cast<int>(mImageRT.step), QImage::Format_RGB888)
-            .rgbSwapped()));
-    uiLabelTime->setText("Detecting Time: -");
-    uiLabelKeypoints->setText("Key points: -");
-  }
+ */  } else {
+  uiLabelRealTime->setPixmap(QPixmap::fromImage(
+      QImage(mImageRT.data, mImageRT.cols, mImageRT.rows,
+             static_cast<int>(mImageRT.step), QImage::Format_RGB888)
+          .rgbSwapped()));
+  uiLabelTime->setText("Detecting Time: -");
+  uiLabelKeypoints->setText("Key points: -");
+}
 }

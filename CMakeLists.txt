@@ -19,12 +19,24 @@ include_directories(${CMAKE_SOURCE_DIR}/build/imagefeaturedetector_autogen)
 
 
 ## http://www.cmake.org/Wiki/CMake:How_To_Find_Libraries
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 if (win32)
+    set(OpenCV_STATIC OFF)
+    set(OpenCV SHARED ON)
     set(OpenCV_DIR "C:/Users/kspark/opencv")
-endif ()
-find_package(OpenCV REQUIRED)
+    set(LIBVLC_INCLUDE_DIR "C:/vlc-winsdk/sdk/include")
+    set(LIBVLC_LIBRARY_DIR "C:/vlc-winsdk/sdk/lib")
+    set(LIBVLC_LIBRARY "C:/vlc-winsdk/sdk/lib/libvlc.lib")
+    set(LIBVLCCORE_LIBRARY "C:/vlc-winsdk/sdk/lib/libvlccore.lib")
+else (win32)
+    set(LIBVLC_INCLUDE_DIR "/usr/local/include")
+    set(LIBVLC_LIBRARY_DIR "/usr/local/lib")
+    set(LIBVLC_LIBRARY ${LIBVLC_LIBRARY_DIR}/libvlc.dylib)
+    set(LIBVLCCORE_LIBRARY ${LIBVLC_LIBRARY_DIR}/libvlccore.dylib)
+   set(OpenCV_DIR "/usr/local/lib/cmake/opencv4")
+endif (win32)
+find_package(OpenCV COMPONENTS opencv_core opencv_imgproc opencv_highgui opencv_objdetect opencv_tracking opencv_xfeatures2d REQUIRED)
+include_directories(. ${LIBVLC_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
 # find_package(Threads REQUIRED) # http://stackoverflow.com/questions/1620918/cmake-and-libpthread (if not 'libpthread.so.0: DSO missing from command line' error will be thrown at linking time)
 # find_package(ZLIB REQUIRED) # http://stackoverflow.com/questions/6173915/need-help-trying-to-make-cmake-find-third-party-libraries
 
@@ -40,7 +52,7 @@ qt5_wrap_ui(ImageFeatureDetector_UI_H ${ImageFeatureDetector_UI})
 
 add_executable(imagefeaturedetector ${ImageFeatureDetector_SRC} ${ImageFeatureDetector_UI_H})
 
-target_link_libraries(imagefeaturedetector Qt5::Core Qt5::Widgets ${OpenCV_LIBS})
+target_link_libraries(imagefeaturedetector Qt5::Core Qt5::Widgets ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY})
 # target_link_libraries(imagefeaturedetector Qt5::Core Qt5::Widgets ${ImageFeatureDetector_A} ${CMAKE_THREAD_LIBS_INIT} -lz -ldl)
 
 

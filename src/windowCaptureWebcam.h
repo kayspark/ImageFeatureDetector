@@ -11,7 +11,7 @@ class
 class WindowCaptureWebcam : public QDialog, private Ui::windowCaptureWebcam {
   Q_OBJECT
 public:
-  explicit WindowCaptureWebcam(WindowMain * main);
+  explicit WindowCaptureWebcam(WindowMain *main);
   void closeEvent(QCloseEvent *) override;
 
   WindowMain *mWindowMain = nullptr;
@@ -19,7 +19,7 @@ public:
 private:
   std::unique_ptr<QTimer> mTimer;
   cv::VideoCapture mCamera;
-  cv::Mat mImageRT;
+  cv::Mat _imgRT;
 
 private slots:
   void capture();

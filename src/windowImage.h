@@ -8,6 +8,7 @@
  */
 
 #pragma once
+#include "nm_detector.h"
 #include "ui_windowImage.h"
 #include <QtWidgets>
 #include <opencv2/opencv.hpp>
@@ -15,7 +16,7 @@
 #include <opencv2/xfeatures2d/nonfree.hpp>
 
 class WindowImage : public QScrollArea, Ui::windowImage {
-Q_OBJECT
+  Q_OBJECT
 public:
   WindowImage(const QString &fileName, QString windowTitle,
               int windowType = normal);
@@ -37,10 +38,10 @@ public:
 
   enum windowType { normal = 0, duplicated = 1, fromWebcam = 2, do4 = 3 };
   enum featureType { none = 0, harris = 1, fast = 2, sift = 3, surf = 4 };
-  std::shared_ptr<QImage> mImage;
-  cv::Mat mImageRT;
+  std::shared_ptr<QImage> _image;
+  cv::Mat _imgRT;
   QPixmap mPixmap;
-  cv::VideoCapture mCamera;
+  cv::VideoCapture _capture;
   std::unique_ptr<QTimer> timer;
   QString mImageZoom;
   QString mImageTime;
@@ -50,8 +51,12 @@ public:
   QString mWindowTitle;
   QString mUid;
   QString mOriginalUid;
+  std::string _data_file;
+  std::string _tracking_algorithm;
+  nm_detector _predator;
   int mWindowType, mFeatureType, mImageN;
   double mCurrentFactor;
+  std::unique_ptr<QRubberBand> _rubberBand;
 
 protected:
   void mousePressEvent(QMouseEvent *event) override;
@@ -63,7 +68,7 @@ private:
   void showProcessedImage(cv::Mat &processedImage);
   void scaleImage();
   void adjustScrollBar(QScrollBar *scrollBar);
-  QImage convertMat2QImage(const cv::Mat_<double> &src);
+  QImage convertMat2QImage(const cv::Mat &src);
 
   QPixmap mPixmapOriginal;
   QSize mOriginalSize;
