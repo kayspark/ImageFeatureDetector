@@ -39,7 +39,16 @@ private:
   std::string _data_file;
   std::string _tracking_algorithm;
 
+  std::unique_ptr<QRubberBand> _rubberBand;
+  bool band_avaiable = false;
+  QPoint mLastPoint;
+protected:
   nm_detector _predator;
+protected:
+  void mousePressEvent(QMouseEvent *event) override;
+  void mouseMoveEvent(QMouseEvent *event) override;
+  void mouseReleaseEvent(QMouseEvent *event) override;
+
 private slots:
   void detect();
   void compute();

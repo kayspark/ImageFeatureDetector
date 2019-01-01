@@ -1,10 +1,11 @@
 #include "nm_detector.h"
+#include "motionCapture.h"
 #include <opencv2/tracking.hpp>
 
 using namespace cv;
 using namespace std;
 
-void nm_detector::createTrackerByName(const std::string &name) {
+void nm_detector::createTrackerByName(const std::string_view name) {
   if (name == "KCF")
     _tracker = cv::TrackerKCF::create();
   else if (name == "TLD")
@@ -25,10 +26,9 @@ void nm_detector::createTrackerByName(const std::string &name) {
     CV_Error(cv::Error::StsBadArg, "Invalid tracking algorithm name\n");
 }
 
-nm_detector::nm_detector(std::string &cascade, std::string &algorithm)
+nm_detector::nm_detector(std::string_view cascade, std::string_view algorithm)
     : _scale(1.1), _tracker_algorithm(algorithm),
       detected_area(cv::Rect2d(0, 0, 0, 0)), initialized_tracker(false),
-      objects(std::vector<cv::Rect>()),
       colors(std::array<cv::Scalar, 8>() =
                  {cv::Scalar(255, 0, 0), cv::Scalar(255, 128, 0),
                   cv::Scalar(255, 255, 0), cv::Scalar(0, 255, 0),
@@ -38,67 +38,92 @@ nm_detector::nm_detector(std::string &cascade, std::string &algorithm)
       ) {
   if (cascade.empty())
     cascade = "./dataset/cascade.xml";
-  if (!_cascade.load(cascade)) {
+  if (!_cascade.load(cascade.data())) {
     std::cerr << "ERROR: Could not load classifier cascade" << std::endl;
     return;
   }
   createTrackerByName(_tracker_algorithm);
 }
 
-nm_detector::~nm_detector() {}
-// detect roi
-void nm_detector::detect_objects(cv::Mat &gray, cv::Mat &display) {
-  double timer = 0;
+bool nm_detector::validate_roi(cv::Mat &roi) {
+  bool ret = false;
   cv::Mat smallImg;
-
+  std::vector<cv::Rect> t_objects;
   // cvtColor(img, gray, COLOR_BGR2GRAY);
-  double fx = 1 / _scale;
-  resize(gray, smallImg, cv::Size(), fx, fx, cv::INTER_LINEAR_EXACT);
+  double fx = 1.1;
+  resize(roi, smallImg, cv::Size(), fx, fx, cv::INTER_LINEAR_EXACT);
   // equalizeHist(smallImg, smallImg);
 
-  timer = (double)cv::getTickCount();
-  _cascade.detectMultiScale(smallImg, objects, _scale, 3,
+  _cascade.detectMultiScale(smallImg, t_objects, 1.1, 3,
                             0
                                 //|CASCADE_FIND_BIGGEST_OBJECT
                                 //|CASCADE_DO_ROUGH_SEARCH
                                 | cv::CASCADE_SCALE_IMAGE,
                             Size(24, 24), Size(200, 200));
 
-  timer = (double)getTickCount() - timer;
-  std::cout << "suspicious object: " << objects.size()
-            << " , time: " << timer * 1000 / getTickFrequency() << std::endl;
-  int color_code = 0;
-  if (objects.size() > 0) {
-    detected_area = cv::Rect(
-        Point(cvRound(objects[0].x * _scale), cvRound(objects[0].y * _scale)),
-        Point(cvRound((objects[0].x + objects[0].width - 1) * _scale),
-              cvRound((objects[0].y + objects[0].height - 1) * _scale)));
+  if (!objects.empty()) {
+    ret = true;
+  }
+  return ret;
+  // draw_objects(display, color_code);
+  // imshow( "result", img );
+} // detect roi
+
+void nm_detector::detect_candidate(Mat &gray) {
+  _motion.find(gray);
+  _motion.get_detected(candidate_objects);
+}
+
+void nm_detector::detect_objects(const cv::Mat &gray) {
+  auto timer = (double) cv::getTickCount();
+  //for (const auto &r : candidate_objects) {
+  cv::Mat smallImg;// = gray;//(r);
+  // cvtColor(img, gray, COLOR_BGR2GRAY);
+  double fx = 1 / _scale;
+  resize(gray, smallImg, cv::Size(), fx, fx, cv::INTER_LINEAR_EXACT);
+  // equalizeHist(smallImg, smallImg);
+  _cascade.detectMultiScale(smallImg, objects, _scale, 3,
+                            0
+                                //|CASCADE_FIND_BIGGEST_OBJECT
+                                //|CASCADE_DO_ROUGH_SEARCH
+                                | cv::CASCADE_SCALE_IMAGE,
+                            Size(24, 24), Size(200, 200));
+  //}
+  detection_time = ((double) getTickCount() - timer) * 1000 / getTickFrequency();
+  //  std::cout << "suspicious object: " << objects.size()
+  //            << " , time: " << timer * 1000 / getTickFrequency() <<
+  //            std::endl;
+  std::for_each(objects.begin(), objects.end(), [&](auto &rect) {
+    rect.x = rect.x * _scale;
+    rect.y = rect.y * _scale;
+    rect.width = rect.width * _scale;
+    rect.height = rect.height * _scale;
+    // rectangle(display, rect, colors[0], 3);
+  });
+  if (!objects.empty()) {
+    detected_area = objects[0];
   } else
     detected_area = Rect2d(0, 0, 0, 0);
-
-  draw_objects(display, color_code);
-
-  // imshow( "result", img );
 }
-void nm_detector::draw_objects(const Mat &display, int color_code) const {
-  for (const auto &r : objects) {
-    Scalar color = colors[color_code++ % 8];
-    rectangle(display, Point(cvRound(r.x * _scale), cvRound(r.y * _scale)),
-              Point(cvRound((r.x + r.width - 1) * _scale),
-                    cvRound((r.y + r.height - 1) * _scale)),
-              color, 3, 8, 0);
-  }
-}
-bool nm_detector::update_tracker(cv::Mat &gray, cv::Mat &display) {
-  bool ret = !detected_area.empty();
+
+bool nm_detector::update_tracker(cv::Mat &gray) {
+  bool ret = !objects.empty();
   // initialized already
+  detect_candidate(gray);
   if (initialized_tracker) {
-    if (_tracker->update(gray, detected_area))
-      cv::rectangle(display, detected_area, cv::Scalar(0, 0, 255), 3);
-    else { // if cannot find
+    if (_tracker->update(gray, detected_area)) {
+      /* cv::Mat roi = gray(detected_area);
+     if (!validate_roi(roi)) {
+        detected_area = cv::Rect2d(0, 0, 0, 0);
+        initialized_tracker = false;
+        ret = false;
+     }*/
+      // cv::rectangle(display, detected_area, cv::Scalar(0, 0, 255), 3);
+    } else {
       detected_area = cv::Rect2d(0, 0, 0, 0);
       createTrackerByName(_tracker_algorithm);
       initialized_tracker = false;
+      ret = false;
     }
   } else {
     if (ret) { // detected area
@@ -112,10 +137,12 @@ bool nm_detector::update_tracker(cv::Mat &gray, cv::Mat &display) {
     } else {
       initialized_tracker = false;
       detected_area = cv::Rect2d(0, 0, 0, 0);
-      detect_objects(gray, display);
+      //detect_objects(gray);
     }
   }
-
   // true if not empty
   return ret;
+}
+const vector<Rect> &nm_detector::get_candidate() const {
+  return candidate_objects;
 }

@@ -8,10 +8,10 @@
 
 class vlc_capture {
 public:
-  vlc_capture(const std::string &chroma, int width, int height);
+  vlc_capture(int width, int height);
   ~vlc_capture();
 
-  void open(const char *url);
+  void open(std::string_view url);
   void release();
   bool isOpened();
 
@@ -20,22 +20,15 @@ public:
 
 private:
   vlc_capture();
-  unsigned format(char *chroma, unsigned *width, unsigned *height,
-                  unsigned *pitches, unsigned *lines);
   void *lock(void **p_pixels);
   void unlock(void *id, void *const *p_pixels);
 
-  static unsigned formater(void **data, char *chroma, unsigned *width,
-                           unsigned *height, unsigned *pitches,
-                           unsigned *lines);
   static void *locker(void *data, void **p_pixels);
   static void unlocker(void *data, void *id, void *const *p_pixels);
 
 private:
   std::mutex _mutex;
-  std::string _url;
-  std::string _chroma;
-  cv::Mat _source_frame;
+  std::string_view _url;
   cv::Mat _rgb;
   bool _is_open;
   std::atomic<bool> _has_frame;

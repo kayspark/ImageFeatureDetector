@@ -3,7 +3,7 @@
 //
 
 #include "fire_detector.h"
-#include "motionDetection.h"
+#include "motionDetectionV1.h"
 #include <opencv2/core/types_c.h>
 #include <opencv2/imgproc/types_c.h>
 
@@ -550,7 +550,7 @@ void fire_detector::regionMarkup(cv::Mat &imgSrc, cv::Mat &imgBackup,
     }
   }
 }
-void fire_detector::detectFire(cv::Mat &maskMotion, motionDetection &bgs,
+void fire_detector::detectFire(cv::Mat &maskMotion, motionDetectionV1 &bgs,
                                cv::Mat &imgBackgroundModel,
                                cv::Mat &imgStandardDeviation,
                                cv::Mat &img32FBackgroundModel,

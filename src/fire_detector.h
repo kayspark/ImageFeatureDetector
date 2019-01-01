@@ -5,7 +5,7 @@
 #pragma once
 #define _max_corners 10000
 #include "ds.h"
-#include "motionDetection.h"
+#include "motionDetectionV1.h"
 #include <opencv2/opencv.hpp>
 #include <opencv2/tracking.hpp>
 
@@ -77,7 +77,7 @@ private:
   cv::Mat maskHSI;
 
 public:
-  void detectFire(cv::Mat &maskMotion, motionDetection &bgs,
+  void detectFire(cv::Mat &maskMotion, motionDetectionV1 &bgs,
                   cv::Mat &imgBackgroundModel, cv::Mat &imgStandardDeviation,
                   cv::Mat &img32FBackgroundModel,
                   cv::Mat &img32FStandardDeviation, cv::Mat &imgSrc,

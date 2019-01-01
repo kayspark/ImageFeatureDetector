@@ -1,16 +1,14 @@
 #include "vlccap.h"
 #include <cstring>
+#include <string_view>
 #include <thread>
 
-vlc_capture::vlc_capture()
-    : _is_open(false), _has_frame(false), _vlc_instance(nullptr),
-      _media_player(nullptr) {}
+vlc_capture::vlc_capture() : _is_open(false), _has_frame(false) {}
 
-vlc_capture::vlc_capture(const std::string &chroma, int width, int height)
-    : vlc_capture() {
-  _chroma = chroma;
+vlc_capture::vlc_capture(int width, int height) : vlc_capture() {
   _size.width = width;
   _size.height = height;
+  _rgb.create(_size, CV_8UC3);
 }
 
 vlc_capture::~vlc_capture() {
@@ -21,35 +19,36 @@ vlc_capture::~vlc_capture() {
   }
 }
 
-void vlc_capture::open(const char *url) {
+void vlc_capture::open(std::string_view url) {
   release();
   _url = url;
-  std::string arg_width = " --vmem-width=" + std::to_string(_size.width);
-  std::string arg_height = " --vmem-height=" + std::to_string(_size.height);
-  std::string arg_chroma = " --vmem-chroma=" + _chroma;
+  std::string_view arg_width = " --vmem-width=" + std::to_string(_size.width);
+  std::string_view arg_height = " --vmem-height=" + std::to_string(_size.height);
   const char *args[] = {"-I",
                         "dummy",
                         "--no-audio",
-                        "--network-caching=500",
+                        "--network-caching=1000",
                         "--clock-jitter=0",
                         "--clock-synchro=0",
                         "--swscale-mode=2",
-                        "--verbose=2",
-                        arg_width.c_str(),
-                        arg_height.c_str(),
-                        arg_chroma.c_str()};
+                        "--verbose=1",
+                        arg_width.data(),
+                        arg_height.data()};
   _vlc_instance = libvlc_new(sizeof(args) / sizeof(args[0]), args);
 
   if (_vlc_instance) {
     libvlc_media_t *media = nullptr;
-    media = libvlc_media_new_location(_vlc_instance, _url.c_str());
+    media = libvlc_media_new_location(_vlc_instance, _url.data());
     if (media) {
       _media_player = libvlc_media_player_new_from_media(media);
       if (_media_player) {
         libvlc_media_release(media);
-        libvlc_video_set_callbacks(_media_player, locker, unlocker, nullptr,
+        libvlc_video_set_callbacks(_media_player, &locker, &unlocker, nullptr,
                                    this);
-        libvlc_video_set_format_callbacks(_media_player, formater, nullptr);
+        libvlc_video_set_format(
+            _media_player, "RV24", static_cast<unsigned int>(get_size().width),
+            static_cast<unsigned int>(get_size().height),
+            static_cast<unsigned int>(get_size().width * 3));
 
         int resp = libvlc_media_player_play(_media_player);
         if (resp == 0) {
@@ -94,10 +93,6 @@ bool vlc_capture::read(cv::Mat &outFrame) {
 
   {
     std::lock_guard<std::mutex> guard(_mutex);
-    if ("J420" == _chroma)
-      cv::cvtColor(_source_frame, _rgb, cv::COLOR_YUV420p2RGB, 3);
-    else if ("420v" == _chroma)
-      cv::cvtColor(_source_frame, _rgb, cv::COLOR_YUV2RGB_YUYV);
     outFrame = _rgb.clone();
     _has_frame = true;
   }
@@ -106,52 +101,19 @@ bool vlc_capture::read(cv::Mat &outFrame) {
 
 cv::Size vlc_capture::get_size() { return _size; }
 
-unsigned vlc_capture::format(char *chroma, unsigned *width, unsigned *height,
-                             unsigned *pitches, unsigned *lines) {
-  // TODO: Allow overriding of native size?
-  std::lock_guard<std::mutex> guard(_mutex);
-  std::cout << "vlc_capture::format - " << chroma << " - " << *width << "/"
-            << *height << std::endl;
-  *width = _size.width;
-  *height = _size.height;
-  memcpy(chroma, _chroma.c_str(), 4);
-  if ("J420" == _chroma) { // seems like rtsp server choose this,
-    pitches[0] = (*width);
-    lines[0] = (*height) * 1.5;
-    _source_frame.create((*height) * 1.5, *width, CV_8UC1);
-    _rgb.create(*height, *width, CV_8UC3);
-  } else if ("420v" == _chroma) { // seems like rtsp server choose this,
-    pitches[0] = (*width);
-    lines[0] = (*height) * 1.5;
-    _source_frame.create((*height) * 1.5, *width, CV_8UC1);
-    _rgb.create(*height, *width, CV_8UC3);
-  } else { // will be RV24 in general
-    pitches[0] = (*width) * 24 / 8;
-    lines[0] = *height;
-    _rgb.create(*height, *width, CV_8UC3);
-  }
-  return 1;
-}
 // whatever the choosen size was, need to alloc space for the whole input image
 // here !
 
 void *vlc_capture::lock(void **p_pixels) {
   // cout << "vlc_capture::lock" << endl;
   _mutex.lock();
-  *p_pixels = (unsigned char *)_rgb.data;
+  *p_pixels = _rgb.data;
   return nullptr;
 }
 
-void vlc_capture::unlock(void *id, void *const *p_pixels) {
+void vlc_capture::unlock(void * /*id*/, void *const * /*p_pixels*/) {
   _has_frame = true;
   _mutex.unlock();
-}
-
-unsigned vlc_capture::formater(void **data, char *chroma, unsigned *width,
-                               unsigned *height, unsigned *pitches,
-                               unsigned *lines) {
-  return static_cast<vlc_capture *>(*data)->format(chroma, width, height,
-                                                   pitches, lines);
 }
 
 void *vlc_capture::locker(void *data, void **p_pixels) {

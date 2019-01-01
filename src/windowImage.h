@@ -10,6 +10,7 @@
 #pragma once
 #include "nm_detector.h"
 #include "ui_windowImage.h"
+#include "vlccap.h"
 #include <QtWidgets>
 #include <opencv2/opencv.hpp>
 #include <opencv2/xfeatures2d.hpp>
@@ -41,6 +42,7 @@ public:
   std::shared_ptr<QImage> _image;
   cv::Mat _imgRT;
   QPixmap mPixmap;
+  //vlc_capture _capture;
   cv::VideoCapture _capture;
   std::unique_ptr<QTimer> timer;
   QString mImageZoom;
@@ -57,7 +59,7 @@ public:
   int mWindowType, mFeatureType, mImageN;
   double mCurrentFactor;
   std::unique_ptr<QRubberBand> _rubberBand;
-
+  bool band_avaiable = false;
 protected:
   void mousePressEvent(QMouseEvent *event) override;
   void mouseMoveEvent(QMouseEvent *event) override;

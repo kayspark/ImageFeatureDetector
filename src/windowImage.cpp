@@ -33,10 +33,10 @@ WindowImage::WindowImage(const QString &fileName, QString windowTitle,
     _capture.set(cv::CAP_PROP_FRAME_WIDTH, 640);
     _capture.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
     compute();
-    float sizeInKiB = _image->byteCount() / (float)1024;
+    float sizeInKiB = _image->byteCount() / (float) 1024;
     if (sizeInKiB > 1024)
       mImageSize =
-          mLocale->toString(sizeInKiB / (float)1024, 'f', 2).append(" MiB");
+          mLocale->toString(sizeInKiB / (float) 1024, 'f', 2).append(" MiB");
     else
       mImageSize = mLocale->toString(sizeInKiB, 'f', 2).append(" KiB");
     // For async refresh
@@ -49,6 +49,10 @@ WindowImage::WindowImage(const QString &fileName, QString windowTitle,
         "There is some problem with the cam.\nCannot get images.");
     uiLabelImage->setText("Please check camera");
   }
+
+  mOriginalSize = QSize(800, 600);
+  mOriginalWidth = 800;
+  mOriginalHeight = 600;
 
   mScaleFactorAbove100 = 0.5;
   mScaleFactorUnder100 = 0.25;
@@ -84,12 +88,12 @@ WindowImage::WindowImage(std::shared_ptr<QImage> image, QString windowTitle,
   mOriginalWidth = _image->width();
   mOriginalHeight = _image->height();
 
-  mImageZoom = tr("%1%").arg((int)(mCurrentFactor * 100));
+  mImageZoom = tr("%1%").arg((int) (mCurrentFactor * 100));
   mImageDimensions = tr("%1x%2 px").arg(mOriginalWidth).arg(mOriginalHeight);
-  float sizeInKiB = _image->byteCount() / (float)1024;
+  float sizeInKiB = _image->byteCount() / (float) 1024;
   if (sizeInKiB > 1024)
     mImageSize =
-        mLocale->toString(sizeInKiB / (float)1024, 'f', 2).append(" MiB");
+        mLocale->toString(sizeInKiB / (float) 1024, 'f', 2).append(" MiB");
   else
     mImageSize = mLocale->toString(sizeInKiB, 'f', 2).append(" KiB");
 }
@@ -122,11 +126,11 @@ void WindowImage::zoomBestFit() {
   int scrollWidth = width();
   int scrollHeight = height();
 
-  float relationScroll = scrollWidth / (float)scrollHeight;
-  float relationImage = mOriginalWidth / (float)mOriginalHeight;
+  float relationScroll = scrollWidth / (float) scrollHeight;
+  float relationImage = mOriginalWidth / (float) mOriginalHeight;
 
-  float scaleWidth = scrollWidth / (float)mOriginalWidth;
-  float scaleHeight = scrollHeight / (float)mOriginalHeight;
+  float scaleWidth = scrollWidth / (float) mOriginalWidth;
+  float scaleHeight = scrollHeight / (float) mOriginalHeight;
 
   if (relationScroll > relationImage) {
     mFactorIncrement = correctF * scaleHeight / mCurrentFactor;
@@ -159,12 +163,12 @@ void WindowImage::applyHarris(int sobelApertureSize, int harrisApertureSize,
   cvtColor(image, imageGrey, cv::COLOR_RGB2GRAY);
 
   cv::Mat imageHarris(_image->height(), _image->width(), CV_8UC1);
-  auto time = (float)cv::getTickCount();
+  auto time = (float) cv::getTickCount();
   cornerHarris(imageGrey, imageHarris, harrisApertureSize, sobelApertureSize,
                kValue);
 
   mImageTime = mLocale->toString(
-      (float)((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f',
+      (float) ((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f',
       2);
 
   // Increases the contrast. If not only a nearly black image would be seen
@@ -222,9 +226,9 @@ void WindowImage::applyFast(int threshold, bool nonMaxSuppression) {
   FAST(imageGrey, keyPoints, threshold, nonMaxSuppression);
 
   mImageTime = mLocale->toString(
-      (float)((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f',
+      (float) ((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f',
       2);
-  mImageKeypoints = mLocale->toString((float)keyPoints.size(), 'f', 0);
+  mImageKeypoints = mLocale->toString((float) keyPoints.size(), 'f', 0);
 
   mPainter->begin(&mPixmap);
   QPen pen(QColor::fromRgb(255, 0, 0));
@@ -232,7 +236,7 @@ void WindowImage::applyFast(int threshold, bool nonMaxSuppression) {
   mPainter->setPen(pen);
   mPainter->setRenderHint(QPainter::Antialiasing);
   for (const auto &point : keyPoints)
-    mPainter->drawEllipse((int)point.pt.x, (int)point.pt.y, 4, 4);
+    mPainter->drawEllipse((int) point.pt.x, (int) point.pt.y, 4, 4);
   mPainter->end();
 
   mModified = true;
@@ -255,24 +259,24 @@ void WindowImage::applySift(double threshold, double edgeThreshold,
   cv::cvtColor(image, imgGray, cv::COLOR_RGB2GRAY);
 
   std::vector<cv::KeyPoint> keyPoints;
-  auto time = (float)cv::getTickCount();
+  auto time = (float) cv::getTickCount();
   cv::Ptr<cv::Feature2D> feature = cv::xfeatures2d::SIFT::create(
       nOctaveLayers, nOctaves, threshold, edgeThreshold);
   feature->detect(imgGray, keyPoints);
 
   mImageTime = mLocale->toString(
-      (float)((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f',
+      (float) ((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f',
       2);
-  mImageKeypoints = mLocale->toString((int)keyPoints.size());
+  mImageKeypoints = mLocale->toString((int) keyPoints.size());
 
   QPoint center;
   mPainter->begin(&mPixmap);
   mPainter->setRenderHint(QPainter::Antialiasing);
   for (const auto &point : keyPoints) {
-    center.setX((int)point.pt.x);
-    center.setY((int)point.pt.y);
+    center.setX((int) point.pt.x);
+    center.setY((int) point.pt.y);
     const auto radius =
-        (int)(point.size); // radius = (int)(keyPoints->at(n).size*1.2/9.*2); =
+        (int) (point.size); // radius = (int)(keyPoints->at(n).size*1.2/9.*2); =
     // 0.266666
     if (showOrientation) {
       mPainter->setPen(QColor::fromRgb(255, 0, 0));
@@ -312,16 +316,16 @@ void WindowImage::applySurf(double threshold, int nOctaves, int nOctaveLayers,
 
   mImageTime = mLocale->toString(
       ((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'd', 2);
-  mImageKeypoints = mLocale->toString((float)keyPoints.size(), 'd', 0);
+  mImageKeypoints = mLocale->toString((float) keyPoints.size(), 'd', 0);
 
   QPoint center;
   mPainter->begin(&mPixmap);
   mPainter->setRenderHint(QPainter::Antialiasing);
   for (const auto &point : keyPoints) {
-    center.setX((int)point.pt.x);
-    center.setY((int)point.pt.y);
+    center.setX((int) point.pt.x);
+    center.setY((int) point.pt.y);
     const auto radius =
-        (int)point
+        (int) point
             .size; // radius = (int)(keyPoints->at(n).size*1.2/9.*2); = 0.266666
     if (showOrientation) {
       mPainter->setPen(QColor::fromRgb(255, 0, 0));
@@ -370,8 +374,8 @@ void WindowImage::resetImage() {
 QImage WindowImage::convertMat2QImage(const cv::Mat &src) {
   cv::Mat temp;                    // make the same cv::Mat
   cvtColor(src, temp, CV_BGR2RGB); // cvtColor Makes a copt, that what i need
-  QImage dest((const uchar *)temp.data, temp.cols, temp.rows, temp.step,
-              QImage::Format_RGB32);
+  QImage dest((const uchar *) temp.data, temp.cols, temp.rows,
+              static_cast<int>(temp.step), QImage::Format_RGB32);
   dest.bits(); // enforce deep copy, see documentation
   // of QImage::QImage ( const uchar * data, int width, int height, Format
   // format )
@@ -385,17 +389,17 @@ void WindowImage::scaleImage() {
                                          Qt::SmoothTransformation));
   adjustScrollBar(horizontalScrollBar());
   adjustScrollBar(verticalScrollBar());
-  mImageZoom = tr("%1%").arg((int)(mCurrentFactor * 100));
+  mImageZoom = tr("%1%").arg((int) (mCurrentFactor * 100));
 }
 
 void WindowImage::adjustScrollBar(QScrollBar *scrollBar) {
   scrollBar->setValue(int(mFactorIncrement * scrollBar->value() +
-                          (mFactorIncrement - 1) * scrollBar->pageStep() / 2));
+      (mFactorIncrement - 1) * scrollBar->pageStep() / 2));
 }
 
 void WindowImage::mousePressEvent(QMouseEvent *event) {
   mLastPoint = event->pos();
-  if (_rubberBand.get() == nullptr)
+  if (_rubberBand == nullptr)
     _rubberBand = std::make_unique<QRubberBand>(QRubberBand::Rectangle, this);
   // setCursor(Qt::ClosedHandCursor);
 }
@@ -408,6 +412,7 @@ void WindowImage::mouseMoveEvent(QMouseEvent *event) {
   // verticalScrollBar()->setValue(vValue + (mLastPoint.y() - myPos.y()));
   _rubberBand->setGeometry(QRect(mLastPoint, event->pos()).normalized());
   _rubberBand->show();
+  band_avaiable = false;
   QToolTip::showText(event->globalPos(),
                      QString("%1,%2")
                          .arg(_rubberBand->size().width())
@@ -418,13 +423,9 @@ void WindowImage::mouseMoveEvent(QMouseEvent *event) {
 
 void WindowImage::mouseReleaseEvent(QMouseEvent * /*event*/) {
   // unsetCursor();
-  _rubberBand->hide();
+  band_avaiable = true;
+  //_rubberBand->hide();
   // determine selection.. QRect::contains..
-  QPixmap OriginalPix(*uiLabelImage->pixmap());
-  QImage newImage;
-  newImage = OriginalPix.toImage();
-  new WindowImage(
-      std::make_shared<QImage>(newImage.copy(_rubberBand->geometry())), "test");
 }
 
 void WindowImage::mouseDoubleClickEvent(QMouseEvent *event) {
@@ -435,24 +436,46 @@ void WindowImage::mouseDoubleClickEvent(QMouseEvent *event) {
 }
 
 void WindowImage::compute() {
-  _capture >> _imgRT;
+  _capture.read(_imgRT);
   if (!_imgRT.empty()) {
+
     cv::resize(_imgRT, _imgRT, cv::Size(800, 600), 0, 0, cv::INTER_CUBIC);
     cv::Mat gray;
     cv::cvtColor(_imgRT, gray, cv::COLOR_BGR2GRAY);
-    _predator.update_tracker(gray, _imgRT);
-    cv::resize(_imgRT, _imgRT, cv::Size(640, 480), 0, 0, cv::INTER_CUBIC);
+
+    QRect qRect;
+    cv::Rect rect1;
+    if (_rubberBand && band_avaiable) {
+      _rubberBand->showNormal();
+      qRect = _rubberBand->geometry();
+      rect1 = cv::Rect(qRect.x(), qRect.y(), qRect.width(), qRect.height());
+    }
+
+    _predator.update_tracker(gray);
+    cv::Rect2d object = _predator.get_detected();
+    std::vector<cv::Rect> candidate = _predator.get_candidate();
+    //   cv::resize(_imgRT, _imgRT, cv::Size(640, 480), 0, 0, cv::INTER_CUBIC);
     cvtColor(_imgRT, _imgRT, cv::COLOR_BGR2RGB);
     _image = std::make_unique<QImage>(_imgRT.data, _imgRT.cols, _imgRT.rows,
                                       static_cast<int>(_imgRT.step),
                                       QImage::Format_RGB888);
-    mPixmapOriginal = QPixmap::fromImage(*_image);
-    uiLabelImage->setPixmap(mPixmapOriginal); // With RGB32 doesn't work
-    mOriginalSize = _image->size();
-    mOriginalWidth = _image->width();
-    mOriginalHeight = _image->height();
 
-    mImageZoom = tr("%1%").arg((int)(mCurrentFactor * 100));
-    mImageDimensions = tr("%1x%2 px").arg(mOriginalWidth).arg(mOriginalHeight);
+    mPixmap = QPixmap::fromImage(*_image);
+    mPainter->begin(&mPixmap);
+    QPen pen1(QColor::fromRgb(0, 255, 0));
+    pen1.setWidth(5);
+    QPen pen(QColor::fromRgb(255, 0, 0));
+    pen.setWidth(5);
+    for (const auto &r : candidate) {
+      if (rect1.contains(r.tl()) || rect1.contains(r.br()))
+        mPainter->setPen(pen);
+      else
+        mPainter->setPen(pen1);
+      mPainter->drawRect(r.x, r.y, r.width, r.height);
+    }
+    mPainter->end();
+    uiLabelImage->setPixmap(mPixmap); // With RGB32 doesn't work
+    mImageZoom = tr("%1%").arg((int) (mCurrentFactor * 100));
+    mImageDimensions = tr("%1x%2px").arg(mOriginalWidth).arg(mOriginalHeight);
   }
 }

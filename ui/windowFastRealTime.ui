@@ -9,8 +9,8 @@
       <rect>
         <x>0</x>
         <y>0</y>
-        <width>550</width>
-        <height>350</height>
+        <width>1024</width>
+        <height>768</height>
       </rect>
     </property>
     <property name="sizePolicy">
@@ -54,7 +54,7 @@
         <number>15</number>
       </property>
       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <layout class="QHBoxLayout" name="_2">
           <property name="spacing">
             <number>10</number>
           </property>
@@ -68,14 +68,14 @@
               </property>
               <property name="minimumSize">
                 <size>
-                  <width>800</width>
-                  <height>600</height>
+                  <width>960</width>
+                  <height>544</height>
                 </size>
               </property>
               <property name="maximumSize">
                 <size>
-                  <width>800</width>
-                  <height>600</height>
+                  <width>960</width>
+                  <height>544</height>
                 </size>
               </property>
               <property name="frameShape">
@@ -98,176 +98,138 @@
               </property>
             </widget>
           </item>
+        </layout>
+      </item>
+      <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="spacing">
+            <number>8</number>
+          </property>
           <item>
-            <layout class="QVBoxLayout" name="verticalLayout_2">
-              <property name="spacing">
-                <number>8</number>
-              </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_3">
-                  <item>
-                    <widget class="QLabel" name="label_2">
-                      <property name="sizePolicy">
-                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                        </sizepolicy>
-                      </property>
-                      <property name="maximumSize">
-                        <size>
-                          <width>24</width>
-                          <height>24</height>
-                        </size>
-                      </property>
-                      <property name="pixmap">
-                        <pixmap>icons/Fast.png</pixmap>
-                      </property>
-                      <property name="scaledContents">
-                        <bool>true</bool>
-                      </property>
-                    </widget>
-                  </item>
-                  <item>
-                    <widget class="QLabel" name="label">
-                      <property name="text">
-                        <string>Parameters</string>
-                      </property>
-                    </widget>
-                  </item>
-                </layout>
-              </item>
-              <item>
-                <widget class="Line" name="line_2">
-                  <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
+                <widget class="QLabel" name="label_2">
+                  <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                    </sizepolicy>
                   </property>
-                </widget>
-              </item>
-              <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_5">
-                  <item>
-                    <widget class="QLabel" name="label_3">
-                      <property name="sizePolicy">
-                        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                        </sizepolicy>
-                      </property>
-                      <property name="text">
-                        <string>Threshold</string>
-                      </property>
-                      <property name="buddy">
-                        <cstring>uiSpinBoxThresholdFAST</cstring>
-                      </property>
-                    </widget>
-                  </item>
-                  <item>
-                    <spacer name="horizontalSpacer">
-                      <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                        <size>
-                          <width>40</width>
-                          <height>20</height>
-                        </size>
-                      </property>
-                    </spacer>
-                  </item>
-                  <item>
-                    <widget class="QSpinBox" name="uiSpinBoxThresholdFAST">
-                      <property name="sizePolicy">
-                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                        </sizepolicy>
-                      </property>
-                      <property name="minimum">
-                        <number>1</number>
-                      </property>
-                      <property name="maximum">
-                        <number>999</number>
-                      </property>
-                      <property name="value">
-                        <number>50</number>
-                      </property>
-                    </widget>
-                  </item>
-                </layout>
-              </item>
-              <item>
-                <widget class="QPushButton" name="uiPushButtonNonMaxFAST">
-                  <property name="text">
-                    <string>Non-Max Suppression</string>
-                  </property>
-                  <property name="checkable">
-                    <bool>true</bool>
-                  </property>
-                  <property name="checked">
-                    <bool>true</bool>
-                  </property>
-                </widget>
-              </item>
-              <item>
-                <widget class="QPushButton" name="uiPushButtonResetFAST">
-                  <property name="text">
-                    <string>Reset</string>
-                  </property>
-                  <property name="icon">
-                    <iconset>
-                      <normaloff>icons/edit-clear.svg</normaloff>icons/edit-clear.svg</iconset>
-                  </property>
-                  <property name="iconSize">
+                  <property name="maximumSize">
                     <size>
                       <width>24</width>
                       <height>24</height>
                     </size>
                   </property>
-                </widget>
-              </item>
-              <item>
-                <spacer name="verticalSpacer">
-                  <property name="orientation">
-                    <enum>Qt::Vertical</enum>
+                  <property name="pixmap">
+                    <pixmap>icons/Fast.png</pixmap>
                   </property>
-                  <property name="sizeHint" stdset="0">
-                    <size>
-                      <width>20</width>
-                      <height>40</height>
-                    </size>
-                  </property>
-                </spacer>
-              </item>
-              <item>
-                <widget class="QLabel" name="uiLabelTime">
-                  <property name="text">
-                    <string>Detecting Time: -</string>
+                  <property name="scaledContents">
+                    <bool>true</bool>
                   </property>
                 </widget>
               </item>
-              <item>
-                <widget class="QLabel" name="uiLabelKeypoints">
+              <item alignment="Qt::AlignVCenter">
+                <widget class="QLabel" name="label">
                   <property name="text">
-                    <string>Keypoints: -</string>
+                    <string>Parameters</string>
                   </property>
                 </widget>
               </item>
             </layout>
           </item>
+          <item>
+            <widget class="QPushButton" name="uiPushButtonResetFAST">
+              <property name="text">
+                <string>Reset</string>
+              </property>
+              <property name="icon">
+                <iconset>
+                  <normaloff>icons/edit-clear.svg</normaloff>icons/edit-clear.svg
+                </iconset>
+              </property>
+              <property name="iconSize">
+                <size>
+                  <width>24</width>
+                  <height>24</height>
+                </size>
+              </property>
+            </widget>
+          </item>
+          <item>
+            <widget class="QPushButton" name="uiPushButtonNonMaxFAST">
+              <property name="text">
+                <string>Non-Max Suppression</string>
+              </property>
+              <property name="checkable">
+                <bool>true</bool>
+              </property>
+              <property name="checked">
+                <bool>true</bool>
+              </property>
+            </widget>
+          </item>
+          <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+                <widget class="QLabel" name="label_3">
+                  <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                    </sizepolicy>
+                  </property>
+                  <property name="text">
+                    <string>Threshold</string>
+                  </property>
+                  <property name="buddy">
+                    <cstring>uiSpinBoxThresholdFAST</cstring>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QSpinBox" name="uiSpinBoxThresholdFAST">
+                  <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                    </sizepolicy>
+                  </property>
+                  <property name="minimum">
+                    <number>1</number>
+                  </property>
+                  <property name="maximum">
+                    <number>999</number>
+                  </property>
+                  <property name="value">
+                    <number>50</number>
+                  </property>
+                </widget>
+              </item>
+            </layout>
+          </item>
+          <item>
+            <widget class="QLabel" name="uiLabelKeypoints">
+              <property name="text">
+                <string>Keypoints: -</string>
+              </property>
+            </widget>
+          </item>
+          <item>
+            <widget class="QLabel" name="uiLabelTime">
+              <property name="text">
+                <string>Detecting Time: -</string>
+              </property>
+            </widget>
+          </item>
+          <item>
+            <widget class="Line" name="line_2">
+              <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+              </property>
+            </widget>
+          </item>
         </layout>
-      </item>
-      <item>
-        <spacer name="verticalSpacer_2">
-          <property name="orientation">
-            <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-            <size>
-              <width>20</width>
-              <height>40</height>
-            </size>
-          </property>
-        </spacer>
       </item>
       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
