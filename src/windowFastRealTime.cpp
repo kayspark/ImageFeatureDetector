@@ -119,23 +119,41 @@ void WindowFastRealTime::compute() {
   if (mDetecting) {
     if (!mImageRT.empty()) {
       cv::Mat gray;
-      cv::cvtColor(mImageRT, gray, cv::COLOR_RGB2GRAY);
+      cv::cvtColor(mImageRT, gray, cv::COLOR_BGR2GRAY);
+
+      QRect qRect;
+      cv::Rect rect1;
+      if (_rubberBand && band_avaiable) {
+        _rubberBand->showNormal();
+        qRect = _rubberBand->geometry();
+        rect1 = cv::Rect(qRect.x(), qRect.y(), qRect.width(), qRect.height());
+      }
+
       _predator.update_tracker(gray);
+      cv::Rect2d object = _predator.get_detected();
+      std::vector<cv::Rect> candidate = _predator.get_candidate();
+      //   cv::resize(_imgRT, _imgRT, cv::Size(640, 480), 0, 0, cv::INTER_CUBIC);
       mPixmap = QPixmap::fromImage(
           QImage(mImageRT.data, mImageRT.cols, mImageRT.rows,
                  static_cast<int>(mImageRT.step), QImage::Format_RGB888));
-      cv::Rect2d object = _predator.get_detected();
+      mPainter->begin(&mPixmap);
+      QPen pen1(QColor::fromRgb(0, 255, 0));
+      pen1.setWidth(5);
+      QPen pen(QColor::fromRgb(255, 0, 0));
+      pen.setWidth(5);
+      for (const auto &r : candidate) {
+        if (rect1.contains(r.tl()) || rect1.contains(r.br()))
+          mPainter->setPen(pen);
+        else
+          mPainter->setPen(pen1);
+        mPainter->drawRect(r.x, r.y, r.width, r.height);
+      }
+      mPainter->end();
+      uiLabelRealTime->setPixmap(mPixmap);
       uiLabelTime->setText("Detecting Time: " +
           QString("%1").arg(_predator.get_detection_time()));
       uiLabelKeypoints->setText("Key points: -" + QString("%1").arg(1));
-      mPainter->begin(&mPixmap);
-      QPen pen(QColor::fromRgb(255, 0, 0));
-      pen.setWidth(2);
-      mPainter->setPen(pen);
-      mPainter->setRenderHint(QPainter::Antialiasing);
-      mPainter->drawRect(object.x, object.y, object.width, object.height);
-      mPainter->end();
-      uiLabelRealTime->setPixmap(mPixmap);
+
     }
   } else {
     mPixmap = QPixmap::fromImage(

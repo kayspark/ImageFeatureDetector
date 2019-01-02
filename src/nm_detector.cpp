@@ -70,7 +70,9 @@ bool nm_detector::validate_roi(cv::Mat &roi) {
 } // detect roi
 
 void nm_detector::detect_candidate(Mat &gray) {
+  auto timer = (double) cv::getTickCount();
   _motion.find(gray);
+  detection_time = ((double) getTickCount() - timer) * 1000 / getTickFrequency();
   _motion.get_detected(candidate_objects);
 }
 
