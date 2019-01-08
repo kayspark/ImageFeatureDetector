@@ -33,7 +33,7 @@ else (win32)
     set(LIBVLC_LIBRARY_DIR "/usr/local/lib")
     set(LIBVLC_LIBRARY ${LIBVLC_LIBRARY_DIR}/libvlc.dylib)
     set(LIBVLCCORE_LIBRARY ${LIBVLC_LIBRARY_DIR}/libvlccore.dylib)
-   set(OpenCV_DIR "/usr/local/lib/cmake/opencv4")
+    set(OpenCV_DIR "/usr/local/Cellar/opencv/4.0.1/lib/cmake/opencv4")
 endif (win32)
 find_package(OpenCV COMPONENTS opencv_core opencv_imgproc opencv_highgui opencv_objdetect opencv_tracking opencv_xfeatures2d REQUIRED)
 include_directories(. ${LIBVLC_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
@@ -68,26 +68,3 @@ include(clang-tidy.cmake)
 
 
 
-## Deb package generator. IT DOESN'T WORK YET! ##
-
-# http://www.cmake.org/cmake/help/v3.0/module/CPackDeb.html
-# https://wiki.debian.org/IntroDebianPackaging
-# http://stackoverflow.com/questions/7249440/how-to-build-debian-package-with-cpack-to-execute-setup-py
-# http://stackoverflow.com/questions/10086615/cmake-cpack-debian-packages
-# set(CPACK_PACKAGE_NAME "image-feature-detector")
-# set(CPACK_PACKAGE_VENDOR "Antonio Redondo")
-# set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "IFD is a C++ Qt GUI desktop program to calculate with OpenCV Harris, FAST, SIFT and SURF image features")
-# set(CPACK_PACKAGE_VERSION "2.0")
-# set(CPACK_PACKAGE_VERSION_MAJOR "2")
-# set(CPACK_PACKAGE_VERSION_MINOR "0")
-# set(CPACK_PACKAGE_VERSION_PATCH "0")
-# set(CPACK_SYSTEM_NAME "amd64")
-# set(CPACK_GENERATOR "DEB")
-# set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Antonio Redondo")
-# set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON) # http://www.guyrutenberg.com/2012/07/19/auto-detect-dependencies-when-building-debs-using-cmake/
-## set(CPACK_DEBIAN_PACKAGE_DEPENDS "libQt5Core (>= 5.4.0), libQt5Widgets (>= 5.4.0), libQt5Gui (>= 5.4.0)")
-# set(CPACK_SET_DESTDIR "ON")
-# 
-# include(CPack)
-#
-## Deb package generator END ##
