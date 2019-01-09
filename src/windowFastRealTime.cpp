@@ -10,157 +10,168 @@
 #include "windowFastRealTime.h"
 
 WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
-    : QDialog(wmain, Qt::Dialog), mCamera(vlc_capture(960, 544)),
-      mTimer(std::make_unique<QTimer>()), mDetecting(false), mTime(0.0),
-      _data_file("./dataset/cascade.xml"), _tracking_algorithm("CSRT"),
-      _predator(nm_detector(this->_data_file, this->_tracking_algorithm)),
-      mSettings(wmain->getMSettings()),
-      mLocale(std::make_unique<QLocale>(QLocale::English)),
-      mPainter(std::make_unique<QPainter>()) {
+    : QDialog(wmain, Qt::Dialog), mCamera(vlc_capture(960, 544)), mTimer(std::make_unique<QTimer>()), mDetecting(false),
+      mTime(0.0), _data_file("./dataset/cascade.xml"), _tracking_algorithm("CSRT"),
+      _predator(nm_detector(this->_data_file, this->_tracking_algorithm)), mSettings(wmain->getMSettings()),
+      mLocale(std::make_unique<QLocale>(QLocale::English)), mPainter(std::make_unique<QPainter>())
+{
   setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
-  uiSpinBoxThresholdFAST->setValue(
-      mSettings->value("fastRT/threshold", 25).toInt());
-  uiPushButtonNonMaxFAST->setChecked(
-      mSettings->value("fastRT/nonMaxSuppression", true).toBool());
+  uiSpinBoxThresholdFAST->setValue(mSettings->value("fastRT/threshold", 25).toInt());
+  uiPushButtonNonMaxFAST->setChecked(mSettings->value("fastRT/nonMaxSuppression", true).toBool());
 
-  QObject::connect(uiPushButtonNonMaxFAST, &QPushButton::toggled, this,
-                   &WindowFastRealTime::saveFastParams);
-  QObject::connect(uiSpinBoxThresholdFAST, &QSpinBox::editingFinished, this,
-                   &WindowFastRealTime::saveFastParams);
-  QObject::connect(uiPushButtonResetFAST, &QAbstractButton::clicked, this,
-                   &WindowFastRealTime::resetFastParams);
-  QObject::connect(uiPushButtonDetect, &QAbstractButton::clicked, this,
-                   &WindowFastRealTime::detect);
-  QObject::connect(uiPushButtonCancel, &QAbstractButton::clicked, this,
-                   &WindowFastRealTime::close);
+  listWidget->setViewMode(QListWidget::IconMode);
+  listWidget->setIconSize(QSize(48, 48));
+  listWidget->setResizeMode(QListWidget::Adjust);
+
+  QObject::connect(uiPushButtonNonMaxFAST, &QPushButton::toggled, this, &WindowFastRealTime::saveFastParams);
+  QObject::connect(uiSpinBoxThresholdFAST, &QSpinBox::editingFinished, this, &WindowFastRealTime::saveFastParams);
+  QObject::connect(uiPushButtonResetFAST, &QAbstractButton::clicked, this, &WindowFastRealTime::resetFastParams);
+  QObject::connect(uiPushButtonDetect, &QAbstractButton::clicked, this, &WindowFastRealTime::detect);
+  QObject::connect(uiPushButtonCancel, &QAbstractButton::clicked, this, &WindowFastRealTime::close);
   std::string url = mSettings->value("rtsp/url1").toString().toStdString();
   mCamera.open(url);
-  if (mCamera.isOpened()) {
-    mTimer->start(40); // 25fps
-    QObject::connect(mTimer.get(), &QTimer::timeout, this,
-                     &WindowFastRealTime::compute);
-    uiPushButtonDetect->setEnabled(true);
-  } else {
-    uiLabelRealTime->setText(
-        "There is some problem with the cam.\nCannot get images.");
-  }
+  if (mCamera.isOpened())
+    {
+      mTimer->start(40); // 25fps
+      QObject::connect(mTimer.get(), &QTimer::timeout, this, &WindowFastRealTime::compute);
+      uiPushButtonDetect->setEnabled(true);
+    }
+  else
+    {
+      uiLabelRealTime->setText("There is some problem with the cam.\nCannot get images.");
+    }
 
   show();
 }
 
-void WindowFastRealTime::detect() {
-  if (!mDetecting) {
-    uiPushButtonDetect->setIcon(QIcon("icons/media-playback-stop.svg"));
-    uiPushButtonDetect->setText("Stop Detecting");
-  } else {
-    uiPushButtonDetect->setIcon(QIcon("icons/media-playback-start.svg"));
-    uiPushButtonDetect->setText("Detect");
-  }
+void WindowFastRealTime::detect()
+{
+  if (!mDetecting)
+    {
+      uiPushButtonDetect->setIcon(QIcon(":icons/media-playback-stop.svg"));
+      uiPushButtonDetect->setText("Stop Detecting");
+    }
+  else
+    {
+      uiPushButtonDetect->setIcon(QIcon(":icons/media-playback-play.svg"));
+      uiPushButtonDetect->setText("Detect");
+    }
   mDetecting = !mDetecting;
 }
 
-void WindowFastRealTime::close() {
+void WindowFastRealTime::close()
+{
   if (mTimer)
     mTimer->stop();
   mCamera.release();
   QWidget::close();
 }
 
-void WindowFastRealTime::closeEvent(QCloseEvent *closeEvent) {
+void WindowFastRealTime::closeEvent(QCloseEvent *closeEvent)
+{
   close();
   QDialog::closeEvent(closeEvent);
 }
 
-void WindowFastRealTime::mousePressEvent(QMouseEvent *event) {
+void WindowFastRealTime::mousePressEvent(QMouseEvent *event)
+{
   mLastPoint = event->pos();
   if (_rubberBand == nullptr)
     _rubberBand = std::make_unique<QRubberBand>(QRubberBand::Rectangle, this);
   // setCursor(Qt::ClosedHandCursor);
 }
 
-void WindowFastRealTime::mouseMoveEvent(QMouseEvent *event) {
-  QPoint myPos = event->pos();
+void WindowFastRealTime::mouseMoveEvent(QMouseEvent *event)
+{
+  QPoint pos = event->pos();
   //  int hValue = horizontalScrollBar()->value();
   //  int vValue = verticalScrollBar()->value();
   // horizontalScrollBar()->setValue(hValue + (mLastPoint.x() - myPos.x()));
   // verticalScrollBar()->setValue(vValue + (mLastPoint.y() - myPos.y()));
-  _rubberBand->setGeometry(QRect(mLastPoint, event->pos()).normalized());
+  _rubberBand->setGeometry(QRect(mLastPoint, pos).normalized());
   _rubberBand->show();
-  band_avaiable = false;
+  _band_avaiable = false;
   QToolTip::showText(event->globalPos(),
-                     QString("%1,%2")
-                         .arg(_rubberBand->size().width())
-                         .arg(_rubberBand->size().height()),
-                     this);
+                     QString("%1,%2").arg(_rubberBand->size().width()).arg(_rubberBand->size().height()), this);
   // mLastPoint = myPos;
 }
 
-void WindowFastRealTime::mouseReleaseEvent(QMouseEvent * /*event*/) {
+void WindowFastRealTime::mouseReleaseEvent(QMouseEvent * /*event*/)
+{
   // unsetCursor();
-  band_avaiable = true;
+  _band_avaiable = true;
   //_rubberBand->hide();
   // determine selection.. QRect::contains..
 }
-void WindowFastRealTime::saveFastParams() {
+void WindowFastRealTime::saveFastParams()
+{
   mSettings->setValue("fastRT/threshold", uiSpinBoxThresholdFAST->value());
-  mSettings->setValue("fastRT/nonMaxSuppression",
-                      uiPushButtonNonMaxFAST->isChecked());
+  mSettings->setValue("fastRT/nonMaxSuppression", uiPushButtonNonMaxFAST->isChecked());
 }
 
-void WindowFastRealTime::resetFastParams() {
+void WindowFastRealTime::resetFastParams()
+{
   uiSpinBoxThresholdFAST->setValue(25);
   uiPushButtonNonMaxFAST->setChecked(true);
   saveFastParams();
 }
 
-void WindowFastRealTime::compute() {
+void WindowFastRealTime::compute()
+{
   mCamera.read(mImageRT);
-  if (mDetecting) {
-    if (!mImageRT.empty()) {
-      cv::Mat gray;
-      cv::cvtColor(mImageRT, gray, cv::COLOR_BGR2GRAY);
+  if (mDetecting)
+    {
+      if (!mImageRT.empty())
+        {
+          cv::Mat gray;
+          cv::cvtColor(mImageRT, gray, cv::COLOR_BGR2GRAY);
 
-      QRect qRect;
-      cv::Rect rect1;
-      if (_rubberBand && band_avaiable) {
-        _rubberBand->showNormal();
-        qRect = _rubberBand->geometry();
-        rect1 = cv::Rect(qRect.x(), qRect.y(), qRect.width(), qRect.height());
-      }
+          QRect qRect;
+          cv::Rect rect1;
+          if (_rubberBand && _band_avaiable)
+            {
+              _rubberBand->showNormal();
+              qRect = _rubberBand->geometry();
+              rect1 = cv::Rect(qRect.x(), qRect.y(), qRect.width(), qRect.height());
+            }
 
-      _predator.update_tracker(gray);
-      cv::Rect2d object = _predator.get_detected();
-      std::vector<cv::Rect> candidate = _predator.get_candidate();
-      //   cv::resize(_imgRT, _imgRT, cv::Size(640, 480), 0, 0, cv::INTER_CUBIC);
-      mPixmap = QPixmap::fromImage(
-          QImage(mImageRT.data, mImageRT.cols, mImageRT.rows,
-                 static_cast<int>(mImageRT.step), QImage::Format_RGB888));
-      mPainter->begin(&mPixmap);
-      QPen pen1(QColor::fromRgb(0, 255, 0));
-      pen1.setWidth(5);
-      QPen pen(QColor::fromRgb(255, 0, 0));
-      pen.setWidth(5);
-      for (const auto &r : candidate) {
-        if (rect1.contains(r.tl()) || rect1.contains(r.br()))
-          mPainter->setPen(pen);
-        else
-          mPainter->setPen(pen1);
-        mPainter->drawRect(r.x, r.y, r.width, r.height);
-      }
-      mPainter->end();
-      uiLabelRealTime->setPixmap(mPixmap);
-      uiLabelTime->setText("Detecting Time: " +
-          QString("%1").arg(_predator.get_detection_time()));
-      uiLabelKeypoints->setText("Key points: -" + QString("%1").arg(1));
-
+          _predator.update_tracker(gray);
+          cv::Rect2d object = _predator.get_detected();
+          std::vector<cv::Rect> candidate = _predator.get_candidate();
+          //   cv::resize(_imgRT, _imgRT, cv::Size(640, 480), 0, 0, cv::INTER_CUBIC);
+          mPixmap = QPixmap::fromImage(QImage(mImageRT.data, mImageRT.cols, mImageRT.rows,
+                                              static_cast<int>(mImageRT.step), QImage::Format_RGB888));
+          mPainter->begin(&mPixmap);
+          QPen pen1(QColor::fromRgb(0, 255, 0));
+          pen1.setWidth(5);
+          QPen pen(QColor::fromRgb(255, 0, 0));
+          pen.setWidth(5);
+          for (const auto &r : candidate)
+            {
+              // check whether in valid roi
+              if (rect1.contains(r.tl()) || rect1.contains(r.br()))
+                mPainter->setPen(pen);
+              else
+                mPainter->setPen(pen1);
+              // fill suspicious belt
+              QRect qr(r.x, r.y, r.width, r.height);
+              listWidget->addItem(
+                new QListWidgetItem(QIcon(mPixmap.copy(qr)), QDateTime::currentDateTime().toString("MMdd_hhmmss")));
+              mPainter->drawRect(qr);
+            }
+          mPainter->end();
+          uiLabelRealTime->setPixmap(mPixmap);
+          uiLabelTime->setText("Detecting Time: " + QString("%1").arg(_predator.get_detection_time()));
+          uiLabelKeypoints->setText("Key points: -" + QString("%1").arg(1));
+        }
     }
-  } else {
-    mPixmap = QPixmap::fromImage(
-        QImage(mImageRT.data, mImageRT.cols, mImageRT.rows,
-               static_cast<int>(mImageRT.step), QImage::Format_RGB888));
-    uiLabelRealTime->setPixmap(mPixmap);
-    uiLabelTime->setText("Detecting Time: -");
-    uiLabelKeypoints->setText("Key points: -");
-  }
+  else
+    {
+      mPixmap = QPixmap::fromImage(
+        QImage(mImageRT.data, mImageRT.cols, mImageRT.rows, static_cast<int>(mImageRT.step), QImage::Format_RGB888));
+      uiLabelRealTime->setPixmap(mPixmap);
+      uiLabelTime->setText("Detecting Time: -");
+      uiLabelKeypoints->setText("Key points: -");
+    }
 }

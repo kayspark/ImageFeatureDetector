@@ -44,7 +44,7 @@ BreakConstructorInitializersBeforeComma: false
 BreakConstructorInitializers: BeforeColon
 BreakAfterJavaFieldAnnotations: false
 BreakStringLiterals: true
-ColumnLimit: 80
+ColumnLimit: 120
 CommentPragmas: '^ IWYU pragma:'
 CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
@@ -74,7 +74,6 @@ IndentWidth: 2
 IndentWrappedFunctionNames: false
 JavaScriptQuotes: Leave
 JavaScriptWrapImports: true
-KeepLineBreaksForNonEmptyLines: false
 KeepEmptyLinesAtTheStartOfBlocks: true
 MacroBlockBegin: ''
 MacroBlockEnd: ''
@@ -111,7 +110,7 @@ SpacesInContainerLiterals: true
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-Standard: Cpp17
-TabWidth: 4
+Standard: Cpp11
+TabWidth: 2
 UseTab: Never
 ...

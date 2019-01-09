@@ -16,10 +16,10 @@ WindowMain::WindowMain()
       mSeparatorOpenWindowsAdded(false),
       mMenuRecentFiles(std::make_unique<QMenu>(this)),
       mToolButtonOpenRecent(std::make_unique<QToolButton>(this)),
-      mIconHarris(std::make_unique<QIcon>("icons/Harris.png")),
-      mIconFAST(std::make_unique<QIcon>("icons/Fast.png")),
-      mIconSIFT(std::make_unique<QIcon>("icons/Sift.png")),
-      mIconSURF(std::make_unique<QIcon>("icons/Surf.png")),
+      mIconHarris(std::make_unique<QIcon>(":icons/Harris.png")),
+      mIconFAST(std::make_unique<QIcon>(":icons/Fast.png")),
+      mIconSIFT(std::make_unique<QIcon>(":icons/Sift.png")),
+      mIconSURF(std::make_unique<QIcon>(":icons/Surf.png")),
       mSignalMapper(std::make_unique<QSignalMapper>(
           this)), // for the Open Windows menu entries
       mHarrisToolBar(std::make_unique<QWidget>()),
@@ -68,7 +68,7 @@ WindowMain::WindowMain()
   mActionExit->setText(QApplication::translate("mainWindow", "Exit", nullptr));
   mActionExit->setShortcut(
       QApplication::translate("mainWindow", "Ctrl+Q", nullptr));
-  mActionExit->setIcon(QIcon("icons/window-close.svg"));
+  mActionExit->setIcon(QIcon(":icons/window-close.svg"));
   uiMenuFile->addAction(mActionExit.get());
 
   mToolButtonOpenRecent->setFocusPolicy(Qt::NoFocus);
@@ -416,7 +416,7 @@ void WindowMain::applyHarris() {
       mSettings->value("harris/threshold", 64).toInt(),
       mSettings->value("harris/showProcessedImage", false).toBool());
   mStatusBarLabelIcon->setPixmap(
-      QPixmap::fromImage(QImage("icons/Harris.png")));
+      QPixmap::fromImage(QImage(":icons/Harris.png")));
   mActiveWindow->setWindowIcon(*mIconHarris);
   applyCommonTasks();
 }
@@ -455,7 +455,7 @@ void WindowMain::applyFast() {
   mActiveWindowImage->applyFast(
       mSettings->value("fast/threshold", 50).toInt(),
       mSettings->value("fast/nonMaxSuppression", true).toBool());
-  mStatusBarLabelIcon->setPixmap(QPixmap::fromImage(QImage("icons/Fast.png")));
+  mStatusBarLabelIcon->setPixmap(QPixmap::fromImage(QImage(":icons/Fast.png")));
   mActiveWindow->setWindowIcon(*mIconFAST);
   applyCommonTasks();
 }
@@ -491,7 +491,7 @@ void WindowMain::applySift() {
       mSettings->value("sift/features", 0).toInt(),
       mSettings->value("sift/layers", 3).toInt(),
       mSettings->value("sift/showOrientation", true).toBool());
-  mStatusBarLabelIcon->setPixmap(QPixmap::fromImage(QImage("icons/Sift.png")));
+  mStatusBarLabelIcon->setPixmap(QPixmap::fromImage(QImage(":icons/Sift.png")));
   mActiveWindow->setWindowIcon(*mIconSIFT);
   applyCommonTasks();
 }
@@ -530,7 +530,7 @@ void WindowMain::applySurf() {
       mSettings->value("surf/octaves", 4).toInt(),
       mSettings->value("surf/layers", 3).toInt(),
       mSettings->value("surf/showOrientation", true).toBool());
-  mStatusBarLabelIcon->setPixmap(QPixmap::fromImage(QImage("icons/Surf.png")));
+  mStatusBarLabelIcon->setPixmap(QPixmap::fromImage(QImage(":icons/Surf.png")));
   mActiveWindow->setWindowIcon(*mIconSURF);
   applyCommonTasks();
 }
@@ -695,19 +695,19 @@ void WindowMain::updateWindowMenu(QMdiSubWindow *mdiSubWindow) {
       switch (mActiveWindowImage->mFeatureType) {
       case WindowImage::harris:
         mStatusBarLabelIcon->setPixmap(
-            QPixmap::fromImage(QImage(":/icons/Harris.png")));
+            QPixmap::fromImage(QImage(":/:icons/Harris.png")));
         break;
       case WindowImage::fast:
         mStatusBarLabelIcon->setPixmap(
-            QPixmap::fromImage(QImage(":/icons/Fast.png")));
+            QPixmap::fromImage(QImage(":/:icons/Fast.png")));
         break;
       case WindowImage::sift:
         mStatusBarLabelIcon->setPixmap(
-            QPixmap::fromImage(QImage("icons/Sift.png")));
+            QPixmap::fromImage(QImage(":icons/Sift.png")));
         break;
       case WindowImage::surf:
         mStatusBarLabelIcon->setPixmap(
-            QPixmap::fromImage(QImage(":/icons/Surf.png")));
+            QPixmap::fromImage(QImage(":/:icons/Surf.png")));
         break;
       default:
         break;

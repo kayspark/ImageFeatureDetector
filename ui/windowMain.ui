@@ -16,7 +16,7 @@
     </property>
     <property name="windowIcon">
       <iconset>
-        <normaloff>icons/IFDicon.png</normaloff>icons/IFDicon.png</iconset>
+        <normaloff>:icons/IFDicon.png</normaloff>:icons/IFDicon.png</iconset>
     </property>
     <property name="iconSize">
       <size>
@@ -269,7 +269,7 @@
     <action name="uiActionOpen">
       <property name="icon">
         <iconset>
-          <normaloff>icons/fileopen.svg</normaloff>icons/fileopen.svg</iconset>
+          <normaloff>:icons/fileopen.svg</normaloff>:icons/fileopen.svg</iconset>
       </property>
       <property name="text">
         <string>Open...</string>
@@ -287,7 +287,7 @@
       </property>
       <property name="icon">
         <iconset>
-          <normaloff>icons/document-save.svg</normaloff>icons/document-save.svg</iconset>
+          <normaloff>:icons/document-save.svg</normaloff>:icons/document-save.svg</iconset>
       </property>
       <property name="text">
         <string>Save Copy As...</string>
@@ -299,7 +299,7 @@
     <action name="uiActionWebsite">
       <property name="icon">
         <iconset>
-          <normaloff>icons/go-home.svg</normaloff>icons/go-home.svg</iconset>
+          <normaloff>:icons/go-home.svg</normaloff>:icons/go-home.svg</iconset>
       </property>
       <property name="text">
         <string>Project on GitHub</string>
@@ -311,7 +311,7 @@
     <action name="uiActionAbout">
       <property name="icon">
         <iconset>
-          <normaloff>icons/help-about.svg</normaloff>icons/help-about.svg</iconset>
+          <normaloff>:icons/help-about.svg</normaloff>:icons/help-about.svg</iconset>
       </property>
       <property name="text">
         <string>About...</string>
@@ -320,7 +320,7 @@
     <action name="uiActionCaptureWebcam">
       <property name="icon">
         <iconset>
-          <normaloff>icons/camera-video-symbolic.svg</normaloff>icons/camera-video-symbolic.svg</iconset>
+          <normaloff>:icons/camera-video-symbolic.svg</normaloff>:icons/camera-video-symbolic.svg</iconset>
       </property>
       <property name="text">
         <string>Capture from Webcam...</string>
@@ -332,7 +332,7 @@
     <action name="uiActionPreferences">
       <property name="icon">
         <iconset>
-          <normaloff>icons/configure-shortcuts.svg</normaloff>icons/configure-shortcuts.svg</iconset>
+          <normaloff>:icons/configure-shortcuts.svg</normaloff>:icons/configure-shortcuts.svg</iconset>
       </property>
       <property name="text">
         <string>Preferences...</string>
@@ -393,7 +393,7 @@
       </property>
       <property name="icon">
         <iconset>
-          <normaloff>icons/Sift.png</normaloff>icons/Sift.png</iconset>
+          <normaloff>:icons/Sift.png</normaloff>:icons/Sift.png</iconset>
       </property>
       <property name="text">
         <string>SIFT Features</string>
@@ -405,7 +405,7 @@
       </property>
       <property name="icon">
         <iconset>
-          <normaloff>icons/Surf.png</normaloff>icons/Surf.png</iconset>
+          <normaloff>:icons/Surf.png</normaloff>:icons/Surf.png</iconset>
       </property>
       <property name="text">
         <string>SURF Features</string>
@@ -417,7 +417,7 @@
       </property>
       <property name="icon">
         <iconset>
-          <normaloff>icons/Harris.png</normaloff>icons/Harris.png</iconset>
+          <normaloff>:icons/Harris.png</normaloff>:icons/Harris.png</iconset>
       </property>
       <property name="text">
         <string>Harris Features</string>
@@ -429,7 +429,7 @@
       </property>
       <property name="icon">
         <iconset>
-          <normaloff>icons/Fast.png</normaloff>icons/Fast.png</iconset>
+          <normaloff>:icons/Fast.png</normaloff>:icons/Fast.png</iconset>
       </property>
       <property name="text">
         <string>FAST Features</string>
@@ -438,7 +438,7 @@
     <action name="uiActionZoomIn">
       <property name="icon">
         <iconset>
-          <normaloff>icons/zoom-in.svg</normaloff>icons/zoom-in.svg</iconset>
+          <normaloff>:icons/zoom-in.svg</normaloff>:icons/zoom-in.svg</iconset>
       </property>
       <property name="text">
         <string>Zoom In</string>
@@ -450,7 +450,7 @@
     <action name="uiActionZoomOut">
       <property name="icon">
         <iconset>
-          <normaloff>icons/zoom-out.svg</normaloff>icons/zoom-out.svg</iconset>
+          <normaloff>:icons/zoom-out.svg</normaloff>:icons/zoom-out.svg</iconset>
       </property>
       <property name="text">
         <string>Zoom Out</string>
@@ -462,7 +462,7 @@
     <action name="uiActionZoomOriginal">
       <property name="icon">
         <iconset>
-          <normaloff>icons/zoom-original.svg</normaloff>icons/zoom-original.svg</iconset>
+          <normaloff>:icons/zoom-original.svg</normaloff>:icons/zoom-original.svg</iconset>
       </property>
       <property name="text">
         <string>Normal Size</string>
@@ -474,7 +474,7 @@
     <action name="uiActionZoomBestFit">
       <property name="icon">
         <iconset>
-          <normaloff>icons/zoom-fit-best.svg</normaloff>icons/zoom-fit-best.svg</iconset>
+          <normaloff>:icons/zoom-fit-best.svg</normaloff>:icons/zoom-fit-best.svg</iconset>
       </property>
       <property name="text">
         <string>Best Fit</string>
@@ -489,7 +489,7 @@
       </property>
       <property name="icon">
         <iconset>
-          <normaloff>icons/edit-copy.svg</normaloff>icons/edit-copy.svg</iconset>
+          <normaloff>:icons/edit-copy.svg</normaloff>:icons/edit-copy.svg</iconset>
       </property>
       <property name="text">
         <string>Copy</string>
@@ -520,7 +520,7 @@
       </property>
       <property name="icon">
         <iconset>
-          <normaloff>icons/edit-undo.svg</normaloff>icons/edit-undo.svg</iconset>
+          <normaloff>:icons/edit-undo.svg</normaloff>:icons/edit-undo.svg</iconset>
       </property>
       <property name="text">
         <string>Reset Image</string>
@@ -540,7 +540,7 @@
     <action name="uiActionDo4">
       <property name="icon">
         <iconset>
-          <normaloff>icons/Do4!.png</normaloff>icons/Do4!.png</iconset>
+          <normaloff>:icons/Do4!.png</normaloff>:icons/Do4!.png</iconset>
       </property>
       <property name="text">
         <string>Do4!</string>
@@ -552,7 +552,7 @@
     <action name="uiActionFastRT">
       <property name="icon">
         <iconset>
-          <normaloff>icons/FastRT.png</normaloff>icons/FastRT.png</iconset>
+          <normaloff>:icons/FastRT.png</normaloff>:icons/FastRT.png</iconset>
       </property>
       <property name="text">
         <string>FAST Features in Real Time</string>

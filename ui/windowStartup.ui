@@ -59,7 +59,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>icons/IFDstartup.png</pixmap>
+      <pixmap>:icons/IFDstartup.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>false</bool>
@@ -81,7 +81,7 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>icons/fileopen.svg</normaloff>icons/fileopen.svg</iconset>
+         <normaloff>:icons/fileopen.svg</normaloff>:icons/fileopen.svg</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -101,7 +101,7 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>icons/camera-video-symbolic.svg</normaloff>icons/camera-video-symbolic.svg</iconset>
+         <normaloff>:icons/camera-video-symbolic.svg</normaloff>:icons/camera-video-symbolic.svg</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -121,7 +121,7 @@
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>icons/FastRT.png</normaloff>icons/FastRT.png</iconset>
+         <normaloff>:icons/FastRT.png</normaloff>:icons/FastRT.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -165,7 +165,7 @@
          </property>
          <property name="icon">
           <iconset>
-           <normaloff>icons/document-open-recent.svg</normaloff>icons/document-open-recent.svg</iconset>
+           <normaloff>:icons/document-open-recent.svg</normaloff>:icons/document-open-recent.svg</iconset>
          </property>
          <property name="iconSize">
           <size>

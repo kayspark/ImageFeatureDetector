@@ -62,7 +62,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>icons/Sift.png</pixmap>
+      <pixmap>:icons/Sift.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
@@ -227,7 +227,7 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>icons/draw-donut.svg</normaloff>icons/draw-donut.svg</iconset>
+       <normaloff>:icons/draw-donut.svg</normaloff>:icons/draw-donut.svg</iconset>
      </property>
      <property name="iconSize">
       <size>

@@ -42,7 +42,7 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>icons/zoom-fit-best.svg</normaloff>icons/zoom-fit-best.svg</iconset>
+       <normaloff>:icons/zoom-fit-best.svg</normaloff>:icons/zoom-fit-best.svg</iconset>
      </property>
     </widget>
    </item>
@@ -80,7 +80,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap>icons/Harris2.png</pixmap>
+          <pixmap>:icons/Harris2.png</pixmap>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -204,7 +204,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap>icons/Fast2.png</pixmap>
+          <pixmap>:icons/Fast2.png</pixmap>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -329,7 +329,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap>icons/Sift2.png</pixmap>
+          <pixmap>:icons/Sift2.png</pixmap>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -450,7 +450,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap>icons/Surf2.png</pixmap>
+          <pixmap>:icons/Surf2.png</pixmap>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>

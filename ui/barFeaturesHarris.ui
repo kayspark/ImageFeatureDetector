@@ -62,7 +62,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>icons/Harris.png</pixmap>
+      <pixmap>:icons/Harris.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
@@ -226,7 +226,7 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>icons/view-grid.svg</normaloff>icons/view-grid.svg</iconset>
+       <normaloff>:icons/view-grid.svg</normaloff>:icons/view-grid.svg</iconset>
      </property>
      <property name="iconSize">
       <size>

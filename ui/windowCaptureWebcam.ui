@@ -252,7 +252,7 @@
               </property>
               <property name="icon">
                 <iconset>
-                  <normaloff>icons/camera-photo-symbolic.svg</normaloff>icons/camera-photo-symbolic.svg</iconset>
+                  <normaloff>:icons/camera-photo-symbolic.svg</normaloff>:icons/camera-photo-symbolic.svg</iconset>
               </property>
               <property name="iconSize">
                 <size>
@@ -278,7 +278,7 @@
               </property>
               <property name="icon">
                 <iconset>
-                  <normaloff>icons/dialog-ok-apply.svg</normaloff>icons/dialog-ok-apply.svg</iconset>
+                  <normaloff>:icons/dialog-ok-apply.svg</normaloff>:icons/dialog-ok-apply.svg</iconset>
               </property>
               <property name="iconSize">
                 <size>
@@ -301,7 +301,7 @@
               </property>
               <property name="icon">
                 <iconset>
-                  <normaloff>icons/process-stop.svg</normaloff>icons/process-stop.svg</iconset>
+                  <normaloff>:icons/process-stop.svg</normaloff>:icons/process-stop.svg</iconset>
               </property>
               <property name="iconSize">
                 <size>

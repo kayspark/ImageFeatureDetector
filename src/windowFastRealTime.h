@@ -40,7 +40,7 @@ private:
   std::string _tracking_algorithm;
 
   std::unique_ptr<QRubberBand> _rubberBand;
-  bool band_avaiable = false;
+  bool _band_avaiable = false;
   QPoint mLastPoint;
 protected:
   nm_detector _predator;
