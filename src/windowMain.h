@@ -25,8 +25,10 @@
 #include <QtWidgets>
 #include <memory>
 
-class WindowMain : public QMainWindow, public Ui::windowMain {
-Q_OBJECT
+class WindowMain
+    : public QMainWindow
+    , public Ui::windowMain {
+  Q_OBJECT
 public:
   WindowMain();
   void updateRecentFilesMenu();

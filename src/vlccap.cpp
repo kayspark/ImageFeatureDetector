@@ -3,9 +3,12 @@
 #include <string_view>
 #include <thread>
 
-vlc_capture::vlc_capture() : _is_open(false), _has_frame(false) {}
+vlc_capture::vlc_capture()
+    : _is_open(false)
+    , _has_frame(false) {}
 
-vlc_capture::vlc_capture(int width, int height) : vlc_capture() {
+vlc_capture::vlc_capture(int width, int height)
+    : vlc_capture() {
   _size.width = width;
   _size.height = height;
   _rgb.create(_size, CV_8UC3);
@@ -43,12 +46,10 @@ void vlc_capture::open(std::string_view url) {
       _media_player = libvlc_media_player_new_from_media(media);
       if (_media_player) {
         libvlc_media_release(media);
-        libvlc_video_set_callbacks(_media_player, &locker, &unlocker, nullptr,
-                                   this);
-        libvlc_video_set_format(
-            _media_player, "RV24", static_cast<unsigned int>(get_size().width),
-            static_cast<unsigned int>(get_size().height),
-            static_cast<unsigned int>(get_size().width * 3));
+        libvlc_video_set_callbacks(_media_player, &locker, &unlocker, nullptr, this);
+        libvlc_video_set_format(_media_player, "RV24", static_cast<unsigned int>(get_size().width),
+                                static_cast<unsigned int>(get_size().height),
+                                static_cast<unsigned int>(get_size().width * 3));
 
         int resp = libvlc_media_player_play(_media_player);
         if (resp == 0) {
@@ -80,8 +81,7 @@ bool vlc_capture::isOpened() {
     return false;
 
   libvlc_state_t state = libvlc_media_player_get_state(_media_player);
-  return (state != libvlc_Paused && state != libvlc_Stopped &&
-          state != libvlc_Ended && state != libvlc_Error);
+  return (state != libvlc_Paused && state != libvlc_Stopped && state != libvlc_Ended && state != libvlc_Error);
 }
 
 bool vlc_capture::read(cv::Mat &outFrame) {
@@ -116,9 +116,7 @@ void vlc_capture::unlock(void * /*id*/, void *const * /*p_pixels*/) {
   _mutex.unlock();
 }
 
-void *vlc_capture::locker(void *data, void **p_pixels) {
-  return static_cast<vlc_capture *>(data)->lock(p_pixels);
-}
+void *vlc_capture::locker(void *data, void **p_pixels) { return static_cast<vlc_capture *>(data)->lock(p_pixels); }
 
 void vlc_capture::unlocker(void *data, void *id, void *const *p_pixels) {
   static_cast<vlc_capture *>(data)->unlock(id, p_pixels);

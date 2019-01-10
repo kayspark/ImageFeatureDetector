@@ -27,13 +27,13 @@ void nm_detector::createTrackerByName(const std::string_view name) {
 }
 
 nm_detector::nm_detector(std::string_view cascade, std::string_view algorithm)
-    : _scale(1.1), _tracker_algorithm(algorithm),
-      detected_area(cv::Rect2d(0, 0, 0, 0)), initialized_tracker(false),
-      colors(std::array<cv::Scalar, 8>() =
-                 {cv::Scalar(255, 0, 0), cv::Scalar(255, 128, 0),
-                  cv::Scalar(255, 255, 0), cv::Scalar(0, 255, 0),
-                  cv::Scalar(0, 128, 255), cv::Scalar(0, 255, 255),
-                  cv::Scalar(0, 0, 255), cv::Scalar(255, 0, 255)}
+    : _scale(1.1)
+    , _tracker_algorithm(algorithm)
+    , detected_area(cv::Rect2d(0, 0, 0, 0))
+    , initialized_tracker(false)
+    , colors(std::array<cv::Scalar, 8>() = {cv::Scalar(255, 0, 0), cv::Scalar(255, 128, 0), cv::Scalar(255, 255, 0),
+                                            cv::Scalar(0, 255, 0), cv::Scalar(0, 128, 255), cv::Scalar(0, 255, 255),
+                                            cv::Scalar(0, 0, 255), cv::Scalar(255, 0, 255)}
 
       ) {
   if (cascade.empty())
@@ -56,9 +56,9 @@ bool nm_detector::validate_roi(cv::Mat &roi) {
 
   _cascade.detectMultiScale(smallImg, t_objects, 1.1, 3,
                             0
-                                //|CASCADE_FIND_BIGGEST_OBJECT
-                                //|CASCADE_DO_ROUGH_SEARCH
-                                | cv::CASCADE_SCALE_IMAGE,
+                              //|CASCADE_FIND_BIGGEST_OBJECT
+                              //|CASCADE_DO_ROUGH_SEARCH
+                              | cv::CASCADE_SCALE_IMAGE,
                             Size(24, 24), Size(200, 200));
 
   if (!objects.empty()) {
@@ -70,28 +70,28 @@ bool nm_detector::validate_roi(cv::Mat &roi) {
 } // detect roi
 
 void nm_detector::detect_candidate(Mat &gray) {
-  auto timer = (double) cv::getTickCount();
+  auto timer = (double)cv::getTickCount();
   _motion.find(gray);
-  detection_time = ((double) getTickCount() - timer) * 1000 / getTickFrequency();
+  detection_time = ((double)getTickCount() - timer) * 1000 / getTickFrequency();
   _motion.get_detected(candidate_objects);
 }
 
 void nm_detector::detect_objects(const cv::Mat &gray) {
-  auto timer = (double) cv::getTickCount();
-  //for (const auto &r : candidate_objects) {
-  cv::Mat smallImg;// = gray;//(r);
+  auto timer = (double)cv::getTickCount();
+  // for (const auto &r : candidate_objects) {
+  cv::Mat smallImg; // = gray;//(r);
   // cvtColor(img, gray, COLOR_BGR2GRAY);
   double fx = 1 / _scale;
   resize(gray, smallImg, cv::Size(), fx, fx, cv::INTER_LINEAR_EXACT);
   // equalizeHist(smallImg, smallImg);
   _cascade.detectMultiScale(smallImg, objects, _scale, 3,
                             0
-                                //|CASCADE_FIND_BIGGEST_OBJECT
-                                //|CASCADE_DO_ROUGH_SEARCH
-                                | cv::CASCADE_SCALE_IMAGE,
+                              //|CASCADE_FIND_BIGGEST_OBJECT
+                              //|CASCADE_DO_ROUGH_SEARCH
+                              | cv::CASCADE_SCALE_IMAGE,
                             Size(24, 24), Size(200, 200));
   //}
-  detection_time = ((double) getTickCount() - timer) * 1000 / getTickFrequency();
+  detection_time = ((double)getTickCount() - timer) * 1000 / getTickFrequency();
   //  std::cout << "suspicious object: " << objects.size()
   //            << " , time: " << timer * 1000 / getTickFrequency() <<
   //            std::endl;
@@ -139,12 +139,10 @@ bool nm_detector::update_tracker(cv::Mat &gray) {
     } else {
       initialized_tracker = false;
       detected_area = cv::Rect2d(0, 0, 0, 0);
-      //detect_objects(gray);
+      // detect_objects(gray);
     }
   }
   // true if not empty
   return ret;
 }
-const vector<Rect> &nm_detector::get_candidate() const {
-  return candidate_objects;
-}
+const vector<Rect> &nm_detector::get_candidate() const { return candidate_objects; }

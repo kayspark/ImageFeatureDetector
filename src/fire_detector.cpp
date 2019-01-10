@@ -8,28 +8,29 @@
 #include <opencv2/imgproc/types_c.h>
 
 fire_detector::fire_detector(cv::Size &imgSize)
-    : _tracker(cv::TrackerMedianFlow::create()), _init_tracker(false),
-      _detected_area(cv::Rect2d(0, 0, 0, 0)), _bgm_frame_count{0}, _win_size{5},
-      _rect_width_threshold(5), _rect_height_threshold(5),
-      _contour_points_threshold(12), _contour_area_threshold(12),
-      _accumulate_weighted_alpha_bgm(0.1),
-      _accumulate_weighted_alpha_threshold(0.05), _threshold_coefficient(5),
-      _listCentroid(std::list<Centroid>()), vecOFRect(std::vector<OFRect>()),
-      _mulMapOFRect(std::multimap<int, OFRect>()),
-      _maskMorphology(cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 5),
-                                                cv::Point(1, 2))),
-      _featuresPrev(std::vector<cv::Point2f>(_max_corners)),
-      _featuresCurr(std::vector<cv::Point2f>(_max_corners)),
-      _featureFound(std::vector<uchar>(_max_corners)),
-      _featureErrors(std::vector<float>(_max_corners)),
-      _contours(std::vector<std::vector<cv::Point>>()),
-      _hierachy(std::vector<cv::Vec4i>()), bufHSI(cv::Mat(imgSize, CV_64FC3)),
-      _imgRGB(cv::Mat(imgSize, CV_8UC3)), imgHSI(cv::Mat(imgSize, CV_8UC3)),
-      _maskRGB(cv::Mat(imgSize, CV_8UC1)), maskHSI(cv::Mat(imgSize, CV_8UC1)) {
+    : _tracker(cv::TrackerMedianFlow::create())
+    , _init_tracker(false)
+    , _detected_area(cv::Rect2d(0, 0, 0, 0))
+    , _bgm_frame_count{0}
+    , _win_size{5}
+    , _listCentroid(std::list<Centroid>())
+    , vecOFRect(std::vector<OFRect>())
+    , _mulMapOFRect(std::multimap<int, OFRect>())
+    , _maskMorphology(cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 5), cv::Point(1, 2)))
+    , _featuresPrev(std::vector<cv::Point2f>(_max_corners))
+    , _featuresCurr(std::vector<cv::Point2f>(_max_corners))
+    , _featureFound(std::vector<uchar>(_max_corners))
+    , _featureErrors(std::vector<float>(_max_corners))
+    , _contours(std::vector<std::vector<cv::Point>>())
+    , _hierachy(std::vector<cv::Vec4i>())
+    , bufHSI(cv::Mat(imgSize, CV_64FC3))
+    , _imgRGB(cv::Mat(imgSize, CV_8UC3))
+    , imgHSI(cv::Mat(imgSize, CV_8UC3))
+    , _maskRGB(cv::Mat(imgSize, CV_8UC1))
+    , maskHSI(cv::Mat(imgSize, CV_8UC1)) {
 
   _sizeWin = cv::Size(_win_size, _win_size);
-  _rect_thresh = rectThrd(_rect_width_threshold, _rect_height_threshold,
-                          _contour_area_threshold);
+  _rect_thresh = rectThrd(_rect_width_threshold, _rect_height_threshold, _contour_area_threshold);
 
   /* Rect Motion */
 }
@@ -60,17 +61,14 @@ bool fire_detector::update_tracker(cv::Mat &img) {
   // true if not empty
   return ret;
 }
-bool fire_detector::checkContourPoints(Centroid &ctrd, const int thrdcp,
-                                       const unsigned int pwindows) {
+bool fire_detector::checkContourPoints(Centroid &ctrd, const int thrdcp, const unsigned int pwindows) {
   auto countFrame =
-      // contour points of each frame
-      std::count_if(
-          ctrd.dOFRect.begin(), ctrd.dOFRect.end(),
-          [&thrdcp](const auto &itrDeq) { return (itrDeq.size() < thrdcp); });
+    // contour points of each frame
+    std::count_if(ctrd.dOFRect.begin(), ctrd.dOFRect.end(),
+                  [&thrdcp](const auto &itrDeq) { return (itrDeq.size() < thrdcp); });
   bool out = countFrame < pwindows / 3;
   if (out) {
-    std::cout << "countours are likely" << countFrame << " , " << pwindows / 3
-              << std::endl;
+    std::cout << "countours are likely" << countFrame << " , " << pwindows / 3 << std::endl;
   }
   return out;
 }
@@ -78,27 +76,25 @@ bool fire_detector::checkContourPoints(Centroid &ctrd, const int thrdcp,
 ) input: vecFeature : Contour Features orient      : accumulate array output :
 orien[4]
 */
-void fire_detector::motionOrientationHist(std::vector<Feature> &vecFeature,
-                                          std::vector<unsigned int> &orient) {
+void fire_detector::motionOrientationHist(std::vector<Feature> &vecFeature, std::vector<unsigned int> &orient) {
   // std::vector<Feature>::iterator itrVecFeature;
   /* each point of contour  */
-  std::for_each(vecFeature.begin(), vecFeature.end(),
-                [&orient](const Feature &feature) {
-                  /* orientation */
-                  if (feature.prev.x >= feature.curr.x) {
-                    if (feature.prev.y >= feature.curr.y) {
-                      ++orient[0]; // up-left
-                    } else {
-                      ++orient[2]; // down-left
-                    }
-                  } else {
-                    if (feature.prev.y >= feature.curr.y) {
-                      ++orient[1]; // up-right
-                    } else {
-                      ++orient[3]; // down-right
-                    }
-                  }
-                });
+  std::for_each(vecFeature.begin(), vecFeature.end(), [&orient](const Feature &feature) {
+    /* orientation */
+    if (feature.prev.x >= feature.curr.x) {
+      if (feature.prev.y >= feature.curr.y) {
+        ++orient[0]; // up-left
+      } else {
+        ++orient[2]; // down-left
+      }
+    } else {
+      if (feature.prev.y >= feature.curr.y) {
+        ++orient[1]; // up-right
+      } else {
+        ++orient[3]; // down-right
+      }
+    }
+  });
 }
 
 /* calculate the energy of fire contour based on motion vector
@@ -112,24 +108,21 @@ staticCount: the feature counts who's energy is lower than 1.0
 totalPoints: the feature counts that energy is between 1.0 ~ 100.0
 return: energy
 */
-double fire_detector::getEnergy(std::vector<Feature> &vecFeature,
-                                unsigned int &staticCount,
+double fire_detector::getEnergy(std::vector<Feature> &vecFeature, unsigned int &staticCount,
                                 unsigned int &totalPoints) {
   /* initialization */
   double energy = 0.0;
   /* each contour point */
-  for_each(vecFeature.begin(), vecFeature.end(),
-           [&staticCount, &energy, &totalPoints](const auto &feature) {
-             /* energy */
-             double tmp = pow(abs(feature.curr.x - feature.prev.x), 2) +
-                          pow(abs(feature.curr.y - feature.prev.y), 2);
-             if (tmp < 1.0) {
-               ++staticCount;
-             } else if (tmp < 100.0) {
-               energy += tmp;
-               ++totalPoints;
-             }
-           });
+  for_each(vecFeature.begin(), vecFeature.end(), [&staticCount, &energy, &totalPoints](const auto &feature) {
+    /* energy */
+    double tmp = pow(abs(feature.curr.x - feature.prev.x), 2) + pow(abs(feature.curr.y - feature.prev.y), 2);
+    if (tmp < 1.0) {
+      ++staticCount;
+    } else if (tmp < 100.0) {
+      energy += tmp;
+      ++totalPoints;
+    }
+  });
   return energy;
 }
 
@@ -139,8 +132,7 @@ ctrd    : cadidate fire object
 pwindows: processing window
 return  : fire-like or not
 */
-bool fire_detector::checkContourEnergy(Centroid &ctrd,
-                                       const unsigned int pwindows) {
+bool fire_detector::checkContourEnergy(Centroid &ctrd, const unsigned int pwindows) {
   unsigned int orientFrame = 0;
   // unsigned int totalPoints = 0;
   unsigned int passFrame = 0;
@@ -172,13 +164,10 @@ bool fire_detector::checkContourEnergy(Centroid &ctrd,
   }
 
   /* by experience */
-  static const unsigned int thrdPassFrame = pwindows >> 1,
-                            thrdStaticFrame = pwindows >> 2,
+  static const unsigned int thrdPassFrame = pwindows >> 1, thrdStaticFrame = pwindows >> 2,
                             thrdOrienFrame = (pwindows >> 3) + 1;
 
-  bool out = staticFrame < thrdStaticFrame
-                 ? passFrame > thrdPassFrame && orientFrame < thrdOrienFrame
-                 : false;
+  bool out = staticFrame < thrdStaticFrame ? passFrame > thrdPassFrame && orientFrame < thrdOrienFrame : false;
   /*   if (out)
       std::cout << "energy is likely " << std::endl; */
   return out;
@@ -203,8 +192,7 @@ void fire_detector::matchCentroid(cv::Mat &imgCenteroid, cv::Mat &img) {
       const cv::Rect &rect = (aRect).second.rect;
       cv::Rect rectFire = cv::Rect(0, 0, 0, 0);
       /* matched */
-      if (centre.centroid.y >= rect.y &&
-          (rect.x + rect.width) >= centre.centroid.x &&
+      if (centre.centroid.y >= rect.y && (rect.x + rect.width) >= centre.centroid.x &&
           (rect.y + rect.height) >= centre.centroid.y) {
         /* push rect to the matched listCentroid node */
         centre.vecRect.emplace_back(rect);
@@ -215,8 +203,7 @@ void fire_detector::matchCentroid(cv::Mat &imgCenteroid, cv::Mat &img) {
           /* GO TO PROCEESING DIRECTION MOTION */
           if (!judgeDirectionsMotion(centre.vecRect, rectFire))
             break;
-          if (checkContourPoints(centre, _contour_points_threshold,
-                                 _processing_windows) &&
+          if (checkContourPoints(centre, _contour_points_threshold, _processing_windows) &&
               checkContourEnergy(centre, _processing_windows)) {
             /* recting the fire region */
             // cv::rectangle(img, rectFire, cv::Scalar(255, 100, 0), 3);
@@ -240,25 +227,20 @@ void fire_detector::matchCentroid(cv::Mat &imgCenteroid, cv::Mat &img) {
     return !delete_;
   });
   /* push new rect to listCentroid */
-  std::for_each(_mulMapOFRect.begin(), _mulMapOFRect.end(),
-                [this](const auto &rect) {
-                  if (!rect.second.match) {
-                    /* push new node to listCentroid */
-                    _listCentroid.emplace_back(centroid(rect.second));
-                    // cout << "after rect: " << endl;
-                    // cout << (*itBRect).second << endl;	x
-                  }
-                });
+  std::for_each(_mulMapOFRect.begin(), _mulMapOFRect.end(), [this](const auto &rect) {
+    if (!rect.second.match) {
+      /* push new node to listCentroid */
+      _listCentroid.emplace_back(centroid(rect.second));
+      // cout << "after rect: " << endl;
+      // cout << (*itBRect).second << endl;	x
+    }
+  });
   // cout <<"after list count: "<< listCentroid.size() << endl;
   /* check the list node with image */
-  std::for_each(_listCentroid.begin(), _listCentroid.end(),
-                [&imgCenteroid](const auto &centre) {
-                  cv::rectangle(imgCenteroid,
-                                cv::Point(centre.centroid.x, centre.centroid.y),
-                                cv::Point((centre.centroid.x) + 2,
-                                          (centre.centroid.y) + 2),
-                                cv::Scalar(0, 0, 0), 3);
-                });
+  std::for_each(_listCentroid.begin(), _listCentroid.end(), [&imgCenteroid](const auto &centre) {
+    cv::rectangle(imgCenteroid, cv::Point(centre.centroid.x, centre.centroid.y),
+                  cv::Point((centre.centroid.x) + 2, (centre.centroid.y) + 2), cv::Scalar(0, 0, 0), 3);
+  });
   /* clear up container */
   _mulMapOFRect.clear();
 }
@@ -284,8 +266,7 @@ int fire_detector::getContourFeatures(cv::Mat &img, cv::Mat &display) {
     /* Recting the Contour with smallest rectangle */
     cv::Rect rect_ = boundingRect(contour);
     /* checking the area */
-    if (((rect_.width > _rect_thresh.rectWidth) &&
-         (rect_.height > _rect_thresh.rectHeight)) &&
+    if (((rect_.width > _rect_thresh.rectWidth) && (rect_.height > _rect_thresh.rectHeight)) &&
         (fabs(contourArea(contour)) > _rect_thresh.cntrArea)) {
       /* Drawing the Contours */
       /*    cv::drawContours(img, contours, index, cv::Scalar(250, 0, 0), // Red
@@ -333,8 +314,7 @@ void fire_detector::assignFeaturePoints() {
         continue;
       } else {
         /* push feature to vector of ofrect */
-        aRect.vecFeature.emplace_back(
-            feature(_featuresPrev[i], _featuresCurr[i]));
+        aRect.vecFeature.emplace_back(feature(_featuresPrev[i], _featuresCurr[i]));
       }
     }
     /* insert ofrect to multimap */
@@ -345,8 +325,7 @@ void fire_detector::assignFeaturePoints() {
   vecOFRect.clear();
 }
 /* Counting the foldback point at each directions */
-void fire_detector::foldbackPoint(const std::vector<cv::Rect> &vecRect,
-                                  DirectionsCount &count) {
+void fire_detector::foldbackPoint(const std::vector<cv::Rect> &vecRect, DirectionsCount &count) {
   if (vecRect.size() <= 2)
     std::cerr << "logical errors" << std::endl;
   for (auto i = 1; i < vecRect.size() - 1; i++) {
@@ -359,28 +338,22 @@ void fire_detector::foldbackPoint(const std::vector<cv::Rect> &vecRect,
     if ((rn.x - it.x) * (it.x - rp.x) < 0) {
       ++count.countLeft;
     }
-    if (((rn.y + rn.height) - (it.y + it.height)) *
-            ((it.y + it.height) - (rp.y + rp.height)) <
-        0) {
+    if (((rn.y + rn.height) - (it.y + it.height)) * ((it.y + it.height) - (rp.y + rp.height)) < 0) {
       ++count.countDown;
     }
-    if (((rn.x + rn.width) - (it.x + it.width)) *
-            ((it.x + it.width) - (rp.x + rp.width)) <
-        0) {
+    if (((rn.x + rn.width) - (it.x + it.width)) * ((it.x + it.width) - (rp.x + rp.width)) < 0) {
       ++count.countRight;
     }
   }
 }
 /* Analysis the rect information */
-bool fire_detector::judgeDirectionsMotion(const std::vector<cv::Rect> &vecRect,
-                                          cv::Rect &rectFire) {
+bool fire_detector::judgeDirectionsMotion(const std::vector<cv::Rect> &vecRect, cv::Rect &rectFire) {
   DirectionsCount count;
   zeroCount(count);
   foldbackPoint(vecRect, count);
   const int thresh_foldback_cnt = 3; // 3
   /* Direction Up required to be growth and sparkle */
-  if ((vecRect.front().y - vecRect.back().y) > 2 &&
-      count.countUp >= thresh_foldback_cnt) {
+  if ((vecRect.front().y - vecRect.back().y) > 2 && count.countUp >= thresh_foldback_cnt) {
     /* set up the last rect to rect the frame */
     rectFire = vecRect.back();
     // std::cout << "by directions likely to be fire" << std::endl;
@@ -390,26 +363,22 @@ bool fire_detector::judgeDirectionsMotion(const std::vector<cv::Rect> &vecRect,
   }
 }
 void fire_detector::calcOpticalFlow(cv::Mat &gray, cv::Mat &curr) {
-  cv::calcOpticalFlowPyrLK(
-      gray, curr,
-      _featuresPrev, // the feature points that needed to be found(trace)
-      _featuresCurr, // the feature points that be traced
-      // ContourFeaturePointCount, // the number of feature points
-      _featureFound, // notify whether the feature points be traced or not
-      _featureErrors, _sizeWin, // searching window size
-      2,                        // using pyramid layer 2: will be 3 layers
-      cv::TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 20,
-                       0.3) // iteration criteria
+  cv::calcOpticalFlowPyrLK(gray, curr,
+                           _featuresPrev, // the feature points that needed to be found(trace)
+                           _featuresCurr, // the feature points that be traced
+                           // ContourFeaturePointCount, // the number of feature points
+                           _featureFound,            // notify whether the feature points be traced or not
+                           _featureErrors, _sizeWin, // searching window size
+                           2,                        // using pyramid layer 2: will be 3 layers
+                           cv::TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 20,
+                                            0.3) // iteration criteria
   );
 }
 void fire_detector::findContours(cv::Mat &mask) {
-  cv::findContours(mask, _contours, _hierachy, CV_RETR_TREE,
-                   CV_CHAIN_APPROX_NONE);
+  cv::findContours(mask, _contours, _hierachy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
 }
 
-void fire_detector::dilate(cv::Mat &mask) {
-  cv::dilate(mask, mask, _maskMorphology);
-}
+void fire_detector::dilate(cv::Mat &mask) { cv::dilate(mask, mask, _maskMorphology); }
 /**
  *	@Purpose: check fire-like pixels by rgb model base on reference method
  *			  This function will change fire-like pixels to red
@@ -417,8 +386,7 @@ void fire_detector::dilate(cv::Mat &mask) {
  *		frame: input source image
  *		mask: output mask
  */
-void fire_detector::checkByRGB(const cv::Mat &imgSrc, const cv::Mat &maskMotion,
-                               cv::Mat &maskRGB) {
+void fire_detector::checkByRGB(const cv::Mat &imgSrc, const cv::Mat &maskMotion, cv::Mat &maskRGB) {
   static const int RT = 250;
   const static uint8_t red_ = 255;
   for (int i = 0; i < imgSrc.rows; ++i) {
@@ -444,8 +412,7 @@ void fire_detector::checkByRGB(const cv::Mat &imgSrc, const cv::Mat &maskMotion,
  *		     imgHSI:     CV64FC3			     3
  *		     maskRGB:    CV8UC1      			 1
  */
-void fire_detector::RGB2HSIMask(cv::Mat &imgRGB, cv::Mat &imgHSI,
-                                cv::Mat &maskRGB) {
+void fire_detector::RGB2HSIMask(cv::Mat &imgRGB, cv::Mat &imgHSI, cv::Mat &maskRGB) {
   static const double efs_ = 0.000000000000001;               // acceptable bias
   static const double div13_ = 0.333333333333333333333333333; // 1/3
   static const double div180PI = 180 / CV_PI;                 // (180 / PI)
@@ -462,12 +429,11 @@ void fire_detector::RGB2HSIMask(cv::Mat &imgRGB, cv::Mat &imgHSI,
     for (int j = 0; j < imgRGB.cols; j++) { // loop times = width
       if (mRGB[j] == 255) {                 // if the pixel is moving object
         tmp[j].x = img[j].x / 255.0;        // tmp[ k ] = img[ k ] / 255.0;
-        tmp[j].y = img[j].y / 255.0; // tmp[ k + 1 ] = img[ k + 1 ] / 255.0;
+        tmp[j].y = img[j].y / 255.0;        // tmp[ k + 1 ] = img[ k + 1 ] / 255.0;
         tmp[j].z = img[j].z / 255.0;
         // IF ( R = G = B ) , IN INTENSITY AXIS THERE IS NO SATURATRION ,AND NO
         // DEFINE HUE VALUE
-        if (fabs(tmp[j].z - tmp[j].y) < efs_ &&
-            fabs(tmp[j].y - tmp[j].x) < efs_) {
+        if (fabs(tmp[j].z - tmp[j].y) < efs_ && fabs(tmp[j].y - tmp[j].x) < efs_) {
           hsi[j].x = -1.0; // UNDEFINE
           hsi[j].y = 0.0;
           hsi[j].z = tmp[j].x;
@@ -475,8 +441,7 @@ void fire_detector::RGB2HSIMask(cv::Mat &imgRGB, cv::Mat &imgHSI,
           tmpAdd = tmp[j].x + tmp[j].y + tmp[j].z;
           tmp1 = tmp[j].z - tmp[j].y; // r-g
           tmp2 = tmp[j].z - tmp[j].x; // r-b
-          x = 0.5 * (tmp1 + tmp2) /
-              (sqrt(pow(tmp1, 2) + tmp2 * (tmp[j].y - tmp[j].x)));
+          x = 0.5 * (tmp1 + tmp2) / (sqrt(pow(tmp1, 2) + tmp2 * (tmp[j].y - tmp[j].x)));
           // exam
           if (x < -1.0) {
             x = -1.0;
@@ -491,8 +456,7 @@ void fire_detector::RGB2HSIMask(cv::Mat &imgRGB, cv::Mat &imgHSI,
           } else {
             hsi[j].x = 360.0 - theta;
           }
-          hsi[j].y =
-              1.0 - (3.0 / tmpAdd) * (minrgb(tmp[j].x, tmp[j].y, tmp[j].z));
+          hsi[j].y = 1.0 - (3.0 / tmpAdd) * (minrgb(tmp[j].x, tmp[j].y, tmp[j].z));
           hsi[j].z = div13_ * tmpAdd;
         }
       }
@@ -507,8 +471,7 @@ void fire_detector::RGB2HSIMask(cv::Mat &imgRGB, cv::Mat &imgHSI,
  *		frame: input source image
  *		mask: output mask
  */
-void fire_detector::checkByHSI(cv::Mat &imgRGB, cv::Mat &imgHSI,
-                               cv::Mat &maskRGB, cv::Mat &maskHSI) {
+void fire_detector::checkByHSI(cv::Mat &imgRGB, cv::Mat &imgHSI, cv::Mat &maskRGB, cv::Mat &maskHSI) {
   /* HSI threshold */
   static const int trdH = 60;
   static const double trdS = 0.003043487826087;
@@ -520,10 +483,8 @@ void fire_detector::checkByHSI(cv::Mat &imgRGB, cv::Mat &imgHSI,
     const auto hsi = imgHSI.ptr<_long_pixel>(i);
     auto mHSI = maskHSI.ptr<_short_pixel>(i);
     for (int j = 0; j < imgHSI.cols; ++j) { // stepImg = imgWidth * channel
-      if (mRGB[j] == 255 && hsi[j].x <= trdH && hsi[j].x >= 0 &&
-          hsi[j].z > trdI &&
-          hsi[j].y >=
-              (255 - img[j].z) * trdS) { // HSI color model determine rule
+      if (mRGB[j] == 255 && hsi[j].x <= trdH && hsi[j].x >= 0 && hsi[j].z > trdI &&
+          hsi[j].y >= (255 - img[j].z) * trdS) { // HSI color model determine rule
         mHSI[j] = static_cast<_short_pixel>(255);
       }
     }
@@ -536,8 +497,7 @@ void fire_detector::checkByHSI(cv::Mat &imgRGB, cv::Mat &imgHSI,
  *		backup: output image (for display)
  *		mask: input mask
  */
-void fire_detector::regionMarkup(cv::Mat &imgSrc, cv::Mat &imgBackup,
-                                 cv::Mat &mask) {
+void fire_detector::regionMarkup(cv::Mat &imgSrc, cv::Mat &imgBackup, cv::Mat &mask) {
   for (int i = 0; i < imgSrc.rows; ++i) {
     const auto m = mask.ptr<_short_pixel>(i);
     auto hsi = imgBackup.ptr<_normal_pixel>(i);
@@ -550,12 +510,9 @@ void fire_detector::regionMarkup(cv::Mat &imgSrc, cv::Mat &imgBackup,
     }
   }
 }
-void fire_detector::detectFire(cv::Mat &maskMotion, motionDetectionV1 &bgs,
-                               cv::Mat &imgBackgroundModel,
-                               cv::Mat &imgStandardDeviation,
-                               cv::Mat &img32FBackgroundModel,
-                               cv::Mat &img32FStandardDeviation,
-                               cv::Mat &imgSrc, cv::Mat &imgGray,
+void fire_detector::detectFire(cv::Mat &maskMotion, motionDetectionV1 &bgs, cv::Mat &imgBackgroundModel,
+                               cv::Mat &imgStandardDeviation, cv::Mat &img32FBackgroundModel,
+                               cv::Mat &img32FStandardDeviation, cv::Mat &imgSrc, cv::Mat &imgGray,
                                cv::Mat &imgDisplay) {
   if (imgSrc.empty())
     return;
@@ -578,8 +535,7 @@ void fire_detector::detectFire(cv::Mat &maskMotion, motionDetectionV1 &bgs,
   /* Background update */
   // 8U -> 32F
   imgBackgroundModel.convertTo(img32FBackgroundModel, CV_32FC1);
-  accumulateWeighted(imgGray, img32FBackgroundModel,
-                     get_accumulate_weighted_alpha_bgm(), maskMotion);
+  accumulateWeighted(imgGray, img32FBackgroundModel, get_accumulate_weighted_alpha_bgm(), maskMotion);
   // 32F -> 8U
   img32FBackgroundModel.convertTo(imgBackgroundModel, CV_8UC1);
   /* Threshold update */
@@ -587,8 +543,7 @@ void fire_detector::detectFire(cv::Mat &maskMotion, motionDetectionV1 &bgs,
   imgStandardDeviation.convertTo(img32FStandardDeviation, CV_32FC1);
   // T( x, y; t+1 ) = ( 1-alpha )T( x, y; t ) + ( alpha ) | Src( x, y; t )/
   // - B( x, y; t ) |, if the pixel is stationary
-  accumulateWeighted(imgDiff, img32FStandardDeviation,
-                     get_accumulate_weighted_alpha_threshold(), maskMotion);
+  accumulateWeighted(imgDiff, img32FStandardDeviation, get_accumulate_weighted_alpha_threshold(), maskMotion);
   // 32F -> 8U
   img32FStandardDeviation.convertTo(imgStandardDeviation, CV_8UC1);
   /* Step4: Morphology */
@@ -599,8 +554,7 @@ void fire_detector::detectFire(cv::Mat &maskMotion, motionDetectionV1 &bgs,
   assignFeaturePoints();
   matchCentroid(imgSrc, imgDisplay);
 }
-void fire_detector::setup_motion_model(const cv::Mat &maskMotion,
-                                       cv::Mat &imgDisplay) {
+void fire_detector::setup_motion_model(const cv::Mat &maskMotion, cv::Mat &imgDisplay) {
   imgDisplay.copyTo(_imgRGB);
   checkByRGB(imgDisplay, maskMotion, _maskRGB);
   // markup the fire-like region

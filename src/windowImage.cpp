@@ -1,4 +1,3 @@
-#include <utility>
 
 /*
  * 2018(C) kayspark , 2010-2015 (C) Antonio Redondo
@@ -11,42 +10,43 @@
 
 #include "windowImage.h"
 #include <qstring.h>
-
-WindowImage::WindowImage(const QString &fileName, QString windowTitle,
-                         int windowType)
-    : _capture(cv::VideoCapture(fileName.toStdString())),
-      mWindowTitle(std::move(windowTitle)), mWindowType(windowType), mImageN(0),
-      mOriginalWidth(0), mOriginalHeight(0), mModified(false), mFeatureType(0),
-      _data_file("./dataset/cascade.xml"), _tracking_algorithm("CSRT"),
-      _predator(nm_detector(this->_data_file, this->_tracking_algorithm)),
-      mPainter(std::make_unique<QPainter>()),
-      mLocale(std::make_unique<QLocale>(QLocale::English)) {
+#include <utility>
+WindowImage::WindowImage(const QString &fileName, QString windowTitle, int windowType)
+    : _capture(cv::VideoCapture(fileName.toStdString()))
+    , mWindowTitle(std::move(windowTitle))
+    , mWindowType(windowType)
+    , mImageN(0)
+    , mOriginalWidth(0)
+    , mOriginalHeight(0)
+    , mModified(false)
+    , mFeatureType(0)
+    , _data_file("./dataset/cascade.xml")
+    , _tracking_algorithm("CSRT")
+    , _predator(nm_detector(this->_data_file, this->_tracking_algorithm))
+    , mPainter(std::make_unique<QPainter>())
+    , mLocale(std::make_unique<QLocale>(QLocale::English)) {
   setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
   setWindowTitle(mWindowTitle);
 
-  uiScrollAreaWidgetContents->setSizePolicy(
-      QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+  uiScrollAreaWidgetContents->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
   if (_capture.isOpened()) {
     // setup default values
     _capture.set(cv::CAP_PROP_FRAME_WIDTH, 640);
     _capture.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
     compute();
-    float sizeInKiB = _image->byteCount() / (float) 1024;
+    float sizeInKiB = _image->byteCount() / (float)1024;
     if (sizeInKiB > 1024)
-      mImageSize =
-          mLocale->toString(sizeInKiB / (float) 1024, 'f', 2).append(" MiB");
+      mImageSize = mLocale->toString(sizeInKiB / (float)1024, 'f', 2).append(" MiB");
     else
       mImageSize = mLocale->toString(sizeInKiB, 'f', 2).append(" KiB");
     // For async refresh
     timer = std::make_unique<QTimer>();
     timer->start(40); // 25fps
-    QObject::connect(timer.get(), &QTimer::timeout, this,
-                     &WindowImage::compute);
+    QObject::connect(timer.get(), &QTimer::timeout, this, &WindowImage::compute);
   } else {
-    uiLabelImage->setText(
-        "There is some problem with the cam.\nCannot get images.");
+    uiLabelImage->setText("There is some problem with the cam.\nCannot get images.");
     uiLabelImage->setText("Please check camera");
   }
 
@@ -59,21 +59,24 @@ WindowImage::WindowImage(const QString &fileName, QString windowTitle,
   mFactorIncrement = 0;
   mCurrentFactor = 1.0;
 }
-WindowImage::WindowImage(std::shared_ptr<QImage> image, QString windowTitle,
-                         int windowType)
-    : _image(std::move(image)), mWindowTitle(std::move(windowTitle)),
-      mWindowType(windowType), mImageN(0), mModified(false), mFeatureType(0),
-      _data_file("./dataset/cascade.xml"), _tracking_algorithm("CSRT"),
-      _predator(nm_detector(this->_data_file, this->_tracking_algorithm)),
-      mPainter(std::make_unique<QPainter>()),
-      mLocale(std::make_unique<QLocale>(QLocale::English)) {
+WindowImage::WindowImage(std::shared_ptr<QImage> image, QString windowTitle, int windowType)
+    : _image(std::move(image))
+    , mWindowTitle(std::move(windowTitle))
+    , mWindowType(windowType)
+    , mImageN(0)
+    , mModified(false)
+    , mFeatureType(0)
+    , _data_file("./dataset/cascade.xml")
+    , _tracking_algorithm("CSRT")
+    , _predator(nm_detector(this->_data_file, this->_tracking_algorithm))
+    , mPainter(std::make_unique<QPainter>())
+    , mLocale(std::make_unique<QLocale>(QLocale::English)) {
   setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
 
   setWindowTitle(mWindowTitle);
 
-  uiScrollAreaWidgetContents->setSizePolicy(
-      QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+  uiScrollAreaWidgetContents->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
   mPixmap = QPixmap::fromImage(*_image);
   mPixmapOriginal = mPixmap;
@@ -88,12 +91,11 @@ WindowImage::WindowImage(std::shared_ptr<QImage> image, QString windowTitle,
   mOriginalWidth = _image->width();
   mOriginalHeight = _image->height();
 
-  mImageZoom = tr("%1%").arg((int) (mCurrentFactor * 100));
+  mImageZoom = tr("%1%").arg((int)(mCurrentFactor * 100));
   mImageDimensions = tr("%1x%2 px").arg(mOriginalWidth).arg(mOriginalHeight);
-  float sizeInKiB = _image->byteCount() / (float) 1024;
+  float sizeInKiB = _image->byteCount() / (float)1024;
   if (sizeInKiB > 1024)
-    mImageSize =
-        mLocale->toString(sizeInKiB / (float) 1024, 'f', 2).append(" MiB");
+    mImageSize = mLocale->toString(sizeInKiB / (float)1024, 'f', 2).append(" MiB");
   else
     mImageSize = mLocale->toString(sizeInKiB, 'f', 2).append(" KiB");
 }
@@ -126,11 +128,11 @@ void WindowImage::zoomBestFit() {
   int scrollWidth = width();
   int scrollHeight = height();
 
-  float relationScroll = scrollWidth / (float) scrollHeight;
-  float relationImage = mOriginalWidth / (float) mOriginalHeight;
+  float relationScroll = scrollWidth / (float)scrollHeight;
+  float relationImage = mOriginalWidth / (float)mOriginalHeight;
 
-  float scaleWidth = scrollWidth / (float) mOriginalWidth;
-  float scaleHeight = scrollHeight / (float) mOriginalHeight;
+  float scaleWidth = scrollWidth / (float)mOriginalWidth;
+  float scaleHeight = scrollHeight / (float)mOriginalHeight;
 
   if (relationScroll > relationImage) {
     mFactorIncrement = correctF * scaleHeight / mCurrentFactor;
@@ -149,27 +151,22 @@ void WindowImage::zoomOriginal() {
   scaleImage();
 }
 
-void WindowImage::applyHarris(int sobelApertureSize, int harrisApertureSize,
-                              double kValue, int threshold,
+void WindowImage::applyHarris(int sobelApertureSize, int harrisApertureSize, double kValue, int threshold,
                               bool showProcessed) {
   mFeatureType = WindowImage::harris;
   if (mModified)
     mPixmap = mPixmapOriginal;
 
   cv::Mat image(_image->height(), _image->width(), CV_8UC4, _image->bits(),
-                static_cast<size_t>(
-                    _image->bytesPerLine())); // With CV_8UC3 it doesn't work
+                static_cast<size_t>(_image->bytesPerLine())); // With CV_8UC3 it doesn't work
   cv::Mat imageGrey(_image->height(), _image->width(), CV_8UC1);
   cvtColor(image, imageGrey, cv::COLOR_RGB2GRAY);
 
   cv::Mat imageHarris(_image->height(), _image->width(), CV_8UC1);
-  auto time = (float) cv::getTickCount();
-  cornerHarris(imageGrey, imageHarris, harrisApertureSize, sobelApertureSize,
-               kValue);
+  auto time = (float)cv::getTickCount();
+  cornerHarris(imageGrey, imageHarris, harrisApertureSize, sobelApertureSize, kValue);
 
-  mImageTime = mLocale->toString(
-      (float) ((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f',
-      2);
+  mImageTime = mLocale->toString((float)((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f', 2);
 
   // Increases the contrast. If not only a nearly black image would be seen
   cv::Mat imageHarrisNorm(imageHarris.size(), CV_32FC1);
@@ -190,24 +187,22 @@ void WindowImage::applyHarris(int sobelApertureSize, int harrisApertureSize,
   std::mutex mutex_;
   if (imageHarrisNorm.isContinuous())
     imageHarrisNorm.forEach<float>(
-        [this, &mutex_, &threshold, &keyPoints](const float pixel,
-                                                const int *position) -> void {
-          if (pixel > threshold) {
-            mutex_.lock();
-            mPainter->drawEllipse(position[1], position[0], 4, 4);
-            keyPoints++;
-            mutex_.unlock();
-          }
-        });
+      [this, &mutex_, &threshold, &keyPoints](const float pixel, const int *position) -> void {
+        if (pixel > threshold) {
+          mutex_.lock();
+          mPainter->drawEllipse(position[1], position[0], 4, 4);
+          keyPoints++;
+          mutex_.unlock();
+        }
+      });
   mPainter->end();
   mImageKeypoints = mLocale->toString(keyPoints);
 
   if (showProcessed)
     showProcessedImage(imageHarrisNorm);
   mModified = true;
-  uiLabelImage->setPixmap(mPixmap.scaled(mCurrentFactor * mOriginalSize,
-                                         Qt::IgnoreAspectRatio,
-                                         Qt::SmoothTransformation));
+  uiLabelImage->setPixmap(
+    mPixmap.scaled(mCurrentFactor * mOriginalSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
 void WindowImage::applyFast(int threshold, bool nonMaxSuppression) {
@@ -216,8 +211,7 @@ void WindowImage::applyFast(int threshold, bool nonMaxSuppression) {
     mPixmap = mPixmapOriginal;
 
   cv::Mat image(_image->height(), _image->width(), CV_8UC4, _image->bits(),
-                static_cast<size_t>(
-                    _image->bytesPerLine())); // With CV_8UC3 it doesn't work
+                static_cast<size_t>(_image->bytesPerLine())); // With CV_8UC3 it doesn't work
   cv::Mat imageGrey(_image->height(), _image->width(), CV_8UC1);
   cv::cvtColor(image, imageGrey, cv::COLOR_RGB2GRAY);
 
@@ -225,10 +219,8 @@ void WindowImage::applyFast(int threshold, bool nonMaxSuppression) {
   auto time = cv::getTickCount();
   FAST(imageGrey, keyPoints, threshold, nonMaxSuppression);
 
-  mImageTime = mLocale->toString(
-      (float) ((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f',
-      2);
-  mImageKeypoints = mLocale->toString((float) keyPoints.size(), 'f', 0);
+  mImageTime = mLocale->toString((float)((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f', 2);
+  mImageKeypoints = mLocale->toString((float)keyPoints.size(), 'f', 0);
 
   mPainter->begin(&mPixmap);
   QPen pen(QColor::fromRgb(255, 0, 0));
@@ -236,54 +228,45 @@ void WindowImage::applyFast(int threshold, bool nonMaxSuppression) {
   mPainter->setPen(pen);
   mPainter->setRenderHint(QPainter::Antialiasing);
   for (const auto &point : keyPoints)
-    mPainter->drawEllipse((int) point.pt.x, (int) point.pt.y, 4, 4);
+    mPainter->drawEllipse((int)point.pt.x, (int)point.pt.y, 4, 4);
   mPainter->end();
 
   mModified = true;
-  uiLabelImage->setPixmap(mPixmap.scaled(mCurrentFactor * mOriginalSize,
-                                         Qt::IgnoreAspectRatio,
-                                         Qt::SmoothTransformation));
+  uiLabelImage->setPixmap(
+    mPixmap.scaled(mCurrentFactor * mOriginalSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
-void WindowImage::applySift(double threshold, double edgeThreshold,
-                            int nOctaves, int nOctaveLayers,
+void WindowImage::applySift(double threshold, double edgeThreshold, int nOctaves, int nOctaveLayers,
                             bool showOrientation) {
   mFeatureType = WindowImage::sift;
   if (mModified)
     mPixmap = mPixmapOriginal;
 
   cv::Mat image(_image->height(), _image->width(), CV_8UC4, _image->bits(),
-                static_cast<size_t>(
-                    _image->bytesPerLine())); // With CV_8UC3 it doesn't work
+                static_cast<size_t>(_image->bytesPerLine())); // With CV_8UC3 it doesn't work
   cv::Mat imgGray(_image->height(), _image->width(), CV_8UC1);
   cv::cvtColor(image, imgGray, cv::COLOR_RGB2GRAY);
 
   std::vector<cv::KeyPoint> keyPoints;
-  auto time = (float) cv::getTickCount();
-  cv::Ptr<cv::Feature2D> feature = cv::xfeatures2d::SIFT::create(
-      nOctaveLayers, nOctaves, threshold, edgeThreshold);
+  auto time = (float)cv::getTickCount();
+  cv::Ptr<cv::Feature2D> feature = cv::xfeatures2d::SIFT::create(nOctaveLayers, nOctaves, threshold, edgeThreshold);
   feature->detect(imgGray, keyPoints);
 
-  mImageTime = mLocale->toString(
-      (float) ((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f',
-      2);
-  mImageKeypoints = mLocale->toString((int) keyPoints.size());
+  mImageTime = mLocale->toString((float)((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f', 2);
+  mImageKeypoints = mLocale->toString((int)keyPoints.size());
 
   QPoint center;
   mPainter->begin(&mPixmap);
   mPainter->setRenderHint(QPainter::Antialiasing);
   for (const auto &point : keyPoints) {
-    center.setX((int) point.pt.x);
-    center.setY((int) point.pt.y);
-    const auto radius =
-        (int) (point.size); // radius = (int)(keyPoints->at(n).size*1.2/9.*2); =
+    center.setX((int)point.pt.x);
+    center.setY((int)point.pt.y);
+    const auto radius = (int)(point.size); // radius = (int)(keyPoints->at(n).size*1.2/9.*2); =
     // 0.266666
     if (showOrientation) {
       mPainter->setPen(QColor::fromRgb(255, 0, 0));
-      mPainter->drawLine(QLineF(
-          point.pt.x, point.pt.y,
-          point.pt.x + point.size * qCos(point.angle * 3.14159265 / 180),
-          point.pt.y + point.size * qSin(point.angle * 3.14159265 / 180)));
+      mPainter->drawLine(QLineF(point.pt.x, point.pt.y, point.pt.x + point.size * qCos(point.angle * 3.14159265 / 180),
+                                point.pt.y + point.size * qSin(point.angle * 3.14159265 / 180)));
     }
     mPainter->setPen(QColor::fromRgb(0, 0, 255));
     mPainter->drawEllipse(center, radius, radius);
@@ -291,48 +274,39 @@ void WindowImage::applySift(double threshold, double edgeThreshold,
   mPainter->end();
 
   mModified = true;
-  uiLabelImage->setPixmap(mPixmap.scaled(mCurrentFactor * mOriginalSize,
-                                         Qt::IgnoreAspectRatio,
-                                         Qt::SmoothTransformation));
+  uiLabelImage->setPixmap(
+    mPixmap.scaled(mCurrentFactor * mOriginalSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
-void WindowImage::applySurf(double threshold, int nOctaves, int nOctaveLayers,
-                            bool showOrientation) {
+void WindowImage::applySurf(double threshold, int nOctaves, int nOctaveLayers, bool showOrientation) {
   mFeatureType = WindowImage::surf;
   if (mModified)
     mPixmap = mPixmapOriginal;
 
   cv::Mat image(_image->height(), _image->width(), CV_8UC4, _image->bits(),
-                static_cast<size_t>(
-                    _image->bytesPerLine())); // With CV_8UC3 it doesn't work
+                static_cast<size_t>(_image->bytesPerLine())); // With CV_8UC3 it doesn't work
   cv::Mat imageGrey(_image->height(), _image->width(), CV_8UC1);
   cv::cvtColor(image, imageGrey, cv::COLOR_RGB2GRAY);
 
   std::vector<cv::KeyPoint> keyPoints;
   float time = cv::getTickCount();
-  cv::Ptr<cv::Feature2D> feature = cv::xfeatures2d::SURF::create(
-      threshold, nOctaves, nOctaveLayers, false, false);
+  cv::Ptr<cv::Feature2D> feature = cv::xfeatures2d::SURF::create(threshold, nOctaves, nOctaveLayers, false, false);
   feature->detect(imageGrey, keyPoints);
 
-  mImageTime = mLocale->toString(
-      ((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'd', 2);
-  mImageKeypoints = mLocale->toString((float) keyPoints.size(), 'd', 0);
+  mImageTime = mLocale->toString(((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'd', 2);
+  mImageKeypoints = mLocale->toString((float)keyPoints.size(), 'd', 0);
 
   QPoint center;
   mPainter->begin(&mPixmap);
   mPainter->setRenderHint(QPainter::Antialiasing);
   for (const auto &point : keyPoints) {
-    center.setX((int) point.pt.x);
-    center.setY((int) point.pt.y);
-    const auto radius =
-        (int) point
-            .size; // radius = (int)(keyPoints->at(n).size*1.2/9.*2); = 0.266666
+    center.setX((int)point.pt.x);
+    center.setY((int)point.pt.y);
+    const auto radius = (int)point.size; // radius = (int)(keyPoints->at(n).size*1.2/9.*2); = 0.266666
     if (showOrientation) {
       mPainter->setPen(QColor::fromRgb(255, 0, 0));
-      mPainter->drawLine(QLineF(
-          point.pt.x, point.pt.y,
-          point.pt.x + point.size * qCos(point.angle * 3.14159265 / 180),
-          point.pt.y + point.size * qSin(point.angle * 3.14159265 / 180)));
+      mPainter->drawLine(QLineF(point.pt.x, point.pt.y, point.pt.x + point.size * qCos(point.angle * 3.14159265 / 180),
+                                point.pt.y + point.size * qSin(point.angle * 3.14159265 / 180)));
     }
     mPainter->setPen(QColor::fromRgb(0, 0, 255));
     mPainter->drawEllipse(center, radius, radius);
@@ -340,15 +314,13 @@ void WindowImage::applySurf(double threshold, int nOctaves, int nOctaveLayers,
   mPainter->end();
 
   mModified = true;
-  uiLabelImage->setPixmap(mPixmap.scaled(mCurrentFactor * mOriginalSize,
-                                         Qt::IgnoreAspectRatio,
-                                         Qt::SmoothTransformation));
+  uiLabelImage->setPixmap(
+    mPixmap.scaled(mCurrentFactor * mOriginalSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
 void WindowImage::showProcessedImage(cv::Mat &processedImage) {
   if (mFeatureType == WindowImage::harris) {
-    mPixmap = QPixmap::fromImage(convertMat2QImage(
-        processedImage)); // This should be faster than the below lines
+    mPixmap = QPixmap::fromImage(convertMat2QImage(processedImage)); // This should be faster than the below lines
     // 		Mat imageColor(_image->height(), _image->width(), CV_8UC4); //
     // With CV_8UC3 it doesn't work 		cvtColor(processedImage,
     // imageColor, CV_GRAY2RGBA); // With CV_GRAY2RGB it doesn't work
@@ -365,17 +337,15 @@ void WindowImage::resetImage() {
   mImageTime.clear();
   mImageKeypoints.clear();
   mModified = false;
-  uiLabelImage->setPixmap(mPixmap.scaled(mCurrentFactor * mOriginalSize,
-                                         Qt::IgnoreAspectRatio,
-                                         Qt::SmoothTransformation));
+  uiLabelImage->setPixmap(
+    mPixmap.scaled(mCurrentFactor * mOriginalSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 
 // https://stackoverflow.com/questions/17127762/cvmat-to-qimage-and-back/17137998
 QImage WindowImage::convertMat2QImage(const cv::Mat &src) {
   cv::Mat temp;                    // make the same cv::Mat
   cvtColor(src, temp, CV_BGR2RGB); // cvtColor Makes a copt, that what i need
-  QImage dest((const uchar *) temp.data, temp.cols, temp.rows,
-              static_cast<int>(temp.step), QImage::Format_RGB32);
+  QImage dest((const uchar *)temp.data, temp.cols, temp.rows, static_cast<int>(temp.step), QImage::Format_RGB32);
   dest.bits(); // enforce deep copy, see documentation
   // of QImage::QImage ( const uchar * data, int width, int height, Format
   // format )
@@ -384,17 +354,15 @@ QImage WindowImage::convertMat2QImage(const cv::Mat &src) {
 
 void WindowImage::scaleImage() {
   // 	uiLabelImage->resize(mCurrentFactor*originalSize);
-  uiLabelImage->setPixmap(mPixmap.scaled(mCurrentFactor * mOriginalSize,
-                                         Qt::KeepAspectRatio,
-                                         Qt::SmoothTransformation));
+  uiLabelImage->setPixmap(
+    mPixmap.scaled(mCurrentFactor * mOriginalSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
   adjustScrollBar(horizontalScrollBar());
   adjustScrollBar(verticalScrollBar());
-  mImageZoom = tr("%1%").arg((int) (mCurrentFactor * 100));
+  mImageZoom = tr("%1%").arg((int)(mCurrentFactor * 100));
 }
 
 void WindowImage::adjustScrollBar(QScrollBar *scrollBar) {
-  scrollBar->setValue(int(mFactorIncrement * scrollBar->value() +
-      (mFactorIncrement - 1) * scrollBar->pageStep() / 2));
+  scrollBar->setValue(int(mFactorIncrement * scrollBar->value() + (mFactorIncrement - 1) * scrollBar->pageStep() / 2));
 }
 
 void WindowImage::mousePressEvent(QMouseEvent *event) {
@@ -405,19 +373,11 @@ void WindowImage::mousePressEvent(QMouseEvent *event) {
 }
 
 void WindowImage::mouseMoveEvent(QMouseEvent *event) {
-  QPoint myPos = event->pos();
-  //  int hValue = horizontalScrollBar()->value();
-  //  int vValue = verticalScrollBar()->value();
-  // horizontalScrollBar()->setValue(hValue + (mLastPoint.x() - myPos.x()));
-  // verticalScrollBar()->setValue(vValue + (mLastPoint.y() - myPos.y()));
   _rubberBand->setGeometry(QRect(mLastPoint, event->pos()).normalized());
   _rubberBand->show();
   band_avaiable = false;
   QToolTip::showText(event->globalPos(),
-                     QString("%1,%2")
-                         .arg(_rubberBand->size().width())
-                         .arg(_rubberBand->size().height()),
-                     this);
+                     QString("%1,%2").arg(_rubberBand->size().width()).arg(_rubberBand->size().height()), this);
   // mLastPoint = myPos;
 }
 
@@ -456,8 +416,7 @@ void WindowImage::compute() {
     std::vector<cv::Rect> candidate = _predator.get_candidate();
     //   cv::resize(_imgRT, _imgRT, cv::Size(640, 480), 0, 0, cv::INTER_CUBIC);
     cvtColor(_imgRT, _imgRT, cv::COLOR_BGR2RGB);
-    _image = std::make_unique<QImage>(_imgRT.data, _imgRT.cols, _imgRT.rows,
-                                      static_cast<int>(_imgRT.step),
+    _image = std::make_unique<QImage>(_imgRT.data, _imgRT.cols, _imgRT.rows, static_cast<int>(_imgRT.step),
                                       QImage::Format_RGB888);
 
     mPixmap = QPixmap::fromImage(*_image);
@@ -475,7 +434,7 @@ void WindowImage::compute() {
     }
     mPainter->end();
     uiLabelImage->setPixmap(mPixmap); // With RGB32 doesn't work
-    mImageZoom = tr("%1%").arg((int) (mCurrentFactor * 100));
+    mImageZoom = tr("%1%").arg((int)(mCurrentFactor * 100));
     mImageDimensions = tr("%1x%2px").arg(mOriginalWidth).arg(mOriginalHeight);
   }
 }

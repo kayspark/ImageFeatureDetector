@@ -13,8 +13,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 set(CMAKE_AUTOUIC ON)
-#include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
+set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=-*,modernize-*,clang-analyzer-*)
 ## http://www.cmake.org/Wiki/CMake:How_To_Find_Libraries
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 if (WIN32)
@@ -42,23 +41,7 @@ include_directories(${LIBVLC_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
 file(GLOB ImageFeatureDetector_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
 file(GLOB ImageFeatureDetector_UI ${CMAKE_CURRENT_SOURCE_DIR}/ui/*)
 
-
-
 add_executable(imagefeaturedetector ${ImageFeatureDetector_SRC} ${ImageFeatureDetector_UI} resources.qrc)
-
 target_link_libraries(imagefeaturedetector Qt5::Core Qt5::Widgets ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY})
-# target_link_libraries(imagefeaturedetector Qt5::Core Qt5::Widgets ${ImageFeatureDetector_A} ${CMAKE_THREAD_LIBS_INIT} -lz -ldl)
-
-
-## http://stackoverflow.com/questions/13429656/cmake-how-to-copy-contents-of-a-directory-into-build-directory-after-make
-#add_custom_command(TARGET imagefeaturedetector POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/icons $<TARGET_FILE_DIR:imagefeaturedetector>/icons)
-
-#include(clang-tidy.cmake)
-## http://www.cmake.org/Wiki/CMake:Install_Commands
-## Icons won't be shown because the loading path is relative to the command shell path at the moment of calling ./imagefeaturedetector
-# install (TARGETS imagefeaturedetector DESTINATION bin)
-# file(GLOB icons ${CMAKE_SOURCE_DIR}/icons/*)
-# install (FILES ${icons} DESTINATION bin/icons)
-
 
 

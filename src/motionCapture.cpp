@@ -5,10 +5,11 @@ using namespace chrono;
 using namespace cv;
 
 motionCapture::motionCapture()
-    : _pBgs(cv::createBackgroundSubtractorMOG2(10, 25, false)),
-      _timeRange(3000),
-      _criteria(cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS, 20, 0.1),
-      _winSize(cv::Size(40, 40)), _fps(0) {
+    : _pBgs(cv::createBackgroundSubtractorMOG2(10, 25, false))
+    , _timeRange(3000)
+    , _criteria(cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS, 20, 0.1)
+    , _winSize(cv::Size(40, 40))
+    , _fps(0) {
   // _capture = &cap;
 }
 
@@ -41,10 +42,9 @@ void motionCapture::uniteContours(vector<vector<cv::Point>> &cnts) {
   }
 }
 
-void motionCapture::getFeaturePoints(const std::vector<cv::Point> &in,
-                                     std::vector<cv::Point2f> &out) {
+void motionCapture::getFeaturePoints(const std::vector<cv::Point> &in, std::vector<cv::Point2f> &out) {
   const int qty = 10;
-  long step = (long) in.size() / qty;
+  long step = (long)in.size() / qty;
   for (auto i = in.begin(); i < in.end(); i += step) {
     out.emplace_back(i->x, i->y);
   }
@@ -55,8 +55,7 @@ void motionCapture::find(Mat &gray) {
     return;
   Mat mask;
   Mat fgimg;
-  _currentTime = duration_cast<milliseconds>(
-      high_resolution_clock::now().time_since_epoch());
+  _currentTime = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch());
 
   // resize(frame, frame, cv::Size(800, 600));
   _pBgs->apply(gray, mask, -1);
@@ -91,30 +90,25 @@ void motionCapture::find(Mat &gray) {
         if (!track.empty()) {
           vector<Point2f> tmpVec;
           getFeaturePoints(track.rbegin()->second, tmpVec);
-          for (auto i = pointsPrev.size();
-               i < pointsPrev.size() + tmpVec.size(); i++) {
+          for (auto i = pointsPrev.size(); i < pointsPrev.size() + tmpVec.size(); i++) {
             pointsNum.emplace(trackNumber, i);
           }
           pointsPrev.insert(pointsPrev.end(), tmpVec.begin(), tmpVec.end());
           trackNumber++;
         }
       }
-      calcOpticalFlowPyrLK(_prevGray, gray, pointsPrev, pointsNow, status, err,
-                           _winSize, 3, _criteria, 0, 0.001);
+      calcOpticalFlowPyrLK(_prevGray, gray, pointsPrev, pointsNow, status, err, _winSize, 3, _criteria, 0, 0.001);
       trackNumber = 0;
       for (auto &track : _allTracks) {
         if (!track.empty()) {
           vector<Point2f> tmpVecPoints;
-          const auto&[start, end] = pointsNum.equal_range(static_cast<const int>(trackNumber));
-          for_each(start, end, [&tmpVecPoints, &pointsNow](const auto &it) {
-            tmpVecPoints.emplace_back(pointsNow[it.second]);
-          });
+          const auto &[start, end] = pointsNum.equal_range(static_cast<const int>(trackNumber));
+          for_each(start, end,
+                   [&tmpVecPoints, &pointsNow](const auto &it) { tmpVecPoints.emplace_back(pointsNow[it.second]); });
           Rect tmpRect = boundingRect(tmpVecPoints);
           milliseconds cur_time = _currentTime;
-          allContours.erase(std::remove_if(allContours.begin(),
-                                           allContours.end(),
-                                           [&tmpRect, &cur_time,
-                                               &track](const auto &contour) {
+          allContours.erase(std::remove_if(allContours.begin(), allContours.end(),
+                                           [&tmpRect, &cur_time, &track](const auto &contour) {
                                              bool ret = false;
                                              Rect rect = boundingRect(contour);
                                              if ((tmpRect & rect).height > 10 && (tmpRect & rect).width > 10) {
@@ -130,22 +124,19 @@ void motionCapture::find(Mat &gray) {
       fill_tracks(_allTracks, allContours);
     }
   }
-  milliseconds endtime = duration_cast<milliseconds>(
-      high_resolution_clock::now().time_since_epoch());
+  milliseconds endtime = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch());
   _fps = static_cast<int>(1000.0 / (endtime - _currentTime).count());
   swap(_prevGray, gray);
   //   display();
 }
-void motionCapture::fill_tracks(
-    vector<map<milliseconds, vector<Point>>> &allTracks,
-    vector<vector<Point>> &allContours) const {
+void motionCapture::fill_tracks(vector<map<milliseconds, vector<Point>>> &allTracks,
+                                vector<vector<Point>> &allContours) const {
   milliseconds cur_time = _currentTime;
-  for_each(allContours.begin(), allContours.end(),
-           [&allTracks, &cur_time](const vector<Point> &cnt) {
-             map<milliseconds, vector<Point>> oneTrack;
-             oneTrack.emplace(cur_time, cnt);
-             allTracks.emplace_back(oneTrack);
-           });
+  for_each(allContours.begin(), allContours.end(), [&allTracks, &cur_time](const vector<Point> &cnt) {
+    map<milliseconds, vector<Point>> oneTrack;
+    oneTrack.emplace(cur_time, cnt);
+    allTracks.emplace_back(oneTrack);
+  });
 }
 
 void motionCapture::display() {
@@ -164,15 +155,14 @@ void motionCapture::display() {
       stringstream ss;
       ss << cnt++;
       string stringNumber = ss.str();
-      putText(outFrame, stringNumber, Point(r.x + 5, r.y + 5),
-              FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(0, 0, 255), 1, 8);
+      putText(outFrame, stringNumber, Point(r.x + 5, r.y + 5), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(0, 0, 255), 1, 8);
     }
   }
   stringstream sst;
   sst << _fps;
   string fpsString = "FPS = " + sst.str();
-  putText(outFrame, fpsString, Point(20, outFrame.rows - 20),
-          FONT_HERSHEY_COMPLEX_SMALL, 0.8, Scalar(255, 0, 255), 1, 8);
+  putText(outFrame, fpsString, Point(20, outFrame.rows - 20), FONT_HERSHEY_COMPLEX_SMALL, 0.8, Scalar(255, 0, 255), 1,
+          8);
   imshow("tracks", outFrame);
   waitKey(5);
 }

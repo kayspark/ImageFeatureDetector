@@ -12,8 +12,10 @@ private:
   bool initialized_tracker;
   std::vector<cv::Rect> objects;
   std::vector<cv::Rect> candidate_objects;
+
 public:
   const std::vector<cv::Rect> &get_candidate() const;
+
 private:
   std::array<cv::Scalar, 8> colors;
   double _scale;
@@ -21,6 +23,7 @@ private:
   std::string _tracker_algorithm;
   double detection_time{};
   motionCapture _motion;
+
 public:
   explicit nm_detector(std::string_view cascade, std::string_view algorithm);
   ~nm_detector() = default;

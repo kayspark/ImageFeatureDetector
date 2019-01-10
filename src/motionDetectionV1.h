@@ -36,8 +36,7 @@ public:
   /* one channel & uchar only => imgDiff, imgThreshold, mask
    * the mask always needed to be reflash( cvZero(mask) ) first!!
    */
-  void backgroundSubtraction(const cv::Mat &imgDiff,
-                             const cv::Mat &imgThreshold, cv::Mat &mask);
+  void backgroundSubtraction(const cv::Mat &imgDiff, const cv::Mat &imgThreshold, cv::Mat &mask);
   /* th = th * coefficient */
   void coefficientThreshold(cv::Mat &imgThreshold, int coef);
   /* Negative processing, convert darkest areas to lightest and lightest to

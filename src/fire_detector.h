@@ -13,21 +13,15 @@ using _normal_pixel = cv::Point3_<uint8_t>;
 using _short_pixel = uint8_t;
 using _long_pixel = cv::Point3_<double>;
 /* Find the minimal value of R G B */
-template <typename T> T minrgb(const T r, const T g, const T b) {
-  return (r <= g && r <= b) ? r : (g < b) ? g : b;
-}
+template <typename T> T minrgb(const T r, const T g, const T b) { return (r <= g && r <= b) ? r : (g < b) ? g : b; }
 
 class fire_detector {
 
 public:
   explicit fire_detector(cv::Size &imgSize);
   const int get_bgm_frame_count() const { return _bgm_frame_count; }
-  const double get_accumulate_weighted_alpha_bgm() const {
-    return _accumulate_weighted_alpha_bgm;
-  }
-  const double get_accumulate_weighted_alpha_threshold() const {
-    return _accumulate_weighted_alpha_threshold;
-  }
+  const double get_accumulate_weighted_alpha_bgm() const { return _accumulate_weighted_alpha_bgm; }
+  const double get_accumulate_weighted_alpha_threshold() const { return _accumulate_weighted_alpha_threshold; }
   const int get_threshold_coefficient() const { return _threshold_coefficient; }
 
 private:
@@ -77,21 +71,16 @@ private:
   cv::Mat maskHSI;
 
 public:
-  void detectFire(cv::Mat &maskMotion, motionDetectionV1 &bgs,
-                  cv::Mat &imgBackgroundModel, cv::Mat &imgStandardDeviation,
-                  cv::Mat &img32FBackgroundModel,
-                  cv::Mat &img32FStandardDeviation, cv::Mat &imgSrc,
-                  cv::Mat &imgGray, cv::Mat &imgDisplay);
+  void detectFire(cv::Mat &maskMotion, motionDetectionV1 &bgs, cv::Mat &imgBackgroundModel,
+                  cv::Mat &imgStandardDeviation, cv::Mat &img32FBackgroundModel, cv::Mat &img32FStandardDeviation,
+                  cv::Mat &imgSrc, cv::Mat &imgGray, cv::Mat &imgDisplay);
   bool update_tracker(cv::Mat &img);
   void dilate(cv::Mat &mask);
   void findContours(cv::Mat &mask);
-  bool checkContourPoints(Centroid &ctrd, const int thrdcp,
-                          const unsigned int pwindows);
-  void motionOrientationHist(std::vector<Feature> &vecFeature,
-                             std::vector<unsigned int> &orient);
+  bool checkContourPoints(Centroid &ctrd, const int thrdcp, const unsigned int pwindows);
+  void motionOrientationHist(std::vector<Feature> &vecFeature, std::vector<unsigned int> &orient);
 
-  double getEnergy(std::vector<Feature> &vecFeature, unsigned int &staticCount,
-                   unsigned int &totalPoints);
+  double getEnergy(std::vector<Feature> &vecFeature, unsigned int &staticCount, unsigned int &totalPoints);
 
   bool checkContourEnergy(Centroid &ctrd, const unsigned int pwindows);
 
@@ -125,11 +114,9 @@ public:
   void calcOpticalFlow(cv::Mat &gray, cv::Mat &curr);
   void assignFeaturePoints();
   /* Counting the foldback point at each directions */
-  void foldbackPoint(const std::vector<cv::Rect> &vecRect,
-                     DirectionsCount &count);
+  void foldbackPoint(const std::vector<cv::Rect> &vecRect, DirectionsCount &count);
   /* Analysis the rect information */
-  bool judgeDirectionsMotion(const std::vector<cv::Rect> &vecRect,
-                             cv::Rect &rectFire);
+  bool judgeDirectionsMotion(const std::vector<cv::Rect> &vecRect, cv::Rect &rectFire);
   /**
    *	@Purpose: check fire-like pixels by rgb model base on reference method
    *			  This function will change fire-like pixels to red
@@ -137,8 +124,7 @@ public:
    *		frame: input source image
    *		mask: output mask
    */
-  void checkByRGB(const cv::Mat &imgSrc, const cv::Mat &maskMotion,
-                  cv::Mat &maskRGB);
+  void checkByRGB(const cv::Mat &imgSrc, const cv::Mat &maskMotion, cv::Mat &maskRGB);
   /**
    *   @ Function: Convert RGB to HSI
    *   H: 0~360(degree)  HUE_R = 0 , HUE_G = 120 , HUE_B = 240
@@ -158,8 +144,7 @@ public:
    *		frame: input source image
    *		mask: output mask
    */
-  void checkByHSI(cv::Mat &imgRGB, cv::Mat &imgHSI, cv::Mat &maskRGB,
-                  cv::Mat &maskHSI);
+  void checkByHSI(cv::Mat &imgRGB, cv::Mat &imgHSI, cv::Mat &maskRGB, cv::Mat &maskHSI);
   /**
    *	@Function: markup the interest region based on mask
    *  @Parameter

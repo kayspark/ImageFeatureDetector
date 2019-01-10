@@ -5,10 +5,11 @@
 #include "windowMain.h"
 #include <opencv2/opencv.hpp>
 
-class
-    WindowMain; // http://stackoverflow.com/questions/2133250/does-not-name-a-type-error-in-c
+class WindowMain; // http://stackoverflow.com/questions/2133250/does-not-name-a-type-error-in-c
 
-class WindowCaptureWebcam : public QDialog, private Ui::windowCaptureWebcam {
+class WindowCaptureWebcam
+    : public QDialog
+    , private Ui::windowCaptureWebcam {
   Q_OBJECT
 public:
   explicit WindowCaptureWebcam(WindowMain *main);

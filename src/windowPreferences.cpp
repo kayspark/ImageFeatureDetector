@@ -1,16 +1,17 @@
 /*
-* 2018(C) kayspark , 2010-2015 (C) Antonio Redondo
-*
-* https://github.com/kayspark/ImageFeatureDetector
-*
-* Code under the terms of the GNU General Public License v3.
-*
-*/
+ * 2018(C) kayspark , 2010-2015 (C) Antonio Redondo
+ *
+ * https://github.com/kayspark/ImageFeatureDetector
+ *
+ * Code under the terms of the GNU General Public License v3.
+ *
+ */
 
 #include "windowPreferences.h"
 
 WindowPreferences::WindowPreferences(WindowMain *windowMain)
-    :  QDialog::QDialog(windowMain, Qt::Dialog), mWindowMain(windowMain){
+    : QDialog::QDialog(windowMain, Qt::Dialog)
+    , mWindowMain(windowMain) {
   setupUi(this);
 
   setAttribute(Qt::WA_DeleteOnClose);
@@ -22,11 +23,10 @@ WindowPreferences::WindowPreferences(WindowMain *windowMain)
   uiCheckBoxBestFit->setChecked(mWindowMain->getMSettings()->value("bestFit", true).toBool());
   uiCheckBoxRecentFiles->setChecked(mWindowMain->getMSettings()->value("rememberRecentFiles", true).toBool());
 
-  QObject::connect(uiPushButtonClearRecentFiles, &QAbstractButton::clicked, this, &WindowPreferences::clearRecentFilesPrompt);
-  QObject::connect(uiDialogButtonBox->button(QDialogButtonBox::RestoreDefaults),
-          &QAbstractButton::clicked,
-          this,
-          &WindowPreferences::restore);
+  QObject::connect(uiPushButtonClearRecentFiles, &QAbstractButton::clicked, this,
+                   &WindowPreferences::clearRecentFilesPrompt);
+  QObject::connect(uiDialogButtonBox->button(QDialogButtonBox::RestoreDefaults), &QAbstractButton::clicked, this,
+                   &WindowPreferences::restore);
   QObject::connect(uiDialogButtonBox, &QDialogButtonBox::accepted, this, &WindowPreferences::save);
   QObject::connect(uiDialogButtonBox, &QDialogButtonBox::rejected, this, &WindowPreferences::close);
 
@@ -34,9 +34,9 @@ WindowPreferences::WindowPreferences(WindowMain *windowMain)
 }
 
 void WindowPreferences::clearRecentFilesPrompt() {
-  if (QMessageBox::Yes == QMessageBox::warning(this, tr("Image Feature Detector"),
-                                               tr("Do you want to clear the Recent Files List?"),
-                                               QMessageBox::Yes | QMessageBox::Cancel))
+  if (QMessageBox::Yes ==
+      QMessageBox::warning(this, tr("Image Feature Detector"), tr("Do you want to clear the Recent Files List?"),
+                           QMessageBox::Yes | QMessageBox::Cancel))
     clearRecentFiles();
 }
 

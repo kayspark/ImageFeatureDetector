@@ -1,6 +1,6 @@
 #pragma once
-#include <opencv2/opencv.hpp>
 #include <chrono>
+#include <opencv2/opencv.hpp>
 
 class Frame {
   //	chrono::milliseconds timeStamp;
@@ -8,7 +8,9 @@ class Frame {
 
 public:
   //	Frame(chrono::milliseconds, Mat, Mat);
-  Frame(const cv::Mat &pic, const cv::Mat &m) : img(pic), mask(m) {}
+  Frame(const cv::Mat &pic, const cv::Mat &m)
+      : img(pic)
+      , mask(m) {}
   ~Frame() = default;
   cv::Mat getImg() const { return img; }
 };

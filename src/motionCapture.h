@@ -14,18 +14,19 @@ class motionCapture {
   std::vector<cv::Vec4i> _hierarchy;
   cv::TermCriteria _criteria;
   cv::Size _winSize;
-//  cv::Mat gray;
+  //  cv::Mat gray;
   cv::Mat _prevGray;
   cv::Mat _saved_mask;
 
   std::map<std::chrono::milliseconds, Frame> _frames;
   std::vector<std::map<std::chrono::milliseconds, std::vector<cv::Point>>> _allTracks;
+
 public:
   void get_detected(std::vector<cv::Rect> &out) const;
+
 private:
   cv::Ptr<cv::BackgroundSubtractor> _pBgs;
-  void getFeaturePoints(const std::vector<cv::Point> &in,
-                        std::vector<cv::Point2f> &out);
+  void getFeaturePoints(const std::vector<cv::Point> &in, std::vector<cv::Point2f> &out);
   void uniteContours(std::vector<std::vector<cv::Point>> &cnts);
 
 public:
@@ -34,8 +35,6 @@ public:
   void find(cv::Mat &gray);
   void display();
 
-  void fill_tracks(
-      std::vector<std::map<std::chrono::milliseconds, std::vector<cv::Point>>>
-      &allTracks,
-      std::vector<std::vector<cv::Point>> &allContours) const;
+  void fill_tracks(std::vector<std::map<std::chrono::milliseconds, std::vector<cv::Point>>> &allTracks,
+                   std::vector<std::vector<cv::Point>> &allContours) const;
 };

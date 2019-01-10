@@ -9,8 +9,7 @@ typedef struct RectThrd {
 } RectThresh;
 
 /* for initialize rectThrd node */
-CV_INLINE RectThresh rectThrd(const int rectWidth, const int rectHeight,
-                              const int cntrArea) {
+CV_INLINE RectThresh rectThrd(const int rectWidth, const int rectHeight, const int cntrArea) {
   RectThresh rt;
 
   rt.rectWidth = rectWidth;
@@ -58,8 +57,8 @@ CV_INLINE OFRect ofRect(const cv::Rect &rect, const int countCtrP) {
 
 /* marker node */
 typedef struct Centroid {
-  int countFrame{};   // how many frame the centroid keeping in the region
-  cv::Point centroid; // first detected centroid
+  int countFrame{};                         // how many frame the centroid keeping in the region
+  cv::Point centroid;                       // first detected centroid
   std::vector<cv::Rect> vecRect;            // rect information
   std::deque<std::vector<Feature>> dOFRect; // optical flow feature points
 } Centroid;
@@ -69,12 +68,10 @@ CV_INLINE Centroid centroid(const OFRect &ofRect) {
   Centroid centroid1;
 
   centroid1.countFrame = 1; // first node
-  centroid1.centroid =
-      cv::Point(ofRect.rect.x + (ofRect.rect.width >> 1),
-                ofRect.rect.y + (ofRect.rect.height >> 1)); // centroid position
-  centroid1.vecRect.emplace_back(ofRect.rect); // push rect information
-  centroid1.dOFRect.emplace_back(
-      ofRect.vecFeature); // push contour optical flow feature(after optical
+  centroid1.centroid = cv::Point(ofRect.rect.x + (ofRect.rect.width >> 1),
+                                 ofRect.rect.y + (ofRect.rect.height >> 1)); // centroid position
+  centroid1.vecRect.emplace_back(ofRect.rect);                               // push rect information
+  centroid1.dOFRect.emplace_back(ofRect.vecFeature); // push contour optical flow feature(after optical
   // flow)
 
   return centroid1;

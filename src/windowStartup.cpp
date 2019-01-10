@@ -1,16 +1,17 @@
 /*
-* 2018(C) kayspark , 2010-2015 (C) Antonio Redondo
-*
-* https://github.com/kayspark/ImageFeatureDetector
-*
-* Code under the terms of the GNU General Public License v3.
-*
-*/
+ * 2018(C) kayspark , 2010-2015 (C) Antonio Redondo
+ *
+ * https://github.com/kayspark/ImageFeatureDetector
+ *
+ * Code under the terms of the GNU General Public License v3.
+ *
+ */
 
 #include "windowStartup.h"
 
 WindowStartup::WindowStartup(WindowMain *windowMain)
-    :  QDialog::QDialog(windowMain, Qt::Dialog), mWindowMain(windowMain){
+    : QDialog::QDialog(windowMain, Qt::Dialog)
+    , mWindowMain(windowMain) {
   setupUi(this);
 
   uiCheckBoxStartup->setChecked(mWindowMain->getMSettings()->value("startupDialog", true).toBool());
@@ -50,4 +51,3 @@ void WindowStartup::fastRT() {
 void WindowStartup::saveSettings() {
   mWindowMain->getMSettings()->setValue("startupDialog", uiCheckBoxStartup->isChecked());
 }
-

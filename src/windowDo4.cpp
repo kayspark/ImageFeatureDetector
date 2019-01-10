@@ -14,8 +14,11 @@
 WindowDo4::WindowDo4(const QString &windowTitle, std::unique_ptr<WindowImage> harrisImage,
                      std::unique_ptr<WindowImage> fastImage, std::unique_ptr<WindowImage> siftImage,
                      std::unique_ptr<WindowImage> surfImage)
-    : mHarrisImage(std::move(harrisImage)), mFastImage(std::move(fastImage)), mSiftImage(std::move(siftImage)),
-      mSurfImage(std::move(surfImage)), mTimer(std::move(std::make_unique<QTimer>())) {
+    : mHarrisImage(std::move(harrisImage))
+    , mFastImage(std::move(fastImage))
+    , mSiftImage(std::move(siftImage))
+    , mSurfImage(std::move(surfImage))
+    , mTimer(std::move(std::make_unique<QTimer>())) {
   setupUi(this);
 
   setWindowTitle(windowTitle + " - Do4!");
@@ -35,13 +38,11 @@ WindowDo4::WindowDo4(const QString &windowTitle, std::unique_ptr<WindowImage> ha
   uiSurfTimeLabel->setText(mSurfImage->mImageTime);
   uiSurfKPLabel->setText(mSurfImage->mImageKeypoints);
 
-  QObject::connect(uiPushButtonZoomBestFit, &QPushButton::released, this,
-          &WindowDo4::zoomBestFit);
+  QObject::connect(uiPushButtonZoomBestFit, &QPushButton::released, this, &WindowDo4::zoomBestFit);
   QObject::connect(mTimer.get(), &QTimer::timeout, this, &WindowDo4::zoomBestFit);
 
   // http://wiki.qt.io/Center_a_Window_on_the_Screen
-  setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size(),
-                                  qtApp->desktop()->availableGeometry()));
+  setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size(), qtApp->desktop()->availableGeometry()));
 
   show();
 
@@ -64,11 +65,9 @@ void WindowDo4::zoomBestFit() {
 void WindowDo4::changeEvent(QEvent *event) {
   if (event->type() == QEvent::WindowStateChange) {
     auto pEvent = dynamic_cast<QWindowStateChangeEvent *>(event);
-    if (pEvent->oldState() == Qt::WindowMaximized &&
-        this->windowState() == Qt::WindowNoState)
+    if (pEvent->oldState() == Qt::WindowMaximized && this->windowState() == Qt::WindowNoState)
       mTimer->start();
-    else if (pEvent->oldState() == Qt::WindowNoState &&
-             this->windowState() == Qt::WindowMaximized)
+    else if (pEvent->oldState() == Qt::WindowNoState && this->windowState() == Qt::WindowMaximized)
       mTimer->start();
   }
 }
