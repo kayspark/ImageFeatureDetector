@@ -127,18 +127,15 @@ void WindowFastRealTime::resetUI() {
   saveFastParams();
 }
 
-void WindowFastRealTime::learnNormal() { 
-
-}
+void WindowFastRealTime::learnNormal() {}
 
 void WindowFastRealTime::learnAbnormal() {
 
-  QListWidgetItem* currentItem = listWidget->currentItem(); 
+  QListWidgetItem *currentItem = listWidget->currentItem();
   QIcon icon = currentItem->icon();
-  cv::Mat feature = QPixmap2Mat(icon.pixmap(QSize(100,100) ) , true);
+  cv::Mat feature = QPixmap2Mat(icon.pixmap(QSize(100, 100)), true);
   _nm_classifier->learn(feature);
 }
-
 
 void WindowFastRealTime::compute() {
 
@@ -158,7 +155,7 @@ void WindowFastRealTime::compute() {
       }
 
       std::vector<cv::Rect> candidate;
-      _predator.detect_candidate(gray,candidate);
+      _predator.detect_candidate(gray, candidate);
       //   cv::resize(_imgRT, _imgRT, cv::Size(640, 480), 0, 0, cv::INTER_CUBIC);
       mPixmap = QPixmap::fromImage(
         QImage(imgRT.data, imgRT.cols, imgRT.rows, static_cast<int>(imgRT.step), QImage::Format_RGB888));
@@ -173,9 +170,12 @@ void WindowFastRealTime::compute() {
         // check whether in valid roi
         QRect qr(r.x, r.y, r.width, r.height);
         if (rect1.contains(r.tl()) || rect1.contains(r.br())) {
-          mPainter->setPen(penB);
-          listWidget->addItem(new QListWidgetItem(QIcon(mPixmap.copy(qr).scaled(QSize(100, 100), Qt::KeepAspectRatio)),
-                                                  QDateTime::currentDateTime().toString("MMdd_hhmmss")));
+          QPixmap tpix = mPixmap.copy(qr).scaled(QSize(99, 100), Qt::KeepAspectRatio);
+          if (_nm_classifier->classify(QPixmap2Mat(tpix, true))) {
+            listWidget->addItem(new QListWidgetItem(QIcon(tpix), QDateTime::currentDateTime().toString("MMdd_hhmmss")));
+            mPainter->setPen(penR);
+          } else
+            mPainter->setPen(penB);
         } else
           mPainter->setPen(penG);
         // fill suspicious belt

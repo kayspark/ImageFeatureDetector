@@ -171,7 +171,8 @@ void nm_classifier::learn(NeuroMemLearnReq &req) {
 }
 
 void nm_classifier::learn(cv::Mat &in) { 
-  std::vector<uint8_t> feature(m_neuron_vector_size); 
+  std::vector<uint8_t> feature;
+  feature.reserve(m_neuron_vector_size); 
   extract_feature_vector(in, feature);
   NeuroMemLearnReq lreq;
   std::move(feature.begin(), feature.end(), lreq.vector);
@@ -179,7 +180,8 @@ void nm_classifier::learn(cv::Mat &in) {
 }
 
 bool nm_classifier::classify(cv::Mat &in) { 
-  std::vector<uint8_t> feature(m_neuron_vector_size); 
+  std::vector<uint8_t> feature;
+  feature.reserve(m_neuron_vector_size); 
   extract_feature_vector(in, feature);
   NeuroMemClassifyReq req;
   std::move(feature.begin(), feature.end(), req.vector);
