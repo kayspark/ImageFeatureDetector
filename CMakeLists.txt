@@ -1,9 +1,13 @@
 ## http://cmake.org/runningcmake
 ## http://doc.qt.io/qt-5/cmake-manual.html
 
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.12)
 
-project(imagefeaturedetector)
+project(imagefeaturedetector LANGUAGES CXX)
+
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules
+                      ${CMAKE_MODULE_PATH})
+
 
 SET(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -13,17 +17,23 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 set(CMAKE_AUTOUIC ON)
-set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=-*,modernize-*,clang-analyzer-*)
+set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=-*,modernize-*)
+#include(cppcheck.cmake)
+
 ## http://www.cmake.org/Wiki/CMake:How_To_Find_Libraries
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 if (WIN32)
     set(OpenCV_STATIC OFF)
     set(OpenCV SHARED ON)
-    set(OpenCV_DIR "C:/Users/kspark/opencv")
+#    set(OpenCV_DIR "C:/Users/kspark/opencv")
     set(LIBVLC_INCLUDE_DIR "C:/vlc-winsdk/sdk/include")
     set(LIBVLC_LIBRARY_DIR "C:/vlc-winsdk/sdk/lib")
     set(LIBVLC_LIBRARY "C:/vlc-winsdk/sdk/lib/libvlc.lib")
-    set(LIBVLCCORE_LIBRARY "C:/vlc-winsdk/sdk/lib/libvlccore.lib")
+    set(LIBVLCCORE_LIBRARY "C:/vlc-winsdk/sdk/lib/libvlccore.lib")        
+	set(NM500LLIBDIR_X64 "X:/NM500-SDK-V1/Library/x64")
+	set(NeuroMemLibs  ${NM500LLIBDIR_X64}/NeuroMemEngine.lib ${NM500LLIBDIR_X64}/CyAPI.lib ${NM500LLIBDIR_X64}/cyusbserial.lib)
+
+
 elseif(NOT WIN32)
     set(LIBVLC_INCLUDE_DIR "/usr/local/include")
     set(LIBVLC_LIBRARY_DIR "/usr/local/lib")
@@ -35,13 +45,23 @@ find_package(OpenCV COMPONENTS opencv_core opencv_imgproc opencv_highgui opencv_
 include_directories(${LIBVLC_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
 # find_package(Threads REQUIRED) # http://stackoverflow.com/questions/1620918/cmake-and-libpthread (if not 'libpthread.so.0: DSO missing from command line' error will be thrown at linking time)
 # find_package(ZLIB REQUIRED) # http://stackoverflow.com/questions/6173915/need-help-trying-to-make-cmake-find-third-party-libraries
-
-
 ## http://stackoverflow.com/questions/3201154/cmake-automatically-add-all-files-in-a-folder-to-a-target
 file(GLOB ImageFeatureDetector_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
 file(GLOB ImageFeatureDetector_UI ${CMAKE_CURRENT_SOURCE_DIR}/ui/*)
 
-add_executable(imagefeaturedetector ${ImageFeatureDetector_SRC} ${ImageFeatureDetector_UI} resources.qrc)
-target_link_libraries(imagefeaturedetector Qt5::Core Qt5::Widgets ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY})
+find_package(CppCheck)
+# Add the "make analysis" target
+if( CPPCHECK_FOUND )
+    add_custom_target(analysis)
+   # ADD_DEPENDENCIES(analysis ${ALL_ANALYSIS_TARGETS} ${ImageFeatureDetector_SRC})
+    set_target_properties(analysis PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    message("analysis analysis targets are ${ALL_ANALYSIS_TARGETS}")
+endif()
 
+add_executable(imagefeaturedetector ${ImageFeatureDetector_SRC} ${ImageFeatureDetector_UI} resources.qrc)
+if (WIN32)
+    target_link_libraries(imagefeaturedetector Qt5::Core Qt5::Widgets ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY} ${NeuroMemLibs})
+elseif(NOT WIN32)
+    target_link_libraries(imagefeaturedetector Qt5::Core Qt5::Widgets ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY})
+endif(WIN32)
 

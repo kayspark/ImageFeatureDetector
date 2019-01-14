@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "nm_classifier.h"
 #include "nm_detector.h"
 #include "ui_windowFastRealTime.h"
 #include "vlccap.h"
@@ -33,7 +34,6 @@ private:
   std::unique_ptr<QTimer> mTimer;
   QPixmap mPixmap;
   std::unique_ptr<QPainter> mPainter;
-  cv::Mat mImageRT;
   std::vector<cv::KeyPoint> mKeypoints;
   bool mDetecting;
   double mTime;
@@ -42,6 +42,9 @@ private:
   std::unique_ptr<QRubberBand> _rubberBand;
   bool _band_avaiable = false;
   QPoint mLastPoint;
+  std::unique_ptr<nm_classifier> _nm_classifier;
+  QAction *actNormal = nullptr;
+  QAction *actAbnormal = nullptr;
 
 protected:
   nm_detector _predator;
@@ -57,4 +60,6 @@ private slots:
   void close();
   void saveFastParams();
   void resetUI();
+  void learnNormal();
+  void learnAbnormal();
 };

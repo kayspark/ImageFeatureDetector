@@ -7,7 +7,7 @@ using namespace cv;
 motionCapture::motionCapture()
     : _pBgs(cv::createBackgroundSubtractorMOG2(10, 25, false))
     , _timeRange(3000)
-    , _criteria(cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS, 20, 0.1)
+    , _criteria(cv::TermCriteria::MAX_ITER | cv::TermCriteria::EPS, 20, 0.03)
     , _winSize(cv::Size(40, 40))
     , _fps(0) {
   // _capture = &cap;
@@ -44,9 +44,13 @@ void motionCapture::uniteContours(vector<vector<cv::Point>> &cnts) {
 
 void motionCapture::getFeaturePoints(const std::vector<cv::Point> &in, std::vector<cv::Point2f> &out) {
   const int qty = 10;
-  long step = (long)in.size() / qty;
-  for (auto i = in.begin(); i < in.end(); i += step) {
+  long step = (long) in.size() / qty;
+  for (auto i = in.begin(); i < in.end();) {
     out.emplace_back(i->x, i->y);
+    if (i  < (in.end() - step))
+      i += step;
+    else break;
+         
   }
 }
 
@@ -139,34 +143,7 @@ void motionCapture::fill_tracks(vector<map<milliseconds, vector<Point>>> &allTra
   });
 }
 
-void motionCapture::display() {
-  auto frameIt = _frames.rbegin();
-  milliseconds time = frameIt->first;
-  Mat outFrame;
-  outFrame = frameIt->second.getImg();
-  int cnt = 0;
-  for (const auto &track : _allTracks) {
-    if (track.size() > 1) {
-      auto mapIt = track.find(time);
-      if (mapIt == track.end())
-        continue;
-      Rect r = boundingRect(mapIt->second);
-      rectangle(outFrame, r, Scalar(0, 255, 0), 3, 8, 0);
-      stringstream ss;
-      ss << cnt++;
-      string stringNumber = ss.str();
-      putText(outFrame, stringNumber, Point(r.x + 5, r.y + 5), FONT_HERSHEY_COMPLEX_SMALL, 1, Scalar(0, 0, 255), 1, 8);
-    }
-  }
-  stringstream sst;
-  sst << _fps;
-  string fpsString = "FPS = " + sst.str();
-  putText(outFrame, fpsString, Point(20, outFrame.rows - 20), FONT_HERSHEY_COMPLEX_SMALL, 0.8, Scalar(255, 0, 255), 1,
-          8);
-  imshow("tracks", outFrame);
-  waitKey(5);
-}
-void motionCapture::get_detected(std::vector<cv::Rect> &out) const {
+void motionCapture::get_detected(std::vector<cv::Rect> &out) {
   if (!out.empty())
     out.clear();
   auto frameIt = _frames.rbegin();
@@ -183,4 +160,5 @@ void motionCapture::get_detected(std::vector<cv::Rect> &out) const {
       // rectangle(outFrame, r, Scalar(0, 255, 0), 3, 8, 0);
     }
   }
+  _frames.clear() ;
 }

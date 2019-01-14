@@ -22,7 +22,7 @@ class motionCapture {
   std::vector<std::map<std::chrono::milliseconds, std::vector<cv::Point>>> _allTracks;
 
 public:
-  void get_detected(std::vector<cv::Rect> &out) const;
+  void get_detected(std::vector<cv::Rect> &out);
 
 private:
   cv::Ptr<cv::BackgroundSubtractor> _pBgs;
@@ -33,8 +33,6 @@ public:
   motionCapture();
   ~motionCapture();
   void find(cv::Mat &gray);
-  void display();
-
   void fill_tracks(std::vector<std::map<std::chrono::milliseconds, std::vector<cv::Point>>> &allTracks,
                    std::vector<std::vector<cv::Point>> &allContours) const;
 };

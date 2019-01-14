@@ -11,10 +11,7 @@ private:
   cv::Ptr<cv::Tracker> _tracker;
   bool initialized_tracker;
   std::vector<cv::Rect> objects;
-  std::vector<cv::Rect> candidate_objects;
 
-public:
-  const std::vector<cv::Rect> &get_candidate() const;
 
 private:
   std::array<cv::Scalar, 8> colors;
@@ -29,7 +26,7 @@ public:
   ~nm_detector() = default;
   void createTrackerByName(std::string_view name);
   bool update_tracker(cv::Mat &gray);
-  void detect_candidate(cv::Mat &gray);
+  void detect_candidate(cv::Mat &gray, std::vector<cv::Rect>& out);
   void detect_objects(const cv::Mat &gray);
   double get_detection_time() const { return detection_time; }
   bool validate_roi(cv::Mat &roi);

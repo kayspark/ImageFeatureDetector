@@ -8,12 +8,14 @@
  */
 
 #include "windowFastRealTime.h"
+#include "opencvhelper.h"
 
 WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
     : QDialog(wmain, Qt::Dialog)
     , mCamera(vlc_capture(960, 544))
     , mTimer(std::make_unique<QTimer>())
     , mDetecting(false)
+    , _nm_classifier(std::make_unique<nm_classifier>())
     , mTime(0.0)
     , _data_file("./dataset/cascade.xml")
     , _tracking_algorithm("CSRT")
@@ -31,6 +33,13 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   listWidget->setIconSize(QSize(100, 100));
   listWidget->setResizeMode(QListWidget::Adjust);
   listWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+
+  actAbnormal = new QAction(tr("&Abnormal"), this);
+  actNormal = new QAction(tr("&Normal"), this);
+
+  QObject::connect(actNormal, &QAction::triggered, this, &WindowFastRealTime::learnNormal);
+  QObject::connect(actAbnormal, &QAction::triggered, this, &WindowFastRealTime::learnAbnormal);
+
   QObject::connect(listWidget, &QListWidget::customContextMenuRequested, this, &WindowFastRealTime::showContextMenu);
   QObject::connect(uiPushButtonNonMaxFAST, &QPushButton::toggled, this, &WindowFastRealTime::saveFastParams);
   QObject::connect(uiSpinBoxThresholdFAST, &QSpinBox::editingFinished, this, &WindowFastRealTime::saveFastParams);
@@ -51,8 +60,8 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
 void WindowFastRealTime::showContextMenu(const QPoint &pos) {
   QPoint globalPos = listWidget->mapToGlobal(pos);
   QMenu menu(this);
-  menu.addAction("비정상");
-  menu.addAction("정상");
+  menu.addAction(actAbnormal);
+  menu.addAction(actNormal);
   menu.exec(globalPos);
 }
 void WindowFastRealTime::detect() {
@@ -118,12 +127,27 @@ void WindowFastRealTime::resetUI() {
   saveFastParams();
 }
 
+void WindowFastRealTime::learnNormal() { 
+
+}
+
+void WindowFastRealTime::learnAbnormal() {
+
+  QListWidgetItem* currentItem = listWidget->currentItem(); 
+  QIcon icon = currentItem->icon();
+  cv::Mat feature = QPixmap2Mat(icon.pixmap(QSize(100,100) ) , true);
+  _nm_classifier->learn(feature);
+}
+
+
 void WindowFastRealTime::compute() {
-  mCamera.read(mImageRT);
+
+  cv::Mat imgRT;
+  mCamera.read(imgRT);
   if (mDetecting) {
-    if (!mImageRT.empty()) {
+    if (!imgRT.empty()) {
       cv::Mat gray;
-      cv::cvtColor(mImageRT, gray, cv::COLOR_BGR2GRAY);
+      cv::cvtColor(imgRT, gray, cv::COLOR_BGR2GRAY);
 
       QRect qRect;
       cv::Rect rect1;
@@ -133,26 +157,27 @@ void WindowFastRealTime::compute() {
         rect1 = cv::Rect(qRect.x(), qRect.y(), qRect.width(), qRect.height());
       }
 
-      _predator.update_tracker(gray);
-      cv::Rect2d object = _predator.get_detected();
-      std::vector<cv::Rect> candidate = _predator.get_candidate();
+      std::vector<cv::Rect> candidate;
+      _predator.detect_candidate(gray,candidate);
       //   cv::resize(_imgRT, _imgRT, cv::Size(640, 480), 0, 0, cv::INTER_CUBIC);
       mPixmap = QPixmap::fromImage(
-        QImage(mImageRT.data, mImageRT.cols, mImageRT.rows, static_cast<int>(mImageRT.step), QImage::Format_RGB888));
+        QImage(imgRT.data, imgRT.cols, imgRT.rows, static_cast<int>(imgRT.step), QImage::Format_RGB888));
       mPainter->begin(&mPixmap);
-      QPen pen1(QColor::fromRgb(0, 255, 0));
-      pen1.setWidth(5);
-      QPen pen(QColor::fromRgb(255, 0, 0));
-      pen.setWidth(5);
+      QPen penG(QColor::fromRgb(0, 255, 0));
+      penG.setWidth(5);
+      QPen penR(QColor::fromRgb(255, 0, 0));
+      penR.setWidth(5);
+      QPen penB(QColor::fromRgb(0, 0, 255));
+      penB.setWidth(5);
       for (const auto &r : candidate) {
         // check whether in valid roi
         QRect qr(r.x, r.y, r.width, r.height);
         if (rect1.contains(r.tl()) || rect1.contains(r.br())) {
-          mPainter->setPen(pen);
+          mPainter->setPen(penB);
           listWidget->addItem(new QListWidgetItem(QIcon(mPixmap.copy(qr).scaled(QSize(100, 100), Qt::KeepAspectRatio)),
                                                   QDateTime::currentDateTime().toString("MMdd_hhmmss")));
         } else
-          mPainter->setPen(pen1);
+          mPainter->setPen(penG);
         // fill suspicious belt
         mPainter->drawRect(qr);
       }
@@ -163,7 +188,7 @@ void WindowFastRealTime::compute() {
     }
   } else {
     mPixmap = QPixmap::fromImage(
-      QImage(mImageRT.data, mImageRT.cols, mImageRT.rows, static_cast<int>(mImageRT.step), QImage::Format_RGB888));
+      QImage(imgRT.data, imgRT.cols, imgRT.rows, static_cast<int>(imgRT.step), QImage::Format_RGB888));
     uiLabelRealTime->setPixmap(mPixmap);
     uiLabelTime->setText("Detecting Time: -");
     uiLabelKeypoints->setText("Key points: -");

@@ -69,11 +69,11 @@ bool nm_detector::validate_roi(cv::Mat &roi) {
   // imshow( "result", img );
 } // detect roi
 
-void nm_detector::detect_candidate(Mat &gray) {
+void nm_detector::detect_candidate(Mat &gray, std::vector<cv::Rect>& out ) {
   auto timer = (double)cv::getTickCount();
   _motion.find(gray);
   detection_time = ((double)getTickCount() - timer) * 1000 / getTickFrequency();
-  _motion.get_detected(candidate_objects);
+  _motion.get_detected(out);
 }
 
 void nm_detector::detect_objects(const cv::Mat &gray) {
@@ -111,7 +111,6 @@ void nm_detector::detect_objects(const cv::Mat &gray) {
 bool nm_detector::update_tracker(cv::Mat &gray) {
   bool ret = !objects.empty();
   // initialized already
-  detect_candidate(gray);
   if (initialized_tracker) {
     if (_tracker->update(gray, detected_area)) {
       /* cv::Mat roi = gray(detected_area);
@@ -145,4 +144,3 @@ bool nm_detector::update_tracker(cv::Mat &gray) {
   // true if not empty
   return ret;
 }
-const vector<Rect> &nm_detector::get_candidate() const { return candidate_objects; }
