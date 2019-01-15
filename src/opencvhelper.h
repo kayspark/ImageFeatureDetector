@@ -19,12 +19,11 @@
 #ifndef OPENCVHELPER_H
 #define OPENCVHELPER_H
 
+#include <QDebug>
 #include <QImage>
 #include <QPixmap>
-#include <QDebug>
-#include <QtMultimedia/QVideoFrame>
+//#include <QtMultimedia/QVideoFrame>
 #include <opencv2/imgproc/imgproc.hpp>
-
 
 // CV_8UC3|4 -> CV_8UC3
 inline void ensureC3(cv::Mat *mat) {
@@ -61,7 +60,7 @@ inline QImage Mat2QImage(const cv::Mat &mat) {
       return QImage();
   }
 }
-
+/*
 // YUV QVideoFrame -> CV_8UC3
 inline cv::Mat yuvFrameToMat8(const QVideoFrame &frame) {
   // Q_ASSERT(frame.handleType() == QAbstractVideoBuffer::NoHandle &&
@@ -74,6 +73,7 @@ inline cv::Mat yuvFrameToMat8(const QVideoFrame &frame) {
            frame.pixelFormat() == QVideoFrame::Format_YUV420P ? cv::COLOR_YUV2BGR_NV12 : cv::COLOR_YUV2BGR_NV12);
   return result;
 }
+*/
 inline cv::Mat QImage2Mat(QImage const &src, bool bClone = true) {
   switch (src.format()) {
     // 8-bit, 4 channel
@@ -128,7 +128,6 @@ inline cv::Mat QImage2Mat(QImage const &src, bool bClone = true) {
   }
   return cv::Mat();
 }
-
 
 inline cv::Mat QPixmap2Mat(const QPixmap &in, bool bclone) { return QImage2Mat(in.toImage(), bclone); }
 

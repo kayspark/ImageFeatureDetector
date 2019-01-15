@@ -1,11 +1,11 @@
 //
-// Created by 박기수 on 2018-12-10.
+// Created by kspark@nepes.co.kr on 2018-12-10.
 //
 
 #pragma once
 #define _max_corners 10000
 #include "ds.h"
-#include "motionDetectionV1.h"
+#include "fireBehaviorDetection.h"
 #include <opencv2/opencv.hpp>
 #include <opencv2/tracking.hpp>
 
@@ -71,7 +71,7 @@ private:
   cv::Mat maskHSI;
 
 public:
-  void detectFire(cv::Mat &maskMotion, motionDetectionV1 &bgs, cv::Mat &imgBackgroundModel,
+  void detectFire(cv::Mat &maskMotion, fireBehaviorDetection &bgs, cv::Mat &imgBackgroundModel,
                   cv::Mat &imgStandardDeviation, cv::Mat &img32FBackgroundModel, cv::Mat &img32FStandardDeviation,
                   cv::Mat &imgSrc, cv::Mat &imgGray, cv::Mat &imgDisplay);
   bool update_tracker(cv::Mat &img);

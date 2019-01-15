@@ -37,15 +37,16 @@ and the following disclaimer.
 #include "nm_classifier.h"
 #include <algorithm>
 #include <map>
-#include <qdir.h>
 #include <opencv2/opencv.hpp>
+#include <qdir.h>
 
 using namespace NeuroMem;
 using namespace cv;
 
-nm_classifier::nm_classifier(): m_device(std::make_unique<NeuroMem::NeuroMemDevice>()) {
+nm_classifier::nm_classifier()
+    : m_device(std::make_unique<NeuroMem::NeuroMemDevice>()) {
   m_category_set_.insert(0);
-#if defined _WIN32 
+#if defined _WIN32
   NeuroMem::NeuroMemEngine::GetDevices(m_device.get(), 1);
   if (NeuroMem::NeuroMemEngine::Connect(m_device.get()) == 100) {
     std::cout << "connection error" << std::endl;
@@ -73,19 +74,25 @@ nm_classifier::~nm_classifier() {
     m_device.release();
 }
 
-
 bool nm_classifier::is_loaded_from_file() const { return m_loaded_; }
 
 void nm_classifier::get_names(std::vector<std::string> &ret) {
   ret.reserve(m_names_.size());
 
-  std::for_each(std::begin(m_names_), std::end(m_names_),
-                [&ret](const std::map<uint16_t, std::string>::value_type &entry) { ret.push_back(entry.second); });
+  std::for_each(
+      std::begin(m_names_), std::end(m_names_),
+      [&ret](const std::map<uint16_t, std::string>::value_type &entry) {
+        ret.push_back(entry.second);
+      });
 }
 
-enum_feature_algorithm nm_classifier::get_feature_algorithm() const { return m_algorithm; }
+enum_feature_algorithm nm_classifier::get_feature_algorithm() const {
+  return m_algorithm;
+}
 
-uint16_t nm_classifier::get_neuron_vector_size() const { return m_neuron_vector_size; }
+uint16_t nm_classifier::get_neuron_vector_size() const {
+  return m_neuron_vector_size;
+}
 
 void nm_classifier::set_learning_mode(bool mode) { learning_mode_ = mode; }
 
@@ -102,36 +109,38 @@ void nm_classifier::set_feature_algorithm(enum_feature_algorithm algorithm) {
     return;
   switch (algorithm) {
 
-    case enum_feature_algorithm::hog:
+  case enum_feature_algorithm::hog:
 
-      if (m_hog.empty()) {
-        std::cout << "new hog instance created" << std::endl;
-        m_hog = cv::makePtr<HOGDescriptor>(Size(32, 32),                   // winSize
-                                           Size(20, 20),                   // blocksize
-                                           Size(12, 12),                   // blockStride,
-                                           Size(10, 10),                   // cellSize,
-                                           16,                             // nbins,
-                                           1,                              // derivAper,
-                                           -1,                             // winSigma,
-                                           HOGDescriptor::L2Hys,           // histogramNormType,
-                                           0.2,                            // L2HysThresh,
-                                           true,                           // gammal correction,
-                                           HOGDescriptor::DEFAULT_NLEVELS, // nlevels=64
-                                           false);
-      }
-      m_neuron_vector_size = 256;
-      break;
-    case enum_feature_algorithm::default_:
-      m_neuron_vector_size = 256;
-      break;
-    case enum_feature_algorithm::sub_sampling:
-      break;
+    if (m_hog.empty()) {
+      std::cout << "new hog instance created" << std::endl;
+      m_hog = cv::makePtr<HOGDescriptor>(
+          Size(32, 32),                   // winSize
+          Size(20, 20),                   // blocksize
+          Size(12, 12),                   // blockStride,
+          Size(10, 10),                   // cellSize,
+          16,                             // nbins,
+          1,                              // derivAper,
+          -1,                             // winSigma,
+          HOGDescriptor::L2Hys,           // histogramNormType,
+          0.2,                            // L2HysThresh,
+          true,                           // gammal correction,
+          HOGDescriptor::DEFAULT_NLEVELS, // nlevels=64
+          false);
+    }
+    m_neuron_vector_size = 256;
+    break;
+  case enum_feature_algorithm::default_:
+    m_neuron_vector_size = 256;
+    break;
+  case enum_feature_algorithm::sub_sampling:
+    break;
   }
 
   m_algorithm = algorithm;
 }
 
-void nm_classifier::set_context(uint16_t context, const uint16_t norm, const uint16_t minif, const uint16_t maxif) {
+void nm_classifier::set_context(uint16_t context, const uint16_t norm,
+                                const uint16_t minif, const uint16_t maxif) {
   NeuroMemContext ctx;
   ctx.context = context;
   ctx.norm = norm;
@@ -149,10 +158,10 @@ bool nm_classifier::classify(NeuroMemClassifyReq &req) {
   bool ret = false;
   assert(m_device->handle != nullptr);
 #if defined _WIN32
-    const int t = NeuroMemEngine::Classify(m_device.get(), &req);
-    if (t == NM_CLASSIFY_IDENTIFIED || req.distance[0] < UNKNOWN) {
-      ret = true;
-    }
+  const int t = NeuroMemEngine::Classify(m_device.get(), &req);
+  if (t == NM_CLASSIFY_IDENTIFIED || req.distance[0] < UNKNOWN) {
+    ret = true;
+  }
 #endif
   return ret;
 }
@@ -165,28 +174,28 @@ void nm_classifier::learn(NeuroMemLearnReq &req) {
 #endif
   if (req.ns > 0) {
     const auto ret = m_category_set_.insert(req.category);
-    if (!ret.second) 
-      std::cout << "cannot be learnd for the category :" << req.category << std::endl;
+    if (!ret.second)
+      std::cout << "cannot be learnd for the category :" << req.category
+                << std::endl;
   }
 }
 
-void nm_classifier::learn(cv::Mat &in) { 
+void nm_classifier::learn(cv::Mat &in) {
   std::vector<uint8_t> feature;
-  feature.reserve(m_neuron_vector_size); 
+  feature.reserve(m_neuron_vector_size);
   extract_feature_vector(in, feature);
   NeuroMemLearnReq lreq;
   std::move(feature.begin(), feature.end(), lreq.vector);
   learn(lreq);
 }
 
-bool nm_classifier::classify(cv::Mat &in) { 
+bool nm_classifier::classify(cv::Mat &in) {
   std::vector<uint8_t> feature;
-  feature.reserve(m_neuron_vector_size); 
+  feature.reserve(m_neuron_vector_size);
   extract_feature_vector(in, feature);
   NeuroMemClassifyReq req;
   std::move(feature.begin(), feature.end(), req.vector);
   return classify(req);
-
 }
 uint32_t nm_classifier::file_to_neurons() {
   uint32_t neuron_count = 0; // NeuroMemEngine::GetNeuronCount(&hnn);
@@ -199,13 +208,15 @@ uint32_t nm_classifier::file_to_neurons() {
 
   file.open("backup/backup.hex", std::ios::in | std::ios::binary);
   if (!file.is_open()) {
-    std::cout << "Skip the restore process because there isn't backup.hex file" << std::endl;
+    std::cout << "Skip the restore process because there isn't backup.hex file"
+              << std::endl;
     return (0);
   }
 
   file_name.open("backup/name.txt", std::ios::in);
   if (!file_name.is_open()) {
-    std::cout << "Skip the restore process because there isn't backup.hex file" << std::endl;
+    std::cout << "Skip the restore process because there isn't backup.hex file"
+              << std::endl;
     return (0);
   }
   NeuroMemContext ctx{};
@@ -239,7 +250,8 @@ uint32_t nm_classifier::file_to_neurons() {
   std::vector<uint16_t> buffer(m_neuron_vector_size + 5);
   uint16_t cat = 1;
   for (auto &&neuron : neurons) {
-    file.read(reinterpret_cast<char *>(&buffer[0]), sizeof(uint16_t) * (m_neuron_vector_size + 5));
+    file.read(reinterpret_cast<char *>(&buffer[0]),
+              sizeof(uint16_t) * (m_neuron_vector_size + 5));
     if (!file.eof()) {
       neuron.ncr = buffer[0];
       neuron.size = m_neuron_vector_size;
@@ -247,9 +259,12 @@ uint32_t nm_classifier::file_to_neurons() {
       neuron.minif = buffer[2 + m_neuron_vector_size];
       neuron.cat = buffer[3 + m_neuron_vector_size];
       neuron.nid = buffer[4 + m_neuron_vector_size];
-      std::cout << "nid= " << neuron.nid << " ,ncr= " << neuron.ncr << " ,cat= " << neuron.cat
-                << " ,aif = " << neuron.aif << " , minif = " << neuron.minif << std::endl;
-      std::move(std::begin(buffer) + 1, std::begin(buffer) + 1 + m_neuron_vector_size, std::begin(neuron.model));
+      std::cout << "nid= " << neuron.nid << " ,ncr= " << neuron.ncr
+                << " ,cat= " << neuron.cat << " ,aif = " << neuron.aif
+                << " , minif = " << neuron.minif << std::endl;
+      std::move(std::begin(buffer) + 1,
+                std::begin(buffer) + 1 + m_neuron_vector_size,
+                std::begin(neuron.model));
 
       // std::cout << "  eob" << std::endl;
       if (neuron.cat > cat) {
@@ -263,7 +278,8 @@ uint32_t nm_classifier::file_to_neurons() {
   assert(m_device->handle != nullptr);
   NeuroMemEngine::WriteNeurons(m_device.get(), neurons.data(), neuron_count);
   neuron_count = NeuroMemEngine::GetNeuronCount(m_device.get());
-  std::cout << "neurons count after write neurons = " << neuron_count << std::endl;
+  std::cout << "neurons count after write neurons = " << neuron_count
+            << std::endl;
   std::cout << "Restoring names." << std::endl;
 
   if (file_name.is_open()) {
@@ -289,19 +305,20 @@ uint32_t nm_classifier::file_to_neurons() {
 
 void nm_classifier::neurons_to_file() {
 #if defined _WIN32
-  const uint32_t neuron_count = NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
+  const uint32_t neuron_count =
+      NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
   if (neuron_count <= 0)
     return;
   std::vector<NeuroMem::NeuroMemNeuron> neurons(neuron_count);
   neurons[0].size = m_neuron_vector_size;
   int size = neurons[0].size;
-  NeuroMem::NeuroMemEngine::ReadNeurons(m_device.get(), &neurons[0], neuron_count);
+  NeuroMem::NeuroMemEngine::ReadNeurons(m_device.get(), &neurons[0],
+                                        neuron_count);
 
   std::string filename = "backup/backup.hex";
   //   QString filename =
   std::ofstream file;
   QDir dir;
-  // ReSharper disable once CppExpressionWithoutSideEffects
   dir.mkdir("backup");
   file.open("backup/backup.hex", std::ios::out | std::ios::binary);
   if (file.is_open()) {
@@ -313,14 +330,16 @@ void nm_classifier::neurons_to_file() {
     std::vector<uint16_t> buffer(size + 5);
     for (const auto neuron : neurons) {
       buffer[0] = neuron.ncr;
-      std::move(std::begin(neuron.model), std::end(neuron.model), std::begin(buffer) + 1);
+      std::move(std::begin(neuron.model), std::end(neuron.model),
+                std::begin(buffer) + 1);
       //	for (int j = 0; j < size; j++)
       //		buffer[1 + j] = neuron.model[j];
       buffer[1 + size] = neuron.aif;
       buffer[2 + size] = neuron.minif;
       buffer[3 + size] = neuron.cat;
       buffer[4 + size] = static_cast<uint16_t>(neuron.nid);
-      file.write(reinterpret_cast<char *>(&buffer[0]), sizeof(uint16_t) * (size + 5));
+      file.write(reinterpret_cast<char *>(&buffer[0]),
+                 sizeof(uint16_t) * (size + 5));
     }
     file.close();
     //	delete[] buffer;
@@ -340,8 +359,9 @@ void nm_classifier::pyramid_reduction(Mat &input, Mat &output, int size) {
 }
 
 void nm_classifier::extract_feature_hog(Mat &input, Mat &output) {
-  if (input.rows > 32 && input.cols > 32)
-    pyramid_reduction(input, input, 32);
+  //  if (input.rows > 32 && input.cols > 32)
+  //    pyramid_reduction(input, input, 32);
+  cv::resize(input, input, cv::Size(32, 32));
   std::vector<float> descriptors_values;
 
   m_hog->compute(input, descriptors_values);
@@ -355,18 +375,18 @@ void nm_classifier::extract_feature_vector(Mat input, std::vector<uint8_t> &v) {
   Mat output;
   // some algorithms need color images , whereas most are needed gray.
   switch (m_algorithm) {
-       case enum_feature_algorithm::hog:
-      if (input.channels() != 1)
-        cvtColor(input, input, cv::COLOR_BGR2GRAY);
-      extract_feature_hog(input, output);
-      break;
-    case enum_feature_algorithm::sub_sampling:
-      if (input.channels() != 1)
-        cvtColor(input, input, cv::COLOR_BGR2GRAY);
-      break;
+  case enum_feature_algorithm::hog:
+    if (input.channels() != 1)
+      cvtColor(input, input, cv::COLOR_BGR2GRAY);
+    extract_feature_hog(input, output);
+    break;
+  case enum_feature_algorithm::sub_sampling:
+    if (input.channels() != 1)
+      cvtColor(input, input, cv::COLOR_BGR2GRAY);
+    break;
 
-    case enum_feature_algorithm::default_:
-      break;
+  case enum_feature_algorithm::default_:
+    break;
   }
 
   // fill_neuron_vector(output, v);

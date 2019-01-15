@@ -20,7 +20,7 @@ WindowImage::WindowImage(const QString &fileName, QString windowTitle, int windo
     , mOriginalHeight(0)
     , mModified(false)
     , mFeatureType(0)
-    , _data_file("./dataset/cascade.xml")
+    , _data_file(":/dataset/cascade.xml")
     , _tracking_algorithm("CSRT")
     , _predator(nm_detector(this->_data_file, this->_tracking_algorithm))
     , mPainter(std::make_unique<QPainter>())
@@ -66,7 +66,7 @@ WindowImage::WindowImage(std::shared_ptr<QImage> image, QString windowTitle, int
     , mImageN(0)
     , mModified(false)
     , mFeatureType(0)
-    , _data_file("./dataset/cascade.xml")
+    , _data_file(":/dataset/cascade.xml")
     , _tracking_algorithm("CSRT")
     , _predator(nm_detector(this->_data_file, this->_tracking_algorithm))
     , mPainter(std::make_unique<QPainter>())
@@ -410,8 +410,8 @@ void WindowImage::compute() {
       qRect = _rubberBand->geometry();
       rect1 = cv::Rect(qRect.x(), qRect.y(), qRect.width(), qRect.height());
     }
-    std::vector<cv::Rect> candidate; 
-    _predator.detect_candidate(gray,candidate);
+    std::vector<cv::Rect> candidate;
+    _predator.detect_candidate(gray, candidate);
     //   cv::resize(_imgRT, _imgRT, cv::Size(640, 480), 0, 0, cv::INTER_CUBIC);
     cvtColor(_imgRT, _imgRT, cv::COLOR_BGR2RGB);
     _image = std::make_unique<QImage>(_imgRT.data, _imgRT.cols, _imgRT.rows, static_cast<int>(_imgRT.step),

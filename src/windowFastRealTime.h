@@ -16,11 +16,10 @@
 #include "windowMain.h"
 #include <opencv2/features2d.hpp>
 #include <opencv2/opencv.hpp>
-class WindowMain; // http://stackoverflow.com/questions/2133250/does-not-name-a-type-error-in-c
+class
+    WindowMain; // http://stackoverflow.com/questions/2133250/does-not-name-a-type-error-in-c
 
-class WindowFastRealTime
-    : public QDialog
-    , Ui::windowFastRealTime {
+class WindowFastRealTime : public QDialog, Ui::windowFastRealTime {
   Q_OBJECT
 public:
   explicit WindowFastRealTime(WindowMain *wmain);
@@ -39,12 +38,14 @@ private:
   double mTime;
   std::string _data_file;
   std::string _tracking_algorithm;
-  std::unique_ptr<QRubberBand> _rubberBand;
-  bool _band_avaiable = false;
+  std::vector<std::shared_ptr<QRubberBand>> _bandList;
+  std::shared_ptr<QRubberBand> _rubberBand;
+  bool _mouse_pressed = false;
   QPoint mLastPoint;
   std::unique_ptr<nm_classifier> _nm_classifier;
-  QAction *actNormal = nullptr;
-  QAction *actAbnormal = nullptr;
+  std::unique_ptr<QAction> actNormal;
+  std::unique_ptr<QAction> actAbnormal;
+  std::unique_ptr<QAction> actClear;
 
 protected:
   nm_detector _predator;
@@ -62,4 +63,5 @@ private slots:
   void resetUI();
   void learnNormal();
   void learnAbnormal();
+  void clearListWidget();
 };

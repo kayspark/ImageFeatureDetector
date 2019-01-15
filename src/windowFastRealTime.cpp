@@ -17,7 +17,7 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
     , mDetecting(false)
     , _nm_classifier(std::make_unique<nm_classifier>())
     , mTime(0.0)
-    , _data_file("./dataset/cascade.xml")
+    , _data_file(":/dataset/cascade.xml")
     , _tracking_algorithm("CSRT")
     , _predator(nm_detector(this->_data_file, this->_tracking_algorithm))
     , mSettings(wmain->getMSettings())
@@ -26,7 +26,6 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
   setContextMenuPolicy(Qt::ActionsContextMenu);
-
   uiSpinBoxThresholdFAST->setValue(mSettings->value("fastRT/threshold", 25).toInt());
   uiPushButtonNonMaxFAST->setChecked(mSettings->value("fastRT/nonMaxSuppression", true).toBool());
   listWidget->setViewMode(QListWidget::IconMode);
@@ -34,11 +33,13 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   listWidget->setResizeMode(QListWidget::Adjust);
   listWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
-  actAbnormal = new QAction(tr("&Abnormal"), this);
-  actNormal = new QAction(tr("&Normal"), this);
+  actAbnormal = std::make_unique<QAction>(tr("&Abnormal"), this);
+  actNormal = std::make_unique<QAction>(tr("&Normal"), this);
+  actClear = std::make_unique<QAction>(tr("&Clear"), this);
 
-  QObject::connect(actNormal, &QAction::triggered, this, &WindowFastRealTime::learnNormal);
-  QObject::connect(actAbnormal, &QAction::triggered, this, &WindowFastRealTime::learnAbnormal);
+  QObject::connect(actNormal.get(), &QAction::triggered, this, &WindowFastRealTime::learnNormal);
+  QObject::connect(actAbnormal.get(), &QAction::triggered, this, &WindowFastRealTime::learnAbnormal);
+  QObject::connect(actClear.get(), &QAction::triggered, this, &WindowFastRealTime::clearListWidget);
 
   QObject::connect(listWidget, &QListWidget::customContextMenuRequested, this, &WindowFastRealTime::showContextMenu);
   QObject::connect(uiPushButtonNonMaxFAST, &QPushButton::toggled, this, &WindowFastRealTime::saveFastParams);
@@ -60,8 +61,9 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
 void WindowFastRealTime::showContextMenu(const QPoint &pos) {
   QPoint globalPos = listWidget->mapToGlobal(pos);
   QMenu menu(this);
-  menu.addAction(actAbnormal);
-  menu.addAction(actNormal);
+  menu.addAction(actAbnormal.get());
+  menu.addAction(actNormal.get());
+  menu.addAction(actClear.get());
   menu.exec(globalPos);
 }
 void WindowFastRealTime::detect() {
@@ -89,25 +91,25 @@ void WindowFastRealTime::closeEvent(QCloseEvent *closeEvent) {
 
 void WindowFastRealTime::mousePressEvent(QMouseEvent *event) {
   mLastPoint = event->pos();
-
-  if (_rubberBand == nullptr)
-    _rubberBand = std::make_unique<QRubberBand>(QRubberBand::Rectangle, this);
+  _mouse_pressed = true;
+  _rubberBand = std::make_shared<QRubberBand>(QRubberBand::Rectangle, this);
+  _bandList.emplace_back(_rubberBand);
   // setCursor(Qt::ClosedHandCursor);
 }
 
 void WindowFastRealTime::mouseMoveEvent(QMouseEvent *event) {
-  QPoint pos = event->pos();
-  _rubberBand->setGeometry(QRect(mLastPoint, pos).normalized());
-  _rubberBand->show();
-  _band_avaiable = false;
-  QToolTip::showText(event->globalPos(),
-                     QString("%1,%2").arg(_rubberBand->size().width()).arg(_rubberBand->size().height()), this);
+  if (_mouse_pressed) {
+    _rubberBand->setGeometry(QRect(mLastPoint, event->pos()).normalized());
+    _rubberBand->show();
+    QToolTip::showText(event->globalPos(),
+                       QString("%1,%2").arg(_rubberBand->size().width()).arg(_rubberBand->size().height()), this);
+  }
   // mLastPoint = myPos;
 }
 
 void WindowFastRealTime::mouseReleaseEvent(QMouseEvent * /*event*/) {
   // unsetCursor();
-  _band_avaiable = true;
+  _mouse_pressed = false;
   //_rubberBand->hide();
   // determine selection.. QRect::contains..
 }
@@ -119,11 +121,14 @@ void WindowFastRealTime::saveFastParams() {
 void WindowFastRealTime::resetUI() {
   uiSpinBoxThresholdFAST->setValue(25);
   uiPushButtonNonMaxFAST->setChecked(true);
-  if (_rubberBand) {
-    _rubberBand->hide();
-    _rubberBand.release();
+  if (_bandList.size() > 0) {
+    for (auto &band : _bandList) {
+      band->hide();
+      band = nullptr;
+    }
+    _bandList.clear();
+    _rubberBand = nullptr;
   }
-  listWidget->clear();
   saveFastParams();
 }
 
@@ -137,26 +142,39 @@ void WindowFastRealTime::learnAbnormal() {
   _nm_classifier->learn(feature);
 }
 
+void WindowFastRealTime::clearListWidget() {
+  QList<QListWidgetItem *> selected = listWidget->selectedItems();
+  int size = selected.size();
+  if (size > 0) {
+    for (auto &item : selected) {
+      // https://stackoverflow.com/questions/25417348/remove-selected-items-from-listwidget
+      listWidget->removeItemWidget(item);
+      delete item;
+    }
+    listWidget->clearSelection();
+  } else
+    listWidget->clear();
+}
+
 void WindowFastRealTime::compute() {
 
   cv::Mat imgRT;
+
   mCamera.read(imgRT);
   if (mDetecting) {
     if (!imgRT.empty()) {
       cv::Mat gray;
       cv::cvtColor(imgRT, gray, cv::COLOR_BGR2GRAY);
-
-      QRect qRect;
-      cv::Rect rect1;
-      if (_rubberBand && _band_avaiable) {
-        _rubberBand->showNormal();
-        qRect = _rubberBand->geometry();
-        rect1 = cv::Rect(qRect.x(), qRect.y(), qRect.width(), qRect.height());
+      std::vector<cv::Rect> roiList;
+      for (const auto &band : _bandList) {
+        band->showNormal();
+        QRect qRect = band->geometry();
+        roiList.emplace_back(cv::Rect(qRect.x(), qRect.y(), qRect.width(), qRect.height()));
       }
-
-      std::vector<cv::Rect> candidate;
-      _predator.detect_candidate(gray, candidate);
-      //   cv::resize(_imgRT, _imgRT, cv::Size(640, 480), 0, 0, cv::INTER_CUBIC);
+      std::vector<cv::Rect> motions;
+      _predator.detect_candidate(gray, motions);
+      //   cv::resize(_imgRT, _imgRT, cv::Size(640, 480), 0, 0,
+      //   cv::INTER_CUBIC);
       mPixmap = QPixmap::fromImage(
         QImage(imgRT.data, imgRT.cols, imgRT.rows, static_cast<int>(imgRT.step), QImage::Format_RGB888));
       mPainter->begin(&mPixmap);
@@ -166,19 +184,24 @@ void WindowFastRealTime::compute() {
       penR.setWidth(5);
       QPen penB(QColor::fromRgb(0, 0, 255));
       penB.setWidth(5);
-      for (const auto &r : candidate) {
+      for (const auto &r : motions) {
         // check whether in valid roi
         QRect qr(r.x, r.y, r.width, r.height);
-        if (rect1.contains(r.tl()) || rect1.contains(r.br())) {
-          QPixmap tpix = mPixmap.copy(qr).scaled(QSize(99, 100), Qt::KeepAspectRatio);
-          if (_nm_classifier->classify(QPixmap2Mat(tpix, true))) {
-            listWidget->addItem(new QListWidgetItem(QIcon(tpix), QDateTime::currentDateTime().toString("MMdd_hhmmss")));
-            mPainter->setPen(penR);
+        for (const auto &roi : roiList) {
+          if (roi.contains(r.tl()) || roi.contains(r.br())) {
+            QPixmap tpix = mPixmap.copy(qr).scaled(QSize(100, 100), Qt::KeepAspectRatio);
+            if (_nm_classifier->classify(QPixmap2Mat(tpix, true))) {
+              mPainter->setPen(penR);
+            } else
+              mPainter->setPen(penB);
+            QString fileName = QString("%1.png").arg(QDateTime::currentDateTime().toString("MMdd_hhmmss"));
+            tpix.toImage().save(QString("backup/%1").arg(fileName));
+            listWidget->addItem(new QListWidgetItem(QIcon(tpix), fileName));
+            break;
           } else
-            mPainter->setPen(penB);
-        } else
-          mPainter->setPen(penG);
-        // fill suspicious belt
+            mPainter->setPen(penG);
+          // fill suspicious belt
+        }
         mPainter->drawRect(qr);
       }
       mPainter->end();

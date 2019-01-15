@@ -1,9 +1,9 @@
 //
-// Created by 박기수 on 2018-12-10.
+// Created by kspark on 2018-12-10.
 //
 
 #include "fire_detector.h"
-#include "motionDetectionV1.h"
+#include "fireBehaviorDetection.h"
 #include <opencv2/core/types_c.h>
 #include <opencv2/imgproc/types_c.h>
 
@@ -510,7 +510,7 @@ void fire_detector::regionMarkup(cv::Mat &imgSrc, cv::Mat &imgBackup, cv::Mat &m
     }
   }
 }
-void fire_detector::detectFire(cv::Mat &maskMotion, motionDetectionV1 &bgs, cv::Mat &imgBackgroundModel,
+void fire_detector::detectFire(cv::Mat &maskMotion, fireBehaviorDetection &bgs, cv::Mat &imgBackgroundModel,
                                cv::Mat &imgStandardDeviation, cv::Mat &img32FBackgroundModel,
                                cv::Mat &img32FStandardDeviation, cv::Mat &imgSrc, cv::Mat &imgGray,
                                cv::Mat &imgDisplay) {

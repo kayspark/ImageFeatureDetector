@@ -9,7 +9,7 @@ typedef struct RectThrd {
 } RectThresh;
 
 /* for initialize rectThrd node */
-CV_INLINE RectThresh rectThrd(const int rectWidth, const int rectHeight, const int cntrArea) {
+inline RectThresh rectThrd(const int rectWidth, const int rectHeight, const int cntrArea) {
   RectThresh rt;
 
   rt.rectWidth = rectWidth;
@@ -26,7 +26,7 @@ typedef struct Feature {
 } Feature;
 
 /* for initialize Feature node */
-CV_INLINE Feature feature(const cv::Point &prev, const cv::Point &curr) {
+inline Feature feature(const cv::Point &prev, const cv::Point &curr) {
   Feature fr;
 
   fr.prev = prev;
@@ -45,7 +45,7 @@ typedef struct OFRect {
 } OFRect;
 
 /* for initialize ofrect node */
-CV_INLINE OFRect ofRect(const cv::Rect &rect, const int countCtrP) {
+inline OFRect ofRect(const cv::Rect &rect, const int countCtrP) {
   OFRect ofr;
 
   ofr.match = false;
@@ -64,7 +64,7 @@ typedef struct Centroid {
 } Centroid;
 
 /* for initailize the new centroid node */
-CV_INLINE Centroid centroid(const OFRect &ofRect) {
+inline Centroid centroid(const OFRect &ofRect) {
   Centroid centroid1;
 
   centroid1.countFrame = 1; // first node
@@ -84,6 +84,25 @@ typedef struct DirectionsCount {
   int countRight;
 } DirectionsCount;
 
-CV_INLINE void zeroCount(DirectionsCount &count) {
+inline void zeroCount(DirectionsCount &count) {
   count.countDown = count.countLeft = count.countRight = count.countUp = 0;
+}
+
+inline std::ostream &operator<<(std::ostream &os, const Centroid &ctrd) {
+  os << "countFrame : " << ctrd.countFrame << std::endl;
+  os << "x          : " << ctrd.centroid.x << std::endl;
+  os << "y          : " << ctrd.centroid.y << std::endl;
+
+  return os;
+}
+
+inline std::ostream &operator<<(std::ostream &os, const OFRect &ofr) {
+  os << "match	: " << ofr.match << std::endl;
+  os << "x		: " << ofr.rect.x << std::endl;
+  os << "y		: " << ofr.rect.y << std::endl;
+  os << "width	: " << ofr.rect.width << std::endl;
+  os << "height	: " << ofr.rect.height << std::endl;
+  os << "countCtrP: " << ofr.countCtrP << std::endl;
+
+  return os;
 }

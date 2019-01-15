@@ -1,6 +1,6 @@
-#include "motionDetectionV1.h"
+#include "fireBehaviorDetection.h"
 /* Create buffer for image */
-motionDetectionV1::motionDetectionV1(const int &frame_count, cv::Size frameSize)
+fireBehaviorDetection::fireBehaviorDetection(const int &frame_count, cv::Size frameSize)
     : _frameno(frame_count)
     , _count(0)
     , _size(std::move(frameSize)) {
@@ -14,13 +14,13 @@ motionDetectionV1::motionDetectionV1(const int &frame_count, cv::Size frameSize)
   // create memory for Standard Deviation(threshold)
 }
 /* Release memory */
-motionDetectionV1::~motionDetectionV1() {
+fireBehaviorDetection::~fireBehaviorDetection() {
   for (int i = 0; i < _frameno; ++i) {
     _vec_frame[i].release();
   }
 }
 /* Calculate Background Model */
-void motionDetectionV1::getBackgroundModel(cv::VideoCapture &cap, cv::Mat &out) {
+void fireBehaviorDetection::getBackgroundModel(cv::VideoCapture &cap, cv::Mat &out) {
   // accumulate frame from video
 
   while (_count != _frameno) {
@@ -45,7 +45,7 @@ void motionDetectionV1::getBackgroundModel(cv::VideoCapture &cap, cv::Mat &out) 
   }
   // average the frame series as background model
 }
-void motionDetectionV1::getBackgroundModel(vlc_capture &cap, cv::Mat &out) {
+void fireBehaviorDetection::getBackgroundModel(vlc_capture &cap, cv::Mat &out) {
   // accumulate frame from video
 
   while (_count != _frameno) {
@@ -73,7 +73,7 @@ void motionDetectionV1::getBackgroundModel(vlc_capture &cap, cv::Mat &out) {
 
 /* Standard Deviation */
 // in 32UC1, out 8UC1
-void motionDetectionV1::getStandardDeviationFrame(cv::Mat &out) {
+void fireBehaviorDetection::getStandardDeviationFrame(cv::Mat &out) {
   out.setTo(cv::Scalar::all(0));
   // Initialize
   cv::Mat tmp(_size, CV_32FC1, cv::Scalar());
@@ -95,14 +95,14 @@ void motionDetectionV1::getStandardDeviationFrame(cv::Mat &out) {
 
 /* Negative processing, convert darkest areas to lightest and lightest to
  * darkest */
-void motionDetectionV1::maskNegative(cv::Mat &img) {
+void fireBehaviorDetection::maskNegative(cv::Mat &img) {
   img.forEach<uint8_t>(
     [](uint8_t &pixel, const int *position) -> void { pixel = static_cast<uint8_t>(pixel == 0 ? 255 : 0); });
 }
 
 /* th = th * coefficient */
 // imgThreshhold = 32FC1, use uchar
-void motionDetectionV1::coefficientThreshold(cv::Mat &imgThreshold, const int coef) {
+void fireBehaviorDetection::coefficientThreshold(cv::Mat &imgThreshold, const int coef) {
   imgThreshold.forEach<uchar>([&coef](uchar &pixel, const int *position) -> void {
     pixel = static_cast<uchar>(pixel * coef);
     pixel = static_cast<uchar>(pixel > 255 ? 255 : pixel < 0 ? 0 : pixel);
@@ -112,7 +112,7 @@ void motionDetectionV1::coefficientThreshold(cv::Mat &imgThreshold, const int co
 /* one channel & uchar only => imgDiff, imgThreshold, mask
  * the mask always needed to be reflash( cvZero(mask) ) first!!
  */
-void motionDetectionV1::backgroundSubtraction(const cv::Mat &imgDiff, const cv::Mat &imgThreshold, cv::Mat &mask) {
+void fireBehaviorDetection::backgroundSubtraction(const cv::Mat &imgDiff, const cv::Mat &imgThreshold, cv::Mat &mask) {
   for (int i = 0; i < imgDiff.rows; ++i) {
     auto m = mask.ptr<uint8_t>(i);
     const auto diff = imgDiff.ptr<uchar>(i);

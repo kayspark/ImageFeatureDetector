@@ -14,7 +14,6 @@ public:
   void open(std::string_view url);
   void release();
   bool isOpened();
-
   bool read(cv::Mat &outFrame);
   cv::Size get_size();
 

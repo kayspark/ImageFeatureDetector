@@ -4,7 +4,7 @@
 WindowCaptureWebcam::WindowCaptureWebcam(WindowMain *main)
     : QDialog(main, Qt::Dialog)
     , mWindowMain(main)
-    , mCamera(cv::VideoCapture(1)) {
+    , mCamera(cv::VideoCapture(0)) {
   setupUi(this);
 
   setAttribute(Qt::WA_DeleteOnClose);

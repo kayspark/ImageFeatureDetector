@@ -5,6 +5,9 @@
 using namespace cv;
 using namespace std;
 
+// shamelessly copied from opencv tracker sample codes
+// all of them seems not adaquate for production use for now
+// CNN based tracker like SSD will be merged soon.
 void nm_detector::createTrackerByName(const std::string_view name) {
   if (name == "KCF")
     _tracker = cv::TrackerKCF::create();
@@ -37,7 +40,7 @@ nm_detector::nm_detector(std::string_view cascade, std::string_view algorithm)
 
       ) {
   if (cascade.empty())
-    cascade = "./dataset/cascade.xml";
+    cascade = ":/dataset/cascade.xml";
   if (!_cascade.load(cascade.data())) {
     std::cerr << "ERROR: Could not load classifier cascade" << std::endl;
     return;
@@ -69,7 +72,7 @@ bool nm_detector::validate_roi(cv::Mat &roi) {
   // imshow( "result", img );
 } // detect roi
 
-void nm_detector::detect_candidate(Mat &gray, std::vector<cv::Rect>& out ) {
+void nm_detector::detect_candidate(Mat &gray, std::vector<cv::Rect> &out) {
   auto timer = (double)cv::getTickCount();
   _motion.find(gray);
   detection_time = ((double)getTickCount() - timer) * 1000 / getTickFrequency();

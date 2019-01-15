@@ -9,7 +9,7 @@
  * threshold, get the foreground from mask(255) coefficientThreshold():  coef *
  * threshold maskNegative(): 0->255; 255->0
  */
-class motionDetectionV1 {
+class fireBehaviorDetection {
 private:
   std::vector<cv::Mat> _vec_frame;
   cv::Mat _img_background; // background model
@@ -24,11 +24,11 @@ public:
    * _frameno: the number of frame that want to be processing as background
    * model frameSize: the size o frame
    */
-  motionDetectionV1(const int &frame_count, cv::Size frameSize);
-  motionDetectionV1(const motionDetectionV1 &bgs) = delete;
-  void operator=(const motionDetectionV1 &bgs) = delete;
+  fireBehaviorDetection(const int &frame_count, cv::Size frameSize);
+  fireBehaviorDetection(const fireBehaviorDetection &bgs) = delete;
+  void operator=(const fireBehaviorDetection &bgs) = delete;
   /* destructor */
-  ~motionDetectionV1();
+  ~fireBehaviorDetection();
   /* Need pass capture  ptr */
   void getBackgroundModel(vlc_capture &cap, cv::Mat &out);
   void getBackgroundModel(cv::VideoCapture &cap, cv::Mat &out);

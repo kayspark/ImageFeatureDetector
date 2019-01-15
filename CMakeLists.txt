@@ -43,9 +43,7 @@ elseif(NOT WIN32)
 endif (WIN32)
 find_package(OpenCV COMPONENTS opencv_core opencv_imgproc opencv_highgui opencv_objdetect opencv_tracking opencv_xfeatures2d REQUIRED)
 include_directories(${LIBVLC_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
-# find_package(Threads REQUIRED) # http://stackoverflow.com/questions/1620918/cmake-and-libpthread (if not 'libpthread.so.0: DSO missing from command line' error will be thrown at linking time)
-# find_package(ZLIB REQUIRED) # http://stackoverflow.com/questions/6173915/need-help-trying-to-make-cmake-find-third-party-libraries
-## http://stackoverflow.com/questions/3201154/cmake-automatically-add-all-files-in-a-folder-to-a-target
+
 file(GLOB ImageFeatureDetector_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
 file(GLOB ImageFeatureDetector_UI ${CMAKE_CURRENT_SOURCE_DIR}/ui/*)
 
