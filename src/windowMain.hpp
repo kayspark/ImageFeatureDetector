@@ -14,11 +14,11 @@
 #include "ui_barFeaturesSift.h"
 #include "ui_barFeaturesSurf.h"
 #include "ui_windowMain.h"
-#include "windowAbout.h"
-#include "windowCaptureWebcam.h"
-#include "windowDo4.h"
-#include "windowFastRealTime.h"
-#include "windowImage.h"
+#include "windowAbout.hpp"
+#include "windowCaptureWebcam.hpp"
+#include "windowDo4.hpp"
+#include "windowFastRealTime.hpp"
+#include "windowImage.hpp"
 #include "windowPreferences.h"
 #include "windowStartup.h"
 #include <QtCore>
@@ -35,8 +35,8 @@ public:
   void showWindowImage(WindowImage *windowImage);
   std::unique_ptr<QToolButton> mToolButtonOpenRecent;
   std::unique_ptr<QMenu> mMenuRecentFiles;
-  int mCapturedWebcamImages;
-  int mTotalImages;
+  int mCapturedWebcamImages{0};
+  int mTotalImages{0};
 
 public slots:
   void open();
@@ -46,7 +46,7 @@ public slots:
 private:
   void applyCommonTasks();
   void loadFile(const QString &filepath);
-  void closeEvent(QCloseEvent *) override;
+  void closeEvent(QCloseEvent *closeEvent) override;
   void saveSettings();
   void setRecentFile(const QString &filepath);
   void removeRecentFile(const QString &filepath);
@@ -57,7 +57,7 @@ public:
   QSettings *getMSettings();
 
 private:
-  bool mSeparatorOpenWindowsAdded; // Adding the separator on Qt Designer
+  bool mSeparatorOpenWindowsAdded{false}; // Adding the separator on Qt Designer
   // doesn't work
   std::unique_ptr<QAction> mActionExit;
   QAction *mActionSeparatorRecentFiles = nullptr;

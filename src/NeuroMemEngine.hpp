@@ -17,40 +17,38 @@
 #define __stdcall
 #endif
 
-#include <cstdint>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdint.h>
+#include <cstdint>
 
-#define NM_NCR 0x00
-#define NM_COMP 0x01
-#define NM_LCOMP 0x02
-#define NM_DIST 0x03
-#define NM_INDEXCOMP 0x03
-#define NM_CAT 0x04
-#define NM_AIF 0x05
-#define NM_MINIF 0x06
-#define NM_MAXIF 0x07
-#define NM_TESTCOMP 0x08
-#define NM_TESTCAT 0x09
-#define NM_NID 0x0A
-#define NM_GCR 0x0B
-#define NM_RSTCHAIN 0x0C
-#define NM_NSR 0x0D
-#define NM_POWERSAVE 0x0E
-#define NM_NCOUNT 0x0F
-#define NM_FORGET 0x0F
+constexpr auto NM_NCR = 0x00;
+constexpr auto NM_COMP = 0x01;
+constexpr auto NM_LCOMP = 0x02;
+constexpr auto NM_DIST = 0x03;
+constexpr auto NM_INDEXCOMP = 0x03;
+constexpr auto NM_CAT = 0x04;
+constexpr auto NM_AIF = 0x05;
+constexpr auto NM_MINIF = 0x06;
+constexpr auto NM_MAXIF = 0x07;
+constexpr auto NM_TESTCOMP = 0x08;
+constexpr auto NM_TESTCAT = 0x09;
+constexpr auto NM_NID = 0x0A;
+constexpr auto NM_GCR = 0x0B;
+constexpr auto NM_RSTCHAIN = 0x0C;
+constexpr auto NM_NSR = 0x0D;
+constexpr auto NM_POWERSAVE = 0x0E;
+constexpr auto NM_NCOUNT = 0x0F;
+constexpr auto NM_FORGET = 0x0F;
 
-#define NEURON_MEMORY 256
-#define CLASSIFY_MAX_K 9
+constexpr auto NEURON_MEMORY = 256;
+constexpr auto CLASSIFY_MAX_K = 9;
 
-#define CAM_FRAME_BUF 1843200
+constexpr auto CAM_FRAME_BUF = 1843200;
 
 namespace NeuroMem {
-  typedef enum _NeuroMemReturnStatus {
+  using NeuroMemReturnStatus = enum _NeuroMemReturnStatus {
     NM_SUCCESS = 0,
     NM_ERROR_UNKNOWN,
     NM_ERROR_DEVICE_NOT_FOUND,
@@ -61,51 +59,51 @@ namespace NeuroMem {
     NM_ERROR_NOT_SUPPORT,
     NM_ERROR_IO_TIMEOUT,
     NM_ERROR_IO_FAILED
-  } NeuroMemReturnStatus;
+  };
 
-  typedef enum _NeuroMemNetworkResult {
+  using NeuroMemNetworkResult = enum _NeuroMemNetworkResult {
     NM_LEARN_ALREADY_KNOWN = 0,
     NM_LEARN_SUCCESS = 1,
     NM_LEARN_DEGENERATED = 2,
     NM_CLASSIFY_UNKNOWN = 0,
     NM_CLASSIFY_UNCERTAIN = 4,
     NM_CLASSIFY_IDENTIFIED = 8
-  } NeuroMemNetworkResult;
+  };
 
-  typedef enum _NeuroMemNetworkType { RBF = 0, KNN = 1 } NeuroMemNetworkType;
+  using NeuroMemNetworkType = enum _NeuroMemNetworkType { RBF = 0, KNN = 1 };
 
-  typedef enum _NeuroMemNormType { L1 = 0, Lsup = 1 } NeuroMemNormType;
+  using NeuroMemNormType = enum _NeuroMemNormType { L1 = 0, Lsup = 1 };
 
-  typedef struct _NeuroMemDevice {
+  using NeuroMemDevice = struct _NeuroMemDevice {
     uint16_t idx;
     uint16_t type;
     uint16_t id;
     uint16_t vid;
     uint16_t pid;
     void *handle;
-  } NeuroMemDevice;
+  };
 
-  typedef struct _NeuroMemNetworkInfo {
+  using NeuroMemNetworkInfo = struct _NeuroMemNetworkInfo {
     uint16_t neuronMemorySize;
     uint32_t neuronSize;
     uint16_t version;
-  } NeuroMemNetworkInfo;
+  };
 
-  typedef struct _NeuroMemContext {
+  using NeuroMemContext = struct _NeuroMemContext {
     uint16_t context;
     uint16_t norm;
     uint16_t minif;
     uint16_t maxif;
-  } NeuroMemContext;
+  };
 
-  typedef struct _NeuroMemNetworkStatus {
+  using NeuroMemNetworkStatus = struct _NeuroMemNetworkStatus {
     uint16_t networkType;
     uint32_t networkUsed;
     uint16_t context;
     uint16_t norm;
-  } NeuroMemNetworkStatus;
+  };
 
-  typedef struct _NeuroMemClassifyReq {
+  using NeuroMemClassifyReq = struct _NeuroMemClassifyReq {
     uint8_t vector[256];
     uint16_t size;
     uint16_t k;
@@ -115,16 +113,16 @@ namespace NeuroMem {
     uint16_t distance[CLASSIFY_MAX_K];
     uint16_t category[CLASSIFY_MAX_K];
     uint32_t nid[CLASSIFY_MAX_K];
-  } NeuroMemClassifyReq;
+  };
 
-  typedef struct _NeuroMemLearnReq {
+  using NeuroMemLearnReq = struct _NeuroMemLearnReq {
     uint8_t vector[256];
     uint16_t size;
     uint16_t category;
     NeuroMemNetworkResult ns;
-  } NeuroMemLearnReq;
+  };
 
-  typedef struct _NeuroMemNeuron {
+  using NeuroMemNeuron = struct _NeuroMemNeuron {
     uint8_t model[256];
     uint16_t size;
     uint16_t ncr;
@@ -132,13 +130,13 @@ namespace NeuroMem {
     uint16_t minif;
     uint16_t cat;
     uint32_t nid;
-  } NeuroMemNeuron;
+  };
 
-  typedef struct _DataCameraFrame {
+  using DataCameraFrame = struct _DataCameraFrame {
     uint8_t *data;
     uint32_t offset;
     uint32_t size;
-  } DataCameraFrame;
+  };
 
   class NeuroMemEngine {
   public:

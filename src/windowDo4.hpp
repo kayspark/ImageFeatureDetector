@@ -10,7 +10,7 @@
 #pragma once
 
 #include "ui_windowDo4.h"
-#include "windowImage.h"
+#include "windowImage.hpp"
 
 class WindowDo4
     : public QWidget

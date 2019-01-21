@@ -9,8 +9,8 @@
 class motionCapture {
   // cv::VideoCapture *_capture = nullptr;
   std::chrono::milliseconds _currentTime;
-  const int _timeRange; // in milliseconds
-  int _fps;
+  const int _timeRange{3000}; // in milliseconds
+  int _fps{0};
   std::vector<cv::Vec4i> _hierarchy;
   cv::TermCriteria _criteria;
   cv::Size _winSize;

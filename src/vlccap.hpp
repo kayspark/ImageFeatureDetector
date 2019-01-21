@@ -1,5 +1,4 @@
-#ifndef VLCCAP_H
-#define VLCCAP_H
+#pragma once
 
 #include "vlc/vlc.h"
 #include <atomic>
@@ -29,11 +28,9 @@ private:
   std::mutex _mutex;
   std::string_view _url;
   cv::Mat _rgb;
-  bool _is_open;
+  bool _is_open{false};
   std::atomic<bool> _has_frame;
   libvlc_instance_t *_vlc_instance = nullptr;
   libvlc_media_player_t *_media_player = nullptr;
   cv::Size _size;
 };
-
-#endif // VLCCAP_H

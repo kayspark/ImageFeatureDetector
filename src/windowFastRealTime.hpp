@@ -9,21 +9,22 @@
 
 #pragma once
 
-#include "nm_classifier.h"
-#include "nm_detector.h"
+#include "nm_classifier.hpp"
+#include "nm_detector.hpp"
 #include "ui_windowFastRealTime.h"
-#include "vlccap.h"
+#include "vlccap.hpp"
 #include "windowMain.h"
 #include <opencv2/features2d.hpp>
 #include <opencv2/opencv.hpp>
-class
-    WindowMain; // http://stackoverflow.com/questions/2133250/does-not-name-a-type-error-in-c
+class WindowMain; // http://stackoverflow.com/questions/2133250/does-not-name-a-type-error-in-c
 
-class WindowFastRealTime : public QDialog, Ui::windowFastRealTime {
+class WindowFastRealTime
+    : public QDialog
+    , Ui::windowFastRealTime {
   Q_OBJECT
 public:
   explicit WindowFastRealTime(WindowMain *wmain);
-  void closeEvent(QCloseEvent *) override;
+  void closeEvent(QCloseEvent *closeEvent) override;
 
 private:
   QSettings *mSettings = nullptr;

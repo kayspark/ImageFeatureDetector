@@ -8,9 +8,9 @@
  */
 
 #pragma once
-#include "nm_detector.h"
+#include "nm_detector.hpp"
 #include "ui_windowImage.h"
-#include "vlccap.h"
+#include "vlccap.hpp"
 #include <QtWidgets>
 #include <opencv2/opencv.hpp>
 #include <opencv2/xfeatures2d.hpp>

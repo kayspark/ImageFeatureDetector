@@ -77,12 +77,12 @@ public:
   bool update_tracker(cv::Mat &img);
   void dilate(cv::Mat &mask);
   void findContours(cv::Mat &mask);
-  bool checkContourPoints(Centroid &ctrd, const int thrdcp, const unsigned int pwindows);
+  bool checkContourPoints(Centroid &ctrd, int thrdcp, unsigned int pwindows);
   void motionOrientationHist(std::vector<Feature> &vecFeature, std::vector<unsigned int> &orient);
 
   double getEnergy(std::vector<Feature> &vecFeature, unsigned int &staticCount, unsigned int &totalPoints);
 
-  bool checkContourEnergy(Centroid &ctrd, const unsigned int pwindows);
+  bool checkContourEnergy(Centroid &ctrd, unsigned int pwindows);
 
   void matchCentroid(cv::Mat &imgCenteroid, cv::Mat &img);
   /* get the feature points from contour

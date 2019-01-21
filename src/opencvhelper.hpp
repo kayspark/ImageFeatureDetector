@@ -16,8 +16,7 @@
 **
 ****************************************************************************/
 
-#ifndef OPENCVHELPER_H
-#define OPENCVHELPER_H
+#pragma once
 
 #include <QDebug>
 #include <QImage>
@@ -130,5 +129,3 @@ inline cv::Mat QImage2Mat(QImage const &src, bool bClone = true) {
 }
 
 inline cv::Mat QPixmap2Mat(const QPixmap &in, bool bclone) { return QImage2Mat(in.toImage(), bclone); }
-
-#endif

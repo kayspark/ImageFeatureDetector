@@ -1,5 +1,4 @@
-#if !defined(NM_DETECT_H)
-#define NM_DETECT_H
+#pragma once
 
 #include "motionCapture.h"
 #include <opencv2/opencv.hpp>
@@ -11,7 +10,6 @@ private:
   cv::Ptr<cv::Tracker> _tracker;
   bool initialized_tracker;
   std::vector<cv::Rect> objects;
-
 
 private:
   std::array<cv::Scalar, 8> colors;
@@ -26,11 +24,9 @@ public:
   ~nm_detector() = default;
   void createTrackerByName(std::string_view name);
   bool update_tracker(cv::Mat &gray);
-  void detect_candidate(cv::Mat &gray, std::vector<cv::Rect>& out);
+  void detect_candidate(cv::Mat &gray, std::vector<cv::Rect> &out);
   void detect_objects(const cv::Mat &gray);
   double get_detection_time() const { return detection_time; }
   bool validate_roi(cv::Mat &roi);
   cv::Rect2d get_detected() const { return detected_area; }
 };
-
-#endif // NM_DETECT_H

@@ -31,10 +31,9 @@
  *  Please use the NeuroMem windows SDK 1.0.3 or later
  */
 
-#if !defined(NM_CLASSIFER_H)
-#define NM_CLASSIFER_H
+#pragma once
 
-#include "NeuroMemEngine.h"
+#include "NeuroMemEngine.hpp"
 #include <map>
 #include <opencv2/core.hpp>
 #include <opencv2/objdetect.hpp>
@@ -81,7 +80,6 @@ private:
 
 public:
   bool is_loaded_from_file() const;
-  void get_names(std::vector<std::string> &ret);
   enum_feature_algorithm get_feature_algorithm() const;
   uint16_t get_neuron_vector_size() const;
 
@@ -89,7 +87,7 @@ public:
   void set_feature_algorithm(enum_feature_algorithm algorithm);
 
   nm_classifier();
-  void init(const uint16_t maxif, const uint16_t minif);
+  void init(uint16_t maxif, uint16_t minif);
   ~nm_classifier();
   bool classify(cv::Mat &in);
   void learn(cv::Mat &in);
@@ -105,5 +103,3 @@ public:
   void set_maxif(uint16_t max);
   void set_minif(uint16_t min);
 };
-
-#endif // !NM_CLASSIFER_H
