@@ -2,8 +2,8 @@
 // Created by kspark on 2018-12-10.
 //
 
-#include "fire_detector.h"
-#include "fireBehaviorDetection.h"
+#include "fire_detector.hpp"
+#include "fireBehaviorDetection.hpp"
 #include <opencv2/core/types_c.h>
 #include <opencv2/imgproc/types_c.h>
 
@@ -11,18 +11,11 @@ fire_detector::fire_detector(cv::Size &imgSize)
     : _tracker(cv::TrackerMedianFlow::create())
     , _init_tracker(false)
     , _detected_area(cv::Rect2d(0, 0, 0, 0))
-    , _bgm_frame_count{0}
-    , _win_size{5}
-    , _listCentroid(std::list<Centroid>())
-    , vecOFRect(std::vector<OFRect>())
-    , _mulMapOFRect(std::multimap<int, OFRect>())
     , _maskMorphology(cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 5), cv::Point(1, 2)))
     , _featuresPrev(std::vector<cv::Point2f>(_max_corners))
     , _featuresCurr(std::vector<cv::Point2f>(_max_corners))
     , _featureFound(std::vector<uchar>(_max_corners))
     , _featureErrors(std::vector<float>(_max_corners))
-    , _contours(std::vector<std::vector<cv::Point>>())
-    , _hierachy(std::vector<cv::Vec4i>())
     , bufHSI(cv::Mat(imgSize, CV_64FC3))
     , _imgRGB(cv::Mat(imgSize, CV_8UC3))
     , imgHSI(cv::Mat(imgSize, CV_8UC3))
@@ -35,7 +28,7 @@ fire_detector::fire_detector(cv::Size &imgSize)
   /* Rect Motion */
 }
 
-// TODO: verfiy logics
+// TODO(kspark): verfiy logics
 bool fire_detector::update_tracker(cv::Mat &img) {
   bool ret = !_detected_area.empty();
   // initialized already
@@ -358,9 +351,8 @@ bool fire_detector::judgeDirectionsMotion(const std::vector<cv::Rect> &vecRect, 
     rectFire = vecRect.back();
     // std::cout << "by directions likely to be fire" << std::endl;
     return true;
-  } else {
-    return false;
   }
+  return false;
 }
 void fire_detector::calcOpticalFlow(cv::Mat &gray, cv::Mat &curr) {
   cv::calcOpticalFlowPyrLK(gray, curr,
@@ -514,8 +506,9 @@ void fire_detector::detectFire(cv::Mat &maskMotion, fireBehaviorDetection &bgs, 
                                cv::Mat &imgStandardDeviation, cv::Mat &img32FBackgroundModel,
                                cv::Mat &img32FStandardDeviation, cv::Mat &imgSrc, cv::Mat &imgGray,
                                cv::Mat &imgDisplay) {
-  if (imgSrc.empty())
+  if (imgSrc.empty()) {
     return;
+  }
   // flash
   _maskRGB.setTo(cv::Scalar::all(0));
   maskHSI.setTo(cv::Scalar::all(0));

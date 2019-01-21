@@ -4,8 +4,8 @@
 
 #pragma once
 #define _max_corners 10000
-#include "ds.h"
-#include "fireBehaviorDetection.h"
+#include "ds.hpp"
+#include "fireBehaviorDetection.hpp"
 #include <opencv2/opencv.hpp>
 #include <opencv2/tracking.hpp>
 

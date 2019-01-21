@@ -7,7 +7,7 @@
  *
  */
 
-#include "windowStartup.h"
+#include "windowStartup.hpp"
 
 WindowStartup::WindowStartup(WindowMain *windowMain)
     : QDialog::QDialog(windowMain, Qt::Dialog)

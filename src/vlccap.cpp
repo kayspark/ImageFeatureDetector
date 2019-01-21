@@ -1,11 +1,11 @@
-#include "vlccap.h"
+#include "vlccap.hpp"
 #include <cstring>
 #include <string_view>
 #include <thread>
 
 vlc_capture::vlc_capture()
-    : _is_open(false)
-    , _has_frame(false) {}
+    : 
+     _has_frame(false) {}
 
 vlc_capture::vlc_capture(int width, int height)
     : vlc_capture() {
@@ -18,7 +18,7 @@ vlc_capture::~vlc_capture() {
   try {
     release();
   } catch (...) {
-    // TODO log
+    // TODO(kspark): log
   }
 }
 
@@ -39,12 +39,12 @@ void vlc_capture::open(std::string_view url) {
                         arg_height.data()};
   _vlc_instance = libvlc_new(sizeof(args) / sizeof(args[0]), args);
 
-  if (_vlc_instance) {
+  if (_vlc_instance != nullptr) {
     libvlc_media_t *media = nullptr;
     media = libvlc_media_new_location(_vlc_instance, _url.data());
-    if (media) {
+    if (media != nullptr) {
       _media_player = libvlc_media_player_new_from_media(media);
-      if (_media_player) {
+      if (_media_player != nullptr) {
         libvlc_media_release(media);
         libvlc_video_set_callbacks(_media_player, &locker, &unlocker, nullptr, this);
         libvlc_video_set_format(_media_player, "RV24", static_cast<unsigned int>(get_size().width),
@@ -65,7 +65,7 @@ void vlc_capture::open(std::string_view url) {
 }
 
 void vlc_capture::release() {
-  if (_vlc_instance) {
+  if (_vlc_instance != nullptr) {
     libvlc_media_player_stop(_media_player);
     libvlc_release(_vlc_instance);
     libvlc_media_player_release(_media_player);
@@ -77,8 +77,9 @@ void vlc_capture::release() {
 }
 
 bool vlc_capture::isOpened() {
-  if (!_is_open)
+  if (!_is_open) {
     return false;
+}
 
   libvlc_state_t state = libvlc_media_player_get_state(_media_player);
   return (state != libvlc_Paused && state != libvlc_Stopped && state != libvlc_Ended && state != libvlc_Error);
@@ -87,8 +88,9 @@ bool vlc_capture::isOpened() {
 bool vlc_capture::read(cv::Mat &outFrame) {
   while (!_has_frame) {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    if (!isOpened())
+    if (!isOpened()) {
       return false; // connection closed
+}
   }
 
   {

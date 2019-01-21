@@ -19,8 +19,8 @@
 #include "windowDo4.hpp"
 #include "windowFastRealTime.hpp"
 #include "windowImage.hpp"
-#include "windowPreferences.h"
-#include "windowStartup.h"
+#include "windowPreferences.hpp"
+#include "windowStartup.hpp"
 #include <QtCore>
 #include <QtWidgets>
 #include <memory>
@@ -145,7 +145,7 @@ private slots:
   void website();
   void about();
 
-  void updateWindowMenu(QMdiSubWindow *);
+  void updateWindowMenu(QMdiSubWindow *mdiSubWindow);
   void openRecentFile();
-  void setActiveSubWindow(QWidget *);
+  void setActiveSubWindow(QWidget *subWindow);
 };

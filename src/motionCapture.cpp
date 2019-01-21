@@ -1,4 +1,4 @@
-#include "motionCapture.h"
+#include "motionCapture.hpp"
 
 using namespace std;
 using namespace chrono;
@@ -6,10 +6,8 @@ using namespace cv;
 
 motionCapture::motionCapture()
     : _pBgs(cv::createBackgroundSubtractorMOG2(10, 25, false))
-    , _timeRange(3000)
     , _criteria(cv::TermCriteria::MAX_ITER | cv::TermCriteria::EPS, 20, 0.03)
-    , _winSize(cv::Size(40, 40))
-    , _fps(0) {
+    , _winSize(cv::Size(40, 40)) {
   // _capture = &cap;
 }
 
@@ -44,19 +42,20 @@ void motionCapture::uniteContours(vector<vector<cv::Point>> &cnts) {
 
 void motionCapture::getFeaturePoints(const std::vector<cv::Point> &in, std::vector<cv::Point2f> &out) {
   const int qty = 10;
-  long step = (long) in.size() / qty;
+  long step = (long)in.size() / qty;
   for (auto i = in.begin(); i < in.end();) {
     out.emplace_back(i->x, i->y);
-    if (i  < (in.end() - step))
+    if (i < (in.end() - step))
       i += step;
-    else break;
-         
+    else
+      break;
   }
 }
 
 void motionCapture::find(Mat &gray) {
-  if (gray.empty())
+  if (gray.empty()) {
     return;
+  }
   Mat mask;
   Mat fgimg;
   _currentTime = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch());
@@ -128,7 +127,7 @@ void motionCapture::find(Mat &gray) {
       fill_tracks(_allTracks, allContours);
     }
   }
-  milliseconds endtime = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch());
+  auto endtime = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch());
   _fps = static_cast<int>(1000.0 / (endtime - _currentTime).count());
   swap(_prevGray, gray);
   //   display();
@@ -160,5 +159,5 @@ void motionCapture::get_detected(std::vector<cv::Rect> &out) {
       // rectangle(outFrame, r, Scalar(0, 255, 0), 3, 8, 0);
     }
   }
-  _frames.clear() ;
+  _frames.clear();
 }

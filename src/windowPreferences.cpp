@@ -7,7 +7,7 @@
  *
  */
 
-#include "windowPreferences.h"
+#include "windowPreferences.hpp"
 
 WindowPreferences::WindowPreferences(WindowMain *windowMain)
     : QDialog::QDialog(windowMain, Qt::Dialog)

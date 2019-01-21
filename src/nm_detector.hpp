@@ -1,23 +1,23 @@
 #pragma once
 
-#include "motionCapture.h"
+#include "motionCapture.hpp"
 #include <opencv2/opencv.hpp>
 #include <opencv2/tracking/tracker.hpp>
 
 class nm_detector {
 private:
-  cv::CascadeClassifier _cascade;
-  cv::Ptr<cv::Tracker> _tracker;
+  cv::CascadeClassifier m_cascade;
+  cv::Ptr<cv::Tracker> m_tracker;
   bool initialized_tracker;
   std::vector<cv::Rect> objects;
 
 private:
   std::array<cv::Scalar, 8> colors;
-  double _scale;
+  double m_scale;
   cv::Rect2d detected_area;
-  std::string _tracker_algorithm;
+  std::string m_tracker_algorithm;
   double detection_time{};
-  motionCapture _motion;
+  motionCapture m_motion;
 
 public:
   explicit nm_detector(std::string_view cascade, std::string_view algorithm);

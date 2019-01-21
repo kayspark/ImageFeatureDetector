@@ -7,7 +7,7 @@
  *
  */
 
-#include "windowDo4.h"
+#include "windowDo4.hpp"
 
 #define qtApp (dynamic_cast<QApplication *>(QCoreApplication::instance()))
 

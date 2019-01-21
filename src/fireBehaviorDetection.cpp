@@ -1,4 +1,4 @@
-#include "fireBehaviorDetection.h"
+#include "fireBehaviorDetection.hpp"
 /* Create buffer for image */
 fireBehaviorDetection::fireBehaviorDetection(const int &frame_count, cv::Size frameSize)
     : _frameno(frame_count)
@@ -29,8 +29,9 @@ void fireBehaviorDetection::getBackgroundModel(cv::VideoCapture &cap, cv::Mat &o
       cap.read(frame);
       // cap >> frame;
       // convert rgb to gray
-      if (frame.empty())
+      if (frame.empty()) {
         continue;
+      }
       //  cv::resize(frame, frame, cv::Size(out.cols, out.rows));
       // cv::cvtColor(frame,frame, cv::COLOR_YUV2BGR_YV12,3);
       cv::cvtColor(frame, frame, cv::COLOR_BGR2GRAY);
@@ -52,10 +53,10 @@ void fireBehaviorDetection::getBackgroundModel(vlc_capture &cap, cv::Mat &out) {
     cv::Mat frame;
     if (cap.isOpened()) {
       cap.read(frame);
-      // cap >> frame;
       // convert rgb to gray
-      if (frame.empty())
+      if (frame.empty()) {
         continue;
+      }
       //  cv::resize(frame, frame, cv::Size(out.cols, out.rows));
       // cv::cvtColor(frame,frame, cv::COLOR_YUV2BGR_YV12,3);
       cv::cvtColor(frame, frame, cv::COLOR_BGR2GRAY);

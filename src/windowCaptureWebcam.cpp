@@ -1,13 +1,20 @@
 
-#include "windowCaptureWebcam.h"
-
+#include "windowCaptureWebcam.hpp"
+#include "opencvhelper.hpp"
 WindowCaptureWebcam::WindowCaptureWebcam(WindowMain *main)
     : QDialog(main, Qt::Dialog)
     , mWindowMain(main)
-    , mCamera(cv::VideoCapture(0)) {
+    , _data_file(":/dataset/cascade.xml")
+    , _tracking_algorithm("CSRT")
+    , _nm_classifier(std::make_unique<nm_classifier>())
+    , _predator(nm_detector(this->_data_file, this->_tracking_algorithm))
+    , mPainter(std::make_unique<QPainter>())
+    , mCamera(cv::VideoCapture(cv::CAP_ANY)) {
   setupUi(this);
 
   setAttribute(Qt::WA_DeleteOnClose);
+  m_pen = QColor::fromRgb(0, 255, 0);
+  m_pen.setWidth(5);
 
   QObject::connect(uiPushButtonCapture, &QAbstractButton::clicked, this, &WindowCaptureWebcam::capture);
   QObject::connect(uiPushButtonOK, &QAbstractButton::clicked, this, &WindowCaptureWebcam::ok);
@@ -61,16 +68,74 @@ void WindowCaptureWebcam::closeEvent(QCloseEvent *closeEvent) {
   QDialog::closeEvent(closeEvent);
 }
 
-void WindowCaptureWebcam::compute() {
-  mCamera >> _imgRT;
-  if (_imgRT.empty())
-    return;
+void WindowCaptureWebcam::mousePressEvent(QMouseEvent *event) {
+  mLastPoint = event->pos();
+  _mouse_pressed = true;
+  _rubberBand = std::make_shared<QRubberBand>(QRubberBand::Rectangle, this);
+  _bandList.emplace_back(_rubberBand);
+  // setCursor(Qt::ClosedHandCursor);
+}
 
+void WindowCaptureWebcam::mouseMoveEvent(QMouseEvent *event) {
+  if (_mouse_pressed) {
+    _rubberBand->setGeometry(QRect(mLastPoint, event->pos()).normalized());
+    _rubberBand->show();
+    QToolTip::showText(event->globalPos(),
+                       QString("%1,%2").arg(_rubberBand->size().width()).arg(_rubberBand->size().height()), this);
+  }
+  // mLastPoint = myPos;
+}
+
+void WindowCaptureWebcam::mouseReleaseEvent(QMouseEvent * /*event*/) {
+  // unsetCursor();
+  _mouse_pressed = false;
+  //_rubberBand->hide();
+  // determine selection.. QRect::contains..
+}
+void WindowCaptureWebcam::compute() {
+
+  mCamera.read(_imgRT);
   cvtColor(_imgRT, _imgRT, cv::COLOR_BGR2RGB);
-  uiLabelRealTime->setPixmap(
-    QPixmap::fromImage(QImage(_imgRT.data, _imgRT.cols, _imgRT.rows, static_cast<int>(_imgRT.step),
-                              QImage::Format_RGB888))); // With RGB32 doesn't work
-  // 	uiLabelRealTime->setPixmap(QPixmap::fromImage(QImage(_imgRT.data,
-  // _imgRT.cols, _imgRT.rows, _imgRT.step,
-  // QImage::Format_RGB888).rgbSwapped()));
+  if (!_imgRT.empty()) {
+    cv::Mat gray;
+    cv::cvtColor(_imgRT, gray, cv::COLOR_BGR2GRAY);
+    std::vector<cv::Rect> roiList;
+    for (const auto &band : _bandList) {
+      band->showNormal();
+      QRect qRect = band->geometry();
+      roiList.emplace_back(cv::Rect(qRect.x(), qRect.y(), qRect.width(), qRect.height()));
+    }
+    std::vector<cv::Rect> motions;
+    _predator.detect_candidate(gray, motions);
+    //   cv::resize(_imgRT, _imgRT, cv::Size(640, 480), 0, 0,
+    //   cv::INTER_CUBIC);
+    QPixmap mPixmap = QPixmap::fromImage(
+      QImage(_imgRT.data, _imgRT.cols, _imgRT.rows, static_cast<int>(_imgRT.step), QImage::Format_RGB888));
+    mPainter->begin(&mPixmap);
+    for (const auto &r : motions) {
+      // check whether in valid roi
+      QRect qr(r.x, r.y, r.width, r.height);
+      for (const auto &roi : roiList) {
+        if (roi.contains(r.tl()) || roi.contains(r.br())) {
+          QPixmap pix = mPixmap.copy(qr).scaled(QSize(100, 100), Qt::KeepAspectRatio);
+          cv::Mat mat = QPixmap2Mat(pix, true);
+          if (_nm_classifier->classify(mat)) {
+            m_pen = QColor::fromRgb(255, 0, 0);
+          } else {
+            m_pen = QColor::fromRgb(0, 0, 255);
+          }
+          QString fileName = QString("%1.png").arg(QDateTime::currentDateTime().toString("MMdd_hhmmss"));
+          pix.toImage().save(QString("backup/%1").arg(fileName));
+          //          listWidget->addItem(new QListWidgetItem(QIcon(pix), fileName));
+          break; // stop if found
+        }
+        // fill suspicious belt
+      }
+      m_pen.setWidth(5);
+      mPainter->setPen(m_pen);
+      mPainter->drawRect(qr);
+    }
+    mPainter->end();
+    uiLabelRealTime->setPixmap(mPixmap);
+  }
 }

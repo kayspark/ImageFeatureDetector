@@ -6,8 +6,8 @@
  * Created on 05 December 2011, 03:31
  */
 
-#include "NeuroMemEngine.h"
-#include "windowMain.h"
+#include "NeuroMemEngine.hpp"
+#include "windowMain.hpp"
 #include <QApplication>
 
 // http://stackoverflow.com/questions/15035767/is-the-qt-5-dark-fusion-theme-available-for-windows
@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
   QApplication app(argc, argv);
   QStringList argList = QCoreApplication::arguments();
 
+#ifdef _WIN32
   using nm_device = NeuroMem::NeuroMemDevice;
   using nm_engine = NeuroMem::NeuroMemEngine;
   nm_device ds{};
@@ -59,6 +60,7 @@ int main(int argc, char *argv[]) {
     system("pause");
     return (0);
   }
+#endif //_WIN32
   // make backup dir to make sure
   QDir dir;
   dir.mkdir("backup");

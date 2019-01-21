@@ -3,8 +3,8 @@
 #include "nm_classifier.hpp"
 #include "nm_detector.hpp"
 #include "ui_windowCaptureWebcam.h"
-#include "windowImage.h"
-#include "windowMain.h"
+#include "windowImage.hpp"
+#include "windowMain.hpp"
 #include <opencv2/opencv.hpp>
 class WindowMain; // http://stackoverflow.com/questions/2133250/does-not-name-a-type-error-in-c
 
@@ -33,9 +33,7 @@ private:
   std::unique_ptr<QAction> actNormal;
   std::unique_ptr<QAction> actAbnormal;
   std::unique_ptr<QAction> actClear;
-  QPen _penG;
-  QPen _penR;
-  QPen _penB;
+  QPen m_pen;
 
 protected:
   void mousePressEvent(QMouseEvent *event) override;

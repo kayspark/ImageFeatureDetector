@@ -7,14 +7,13 @@
  *
  */
 
-#include "windowMain.h"
+#include "windowMain.hpp"
 
 WindowMain::WindowMain()
-    : mTotalImages(0)
-    , mCapturedWebcamImages(0)
-    , mSettings(std::make_unique<QSettings>("imageFeatureDetectorSettings.ini", QSettings::IniFormat))
-    , mSeparatorOpenWindowsAdded(false)
-    , mMenuRecentFiles(std::make_unique<QMenu>(this))
+    : 
+     mSettings(std::make_unique<QSettings>("imageFeatureDetectorSettings.ini", QSettings::IniFormat))
+    , 
+     mMenuRecentFiles(std::make_unique<QMenu>(this))
     , mToolButtonOpenRecent(std::make_unique<QToolButton>(this))
     , mIconHarris(std::make_unique<QIcon>(":icons/Harris.png"))
     , mIconFAST(std::make_unique<QIcon>(":icons/Fast.png"))

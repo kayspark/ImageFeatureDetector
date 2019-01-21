@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(imagefeaturedetector LANGUAGES CXX)
+project(imagefeaturedetector)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules
                       ${CMAKE_MODULE_PATH})
@@ -17,7 +17,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 set(CMAKE_AUTOUIC ON)
-set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=-*,modernize-*)
+#set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=-*,modernize-*)
 #include(cppcheck.cmake)
 
 ## http://www.cmake.org/Wiki/CMake:How_To_Find_Libraries
@@ -39,7 +39,6 @@ elseif(NOT WIN32)
     set(LIBVLC_LIBRARY_DIR "/usr/local/lib")
     set(LIBVLC_LIBRARY ${LIBVLC_LIBRARY_DIR}/libvlc.dylib)
     set(LIBVLCCORE_LIBRARY ${LIBVLC_LIBRARY_DIR}/libvlccore.dylib)
-    set(OpenCV_DIR "/usr/local/Cellar/opencv/4.0.1/lib/cmake/opencv4")
 endif (WIN32)
 find_package(OpenCV COMPONENTS opencv_core opencv_imgproc opencv_highgui opencv_objdetect opencv_tracking opencv_xfeatures2d REQUIRED)
 include_directories(${LIBVLC_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})

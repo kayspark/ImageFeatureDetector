@@ -8,7 +8,7 @@
  *
  */
 
-#include "windowImage.h"
+#include "windowImage.hpp"
 #include <qstring.h>
 #include <utility>
 WindowImage::WindowImage(const QString &fileName, QString windowTitle, int windowType)
@@ -128,11 +128,11 @@ void WindowImage::zoomBestFit() {
   int scrollWidth = width();
   int scrollHeight = height();
 
-  float relationScroll = scrollWidth / (float)scrollHeight;
-  float relationImage = mOriginalWidth / (float)mOriginalHeight;
+  float relationScroll = scrollWidth / static_cast<float>(scrollHeight);
+  float relationImage = mOriginalWidth / static_cast<float>(mOriginalHeight);
 
-  float scaleWidth = scrollWidth / (float)mOriginalWidth;
-  float scaleHeight = scrollHeight / (float)mOriginalHeight;
+  float scaleWidth = scrollWidth / static_cast<float>(mOriginalWidth);
+  float scaleHeight = scrollHeight / static_cast<float>(mOriginalHeight);
 
   if (relationScroll > relationImage) {
     mFactorIncrement = correctF * scaleHeight / mCurrentFactor;
@@ -163,7 +163,7 @@ void WindowImage::applyHarris(int sobelApertureSize, int harrisApertureSize, dou
   cvtColor(image, imageGrey, cv::COLOR_RGB2GRAY);
 
   cv::Mat imageHarris(_image->height(), _image->width(), CV_8UC1);
-  auto time = (float)cv::getTickCount();
+  auto time = static_cast<float>(cv::getTickCount());
   cornerHarris(imageGrey, imageHarris, harrisApertureSize, sobelApertureSize, kValue);
 
   mImageTime = mLocale->toString((float)((cv::getTickCount() - time) * 1000 / cv::getTickFrequency()), 'f', 2);
@@ -198,8 +198,9 @@ void WindowImage::applyHarris(int sobelApertureSize, int harrisApertureSize, dou
   mPainter->end();
   mImageKeypoints = mLocale->toString(keyPoints);
 
-  if (showProcessed)
+  if (showProcessed) {
     showProcessedImage(imageHarrisNorm);
+  }
   mModified = true;
   uiLabelImage->setPixmap(
     mPixmap.scaled(mCurrentFactor * mOriginalSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
@@ -248,7 +249,7 @@ void WindowImage::applySift(double threshold, double edgeThreshold, int nOctaves
   cv::cvtColor(image, imgGray, cv::COLOR_RGB2GRAY);
 
   std::vector<cv::KeyPoint> keyPoints;
-  auto time = (float)cv::getTickCount();
+  auto time = static_cast<float>(cv::getTickCount());
   cv::Ptr<cv::Feature2D> feature = cv::xfeatures2d::SIFT::create(nOctaveLayers, nOctaves, threshold, edgeThreshold);
   feature->detect(imgGray, keyPoints);
 

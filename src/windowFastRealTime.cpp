@@ -7,8 +7,8 @@
  *
  */
 
-#include "windowFastRealTime.h"
-#include "opencvhelper.h"
+#include "windowFastRealTime.hpp"
+#include "opencvhelper.hpp"
 
 WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
     : QDialog(wmain, Qt::Dialog)
@@ -20,6 +20,7 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
     , _data_file(":/dataset/cascade.xml")
     , _tracking_algorithm("CSRT")
     , _predator(nm_detector(this->_data_file, this->_tracking_algorithm))
+    , m_pen(QColor::fromRgb(0, 255, 0))
     , mSettings(wmain->getMSettings())
     , mLocale(std::make_unique<QLocale>(QLocale::English))
     , mPainter(std::make_unique<QPainter>()) {
@@ -47,6 +48,8 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   QObject::connect(uiPushButtonResetFAST, &QAbstractButton::clicked, this, &WindowFastRealTime::resetUI);
   QObject::connect(uiPushButtonDetect, &QAbstractButton::clicked, this, &WindowFastRealTime::detect);
   QObject::connect(uiPushButtonCancel, &QAbstractButton::clicked, this, &WindowFastRealTime::close);
+
+  m_pen.setWidth(5);
   std::string url = mSettings->value("rtsp/url1").toString().toStdString();
   mCamera.open(url);
   if (mCamera.isOpened()) {
@@ -121,7 +124,7 @@ void WindowFastRealTime::saveFastParams() {
 void WindowFastRealTime::resetUI() {
   uiSpinBoxThresholdFAST->setValue(25);
   uiPushButtonNonMaxFAST->setChecked(true);
-  if (_bandList.size() > 0) {
+  if (!_bandList.empty()) {
     for (auto &band : _bandList) {
       band->hide();
       band = nullptr;
@@ -152,8 +155,9 @@ void WindowFastRealTime::clearListWidget() {
       delete item;
     }
     listWidget->clearSelection();
-  } else
+  } else {
     listWidget->clear();
+  }
 }
 
 void WindowFastRealTime::compute() {
@@ -178,30 +182,30 @@ void WindowFastRealTime::compute() {
       mPixmap = QPixmap::fromImage(
         QImage(imgRT.data, imgRT.cols, imgRT.rows, static_cast<int>(imgRT.step), QImage::Format_RGB888));
       mPainter->begin(&mPixmap);
-      QPen penG(QColor::fromRgb(0, 255, 0));
-      penG.setWidth(5);
-      QPen penR(QColor::fromRgb(255, 0, 0));
-      penR.setWidth(5);
-      QPen penB(QColor::fromRgb(0, 0, 255));
-      penB.setWidth(5);
+      m_pen = QColor::fromRgb(0, 255, 0);
       for (const auto &r : motions) {
         // check whether in valid roi
         QRect qr(r.x, r.y, r.width, r.height);
         for (const auto &roi : roiList) {
           if (roi.contains(r.tl()) || roi.contains(r.br())) {
-            QPixmap tpix = mPixmap.copy(qr).scaled(QSize(100, 100), Qt::KeepAspectRatio);
-            if (_nm_classifier->classify(QPixmap2Mat(tpix, true))) {
-              mPainter->setPen(penR);
-            } else
-              mPainter->setPen(penB);
+            QPixmap pix = mPixmap.copy(qr).scaled(QSize(100, 100), Qt::KeepAspectRatio);
+            cv::Mat mat = QPixmap2Mat(pix, true);
+            if (_nm_classifier->classify(mat)) {
+              m_pen = QColor::fromRgb(255, 0, 0);
+              m_pen.setWidth(5);
+            } else {
+              m_pen = QColor::fromRgb(0, 0, 255);
+              m_pen.setWidth(5);
+            }
             QString fileName = QString("%1.png").arg(QDateTime::currentDateTime().toString("MMdd_hhmmss"));
-            tpix.toImage().save(QString("backup/%1").arg(fileName));
-            listWidget->addItem(new QListWidgetItem(QIcon(tpix), fileName));
-            break;
-          } else
-            mPainter->setPen(penG);
+            pix.toImage().save(QString("backup/%1").arg(fileName));
+            listWidget->addItem(new QListWidgetItem(QIcon(pix), fileName));
+            break; // stop if found
+          }
           // fill suspicious belt
         }
+        m_pen.setWidth(5);
+        mPainter->setPen(m_pen);
         mPainter->drawRect(qr);
       }
       mPainter->end();

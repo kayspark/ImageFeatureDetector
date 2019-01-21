@@ -1,12 +1,13 @@
 #pragma once
+
 #include <iostream>
 #include <opencv2/opencv.hpp>
 
-typedef struct RectThrd {
+using RectThresh = struct RectThrd {
   int rectWidth;
   int rectHeight;
   int cntrArea;
-} RectThresh;
+};
 
 /* for initialize rectThrd node */
 inline RectThresh rectThrd(const int rectWidth, const int rectHeight, const int cntrArea) {
@@ -20,10 +21,10 @@ inline RectThresh rectThrd(const int rectWidth, const int rectHeight, const int 
 }
 
 /* Optical Flow feature points */
-typedef struct Feature {
+using Feature = struct Feature {
   cv::Point prev;
   cv::Point curr;
-} Feature;
+};
 
 /* for initialize Feature node */
 inline Feature feature(const cv::Point &prev, const cv::Point &curr) {
@@ -36,13 +37,13 @@ inline Feature feature(const cv::Point &prev, const cv::Point &curr) {
 }
 
 /* rect node(rect space) */
-typedef struct OFRect {
+using OFRect = struct OFRect {
   bool match{};    // determine whether the rect is match or not
   int countCtrP{}; // the pixel count of contour
   // the pixel count of contour which is only be detected
   cv::Rect rect;                   // rect
   std::vector<Feature> vecFeature; // optical flow feature points
-} OFRect;
+};
 
 /* for initialize ofrect node */
 inline OFRect ofRect(const cv::Rect &rect, const int countCtrP) {
@@ -56,12 +57,12 @@ inline OFRect ofRect(const cv::Rect &rect, const int countCtrP) {
 }
 
 /* marker node */
-typedef struct Centroid {
+using Centroid = struct Centroid {
   int countFrame{};                         // how many frame the centroid keeping in the region
   cv::Point centroid;                       // first detected centroid
   std::vector<cv::Rect> vecRect;            // rect information
   std::deque<std::vector<Feature>> dOFRect; // optical flow feature points
-} Centroid;
+};
 
 /* for initailize the new centroid node */
 inline Centroid centroid(const OFRect &ofRect) {
@@ -77,12 +78,12 @@ inline Centroid centroid(const OFRect &ofRect) {
   return centroid1;
 }
 
-typedef struct DirectionsCount {
+using DirectionsCount = struct DirectionsCount {
   int countUp;
   int countDown;
   int countLeft;
   int countRight;
-} DirectionsCount;
+};
 
 inline void zeroCount(DirectionsCount &count) {
   count.countDown = count.countLeft = count.countRight = count.countUp = 0;
