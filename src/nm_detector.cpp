@@ -26,7 +26,7 @@ void nm_detector::createTrackerByName(const std::string_view name) {
   else if (name == "CSRT")
     m_tracker = cv::TrackerCSRT::create();
   else
-    CV_Error(cv::Error::StsBadArg, "Invalid tracking algorithm name\n");
+    std::cerr << "Invalid tracking algorithm name\n";
 }
 
 nm_detector::nm_detector(std::string_view cascade, std::string_view algorithm)

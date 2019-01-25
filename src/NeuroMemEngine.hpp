@@ -2,18 +2,16 @@
  * Copyright (c) 2017-2018, nepes corp, All rights reserved.
  *
  */
-#ifndef NEUROMEM_ENGINE_H
-#define NEUROMEM_ENGINE_H
-
+#pragma once
 #if defined _WIN32 || defined __CYGWIN__
 #if defined __GNUC__ || LLVM
-#define NEUROMEMENGINEDLL_API __attribute__((dllexport))
+#define nm_engine_api __attribute__((dllexport))
 #define __stdcall
 #else
-#define NEUROMEMENGINEDLL_API __declspec(dllexport)
+#define nm_engine_api __declspec(dllexport)
 #endif
 #else
-#define NEUROMEMENGINEDLL_API __attribute__((visibility("default")))
+#define nm_engine_api __attribute__((visibility("default")))
 #define __stdcall
 #endif
 
@@ -23,31 +21,31 @@ extern "C" {
 
 #include <cstdint>
 
-constexpr auto NM_NCR = 0x00;
-constexpr auto NM_COMP = 0x01;
-constexpr auto NM_LCOMP = 0x02;
-constexpr auto NM_DIST = 0x03;
-constexpr auto NM_INDEXCOMP = 0x03;
-constexpr auto NM_CAT = 0x04;
-constexpr auto NM_AIF = 0x05;
-constexpr auto NM_MINIF = 0x06;
-constexpr auto NM_MAXIF = 0x07;
-constexpr auto NM_TESTCOMP = 0x08;
-constexpr auto NM_TESTCAT = 0x09;
-constexpr auto NM_NID = 0x0A;
-constexpr auto NM_GCR = 0x0B;
-constexpr auto NM_RSTCHAIN = 0x0C;
-constexpr auto NM_NSR = 0x0D;
-constexpr auto NM_POWERSAVE = 0x0E;
-constexpr auto NM_NCOUNT = 0x0F;
-constexpr auto NM_FORGET = 0x0F;
-
-constexpr auto NEURON_MEMORY = 256;
-constexpr auto CLASSIFY_MAX_K = 9;
-
-constexpr auto CAM_FRAME_BUF = 1843200;
-
 namespace NeuroMem {
+  constexpr auto NM_NCR = 0x00;
+  constexpr auto NM_COMP = 0x01;
+  constexpr auto NM_LCOMP = 0x02;
+  constexpr auto NM_DIST = 0x03;
+  constexpr auto NM_INDEXCOMP = 0x03;
+  constexpr auto NM_CAT = 0x04;
+  constexpr auto NM_AIF = 0x05;
+  constexpr auto NM_MINIF = 0x06;
+  constexpr auto NM_MAXIF = 0x07;
+  constexpr auto NM_TESTCOMP = 0x08;
+  constexpr auto NM_TESTCAT = 0x09;
+  constexpr auto NM_NID = 0x0A;
+  constexpr auto NM_GCR = 0x0B;
+  constexpr auto NM_RSTCHAIN = 0x0C;
+  constexpr auto NM_NSR = 0x0D;
+  constexpr auto NM_POWERSAVE = 0x0E;
+  constexpr auto NM_NCOUNT = 0x0F;
+  constexpr auto NM_FORGET = 0x0F;
+
+  constexpr auto NEURON_MEMORY = 256;
+  constexpr auto CLASSIFY_MAX_K = 9;
+
+  constexpr auto CAM_FRAME_BUF = 1843200;
+
   using NeuroMemReturnStatus = enum _NeuroMemReturnStatus {
     NM_SUCCESS = 0,
     NM_ERROR_UNKNOWN,
@@ -141,47 +139,44 @@ namespace NeuroMem {
   class NeuroMemEngine {
   public:
     // Common functions
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall GetDevices(NeuroMemDevice *devices, uint16_t count);
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall Connect(NeuroMemDevice *device);
+    static nm_engine_api uint16_t __stdcall GetDevices(NeuroMemDevice *devices, uint16_t count);
+    static nm_engine_api uint16_t __stdcall Connect(NeuroMemDevice *device);
 
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall Forget(NeuroMemDevice *device);
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall Reset(NeuroMemDevice *device);
+    static nm_engine_api uint16_t __stdcall Forget(NeuroMemDevice *device);
+    static nm_engine_api uint16_t __stdcall Reset(NeuroMemDevice *device);
 
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall GetVersion(NeuroMemDevice *device);
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall GetNetworkInfo(NeuroMemDevice *device, NeuroMemNetworkInfo *info);
-    static NEUROMEMENGINEDLL_API uint32_t __stdcall GetNeuronCount(NeuroMemDevice *device);
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall GetNetworkStatus(NeuroMemDevice *device,
-                                                                     NeuroMemNetworkStatus *status);
+    static nm_engine_api uint16_t __stdcall GetVersion(NeuroMemDevice *device);
+    static nm_engine_api uint16_t __stdcall GetNetworkInfo(NeuroMemDevice *device, NeuroMemNetworkInfo *info);
+    static nm_engine_api uint32_t __stdcall GetNeuronCount(NeuroMemDevice *device);
+    static nm_engine_api uint16_t __stdcall GetNetworkStatus(NeuroMemDevice *device, NeuroMemNetworkStatus *status);
 
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall SetNetworkType(NeuroMemDevice *device, uint16_t type);
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall GetNetworkType(NeuroMemDevice *device);
+    static nm_engine_api uint16_t __stdcall SetNetworkType(NeuroMemDevice *device, uint16_t type);
+    static nm_engine_api uint16_t __stdcall GetNetworkType(NeuroMemDevice *device);
 
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall SetContext(NeuroMemDevice *device, NeuroMemContext *context);
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall GetContext(NeuroMemDevice *device, NeuroMemContext *context);
+    static nm_engine_api uint16_t __stdcall SetContext(NeuroMemDevice *device, NeuroMemContext *context);
+    static nm_engine_api uint16_t __stdcall GetContext(NeuroMemDevice *device, NeuroMemContext *context);
 
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall Learn(NeuroMemDevice *device, NeuroMemLearnReq *data);
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall Classify(NeuroMemDevice *device, NeuroMemClassifyReq *data);
+    static nm_engine_api uint16_t __stdcall Learn(NeuroMemDevice *device, NeuroMemLearnReq *data);
+    static nm_engine_api uint16_t __stdcall Classify(NeuroMemDevice *device, NeuroMemClassifyReq *data);
 
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall ReadNeuron(NeuroMemDevice *device, NeuroMemNeuron *neuron);
-    static NEUROMEMENGINEDLL_API uint32_t __stdcall ReadNeurons(NeuroMemDevice *device, NeuroMemNeuron *neurons,
-                                                                uint32_t count);
+    static nm_engine_api uint16_t __stdcall ReadNeuron(NeuroMemDevice *device, NeuroMemNeuron *neuron);
+    static nm_engine_api uint32_t __stdcall ReadNeurons(NeuroMemDevice *device, NeuroMemNeuron *neurons,
+                                                        uint32_t count);
 
-    static NEUROMEMENGINEDLL_API uint32_t __stdcall WriteNeurons(NeuroMemDevice *device, NeuroMemNeuron *neurons,
-                                                                 uint32_t count);
+    static nm_engine_api uint32_t __stdcall WriteNeurons(NeuroMemDevice *device, NeuroMemNeuron *neurons,
+                                                         uint32_t count);
 
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall Read(NeuroMemDevice *device, uint16_t reg);
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall Write(NeuroMemDevice *device, uint16_t reg, uint16_t data);
+    static nm_engine_api uint16_t __stdcall Read(NeuroMemDevice *device, uint16_t reg);
+    static nm_engine_api uint16_t __stdcall Write(NeuroMemDevice *device, uint16_t reg, uint16_t data);
 
     // For Prodigy Board only
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall GetFrame(NeuroMemDevice *device, DataCameraFrame *frame);
-    static NEUROMEMENGINEDLL_API uint16_t __stdcall ReadBuffer(NeuroMemDevice *device, uint8_t *data, uint16_t size);
-    static NEUROMEMENGINEDLL_API uint32_t __stdcall SetROI(NeuroMemDevice *device, NeuroMemNeuron *neurons);
-    static NEUROMEMENGINEDLL_API uint32_t __stdcall SetResolution(NeuroMemDevice *device, NeuroMemNeuron *neurons);
+    static nm_engine_api uint16_t __stdcall GetFrame(NeuroMemDevice *device, DataCameraFrame *frame);
+    static nm_engine_api uint16_t __stdcall ReadBuffer(NeuroMemDevice *device, uint8_t *data, uint16_t size);
+    static nm_engine_api uint32_t __stdcall SetROI(NeuroMemDevice *device, NeuroMemNeuron *neurons);
+    static nm_engine_api uint32_t __stdcall SetResolution(NeuroMemDevice *device, NeuroMemNeuron *neurons);
   };
 } // namespace NeuroMem
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // NEUROMEMENGINE_H

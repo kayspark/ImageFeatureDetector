@@ -21,9 +21,9 @@ public:
 private:
   std::unique_ptr<QTimer> mTimer;
   cv::VideoCapture mCamera;
-  cv::Mat _imgRT;
+  cv::Mat m_imgRT;
   std::string _data_file;
-  std::string _tracking_algorithm;
+  std::string m_tracking_algorithm;
   std::unique_ptr<QPainter> mPainter;
   std::vector<std::shared_ptr<QRubberBand>> _bandList;
   std::shared_ptr<QRubberBand> _rubberBand;

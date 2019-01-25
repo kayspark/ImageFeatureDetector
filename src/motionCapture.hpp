@@ -8,24 +8,24 @@
 
 class motionCapture {
   // cv::VideoCapture *_capture = nullptr;
-  std::chrono::milliseconds _currentTime;
-  const int _timeRange{3000}; // in milliseconds
-  int _fps{0};
-  std::vector<cv::Vec4i> _hierarchy;
-  cv::TermCriteria _criteria;
-  cv::Size _winSize;
+  std::chrono::milliseconds m_currentTime;
+  const int m_timeRange{3000}; // in milliseconds
+  int m_fps{0};
+  std::vector<cv::Vec4i> m_hierarchy;
+  cv::TermCriteria m_criteria;
+  cv::Size m_winSize;
   //  cv::Mat gray;
-  cv::Mat _prevGray;
-  cv::Mat _saved_mask;
+  cv::Mat m_prevGray;
+  cv::Mat m_saved_mask;
 
-  std::map<std::chrono::milliseconds, Frame> _frames;
-  std::vector<std::map<std::chrono::milliseconds, std::vector<cv::Point>>> _allTracks;
+  std::map<std::chrono::milliseconds, Frame> m_frames;
+  std::vector<std::map<std::chrono::milliseconds, std::vector<cv::Point>>> m_allTracks;
 
 public:
   void get_detected(std::vector<cv::Rect> &out);
 
 private:
-  cv::Ptr<cv::BackgroundSubtractor> _pBgs;
+  cv::Ptr<cv::BackgroundSubtractor> m_pBgs;
   void getFeaturePoints(const std::vector<cv::Point> &in, std::vector<cv::Point2f> &out);
   void uniteContours(std::vector<std::vector<cv::Point>> &cnts);
 

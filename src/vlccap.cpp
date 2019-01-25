@@ -4,8 +4,7 @@
 #include <thread>
 
 vlc_capture::vlc_capture()
-    : 
-     _has_frame(false) {}
+    : _has_frame(false) {}
 
 vlc_capture::vlc_capture(int width, int height)
     : vlc_capture() {
@@ -79,7 +78,7 @@ void vlc_capture::release() {
 bool vlc_capture::isOpened() {
   if (!_is_open) {
     return false;
-}
+  }
 
   libvlc_state_t state = libvlc_media_player_get_state(_media_player);
   return (state != libvlc_Paused && state != libvlc_Stopped && state != libvlc_Ended && state != libvlc_Error);
@@ -90,7 +89,7 @@ bool vlc_capture::read(cv::Mat &outFrame) {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     if (!isOpened()) {
       return false; // connection closed
-}
+    }
   }
 
   {

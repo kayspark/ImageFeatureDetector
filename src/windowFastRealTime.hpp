@@ -37,26 +37,20 @@ private:
   std::vector<cv::KeyPoint> mKeypoints;
   bool mDetecting;
   double mTime;
-  std::string _data_file;
-  std::string _tracking_algorithm;
-  std::vector<std::shared_ptr<QRubberBand>> _bandList;
-  std::shared_ptr<QRubberBand> _rubberBand;
-  bool _mouse_pressed = false;
-  QPoint mLastPoint;
-  std::unique_ptr<nm_classifier> _nm_classifier;
+  std::string m_data_file;
+  std::string m_tracking_algorithm;
+  std::unique_ptr<nm_classifier> m_nm_classifier;
   std::unique_ptr<QAction> actNormal;
   std::unique_ptr<QAction> actAbnormal;
   std::unique_ptr<QAction> actClear;
   QPen m_pen;
 
 protected:
-  nm_detector _predator;
+  nm_detector m_predator;
 
 protected:
-  void mousePressEvent(QMouseEvent *event) override;
-  void mouseMoveEvent(QMouseEvent *event) override;
-  void mouseReleaseEvent(QMouseEvent *event) override;
   void showContextMenu(const QPoint &pos);
+
 private slots:
   void detect();
   void compute();

@@ -132,16 +132,16 @@ bool fire_detector::checkContourEnergy(Centroid &ctrd, const unsigned int pwindo
   unsigned int staticFrame = 0;
   std::vector<unsigned int> orient{0, 0, 0, 0};
   /* contour motion vector of each frame */
-  for (auto &feature : ctrd.dOFRect) {
+  for (auto &f : ctrd.dOFRect) {
     /* flash */
     unsigned int staticCount = staticFrame = staticCount = 0;
     unsigned int totalPoints = 0;
 
     /* energy analysis */
-    if (getEnergy(feature, staticCount, totalPoints) > totalPoints >> 1) {
+    if (getEnergy(f, staticCount, totalPoints) > totalPoints >> 1) {
       ++passFrame;
     }
-    if (staticCount > feature.size() >> 1) {
+    if (staticCount > f.size() >> 1) {
       ++staticFrame;
     }
 
@@ -149,7 +149,7 @@ bool fire_detector::checkContourEnergy(Centroid &ctrd, const unsigned int pwindo
     std::fill(begin(orient), end(orient), 0);
     // memset(&orient, 0, sizeof(unsigned int) << 2);
     /* orientation analysis */
-    motionOrientationHist(feature, orient);
+    motionOrientationHist(f, orient);
 
     if (std::count(orient.begin(), orient.end(), 0) >= 1) {
       ++orientFrame;
@@ -305,10 +305,9 @@ void fire_detector::assignFeaturePoints() {
       // if the feature point was be found
       if (_featureFound[i] == 0) {
         continue;
-      } else {
-        /* push feature to vector of ofrect */
-        aRect.vecFeature.emplace_back(feature(_featuresPrev[i], _featuresCurr[i]));
       }
+      /* push feature to vector of ofrect */
+      aRect.vecFeature.emplace_back(feature(_featuresPrev[i], _featuresCurr[i]));
     }
     /* insert ofrect to multimap */
     _mulMapOFRect.insert(std::pair<int, OFRect>(aRect.rect.x, aRect));

@@ -5,9 +5,9 @@ WindowCaptureWebcam::WindowCaptureWebcam(WindowMain *main)
     : QDialog(main, Qt::Dialog)
     , mWindowMain(main)
     , _data_file(":/dataset/cascade.xml")
-    , _tracking_algorithm("CSRT")
+    , m_tracking_algorithm("CSRT")
     , _nm_classifier(std::make_unique<nm_classifier>())
-    , _predator(nm_detector(this->_data_file, this->_tracking_algorithm))
+    , _predator(nm_detector(this->_data_file, this->m_tracking_algorithm))
     , mPainter(std::make_unique<QPainter>())
     , mCamera(cv::VideoCapture(cv::CAP_ANY)) {
   setupUi(this);
@@ -44,7 +44,7 @@ WindowCaptureWebcam::WindowCaptureWebcam(WindowMain *main)
 
 void WindowCaptureWebcam::capture() {
   uiLabelCaptured->setPixmap(QPixmap::fromImage(
-    QImage(_imgRT.data, _imgRT.cols, _imgRT.rows, static_cast<int>(_imgRT.step), QImage::Format_RGB888)));
+    QImage(m_imgRT.data, m_imgRT.cols, m_imgRT.rows, static_cast<int>(m_imgRT.step), QImage::Format_RGB888)));
   uiPushButtonOK->setEnabled(true);
 }
 
@@ -94,11 +94,11 @@ void WindowCaptureWebcam::mouseReleaseEvent(QMouseEvent * /*event*/) {
 }
 void WindowCaptureWebcam::compute() {
 
-  mCamera.read(_imgRT);
-  cvtColor(_imgRT, _imgRT, cv::COLOR_BGR2RGB);
-  if (!_imgRT.empty()) {
+  mCamera.read(m_imgRT);
+  cvtColor(m_imgRT, m_imgRT, cv::COLOR_BGR2RGB);
+  if (!m_imgRT.empty()) {
     cv::Mat gray;
-    cv::cvtColor(_imgRT, gray, cv::COLOR_BGR2GRAY);
+    cv::cvtColor(m_imgRT, gray, cv::COLOR_BGR2GRAY);
     std::vector<cv::Rect> roiList;
     for (const auto &band : _bandList) {
       band->showNormal();
@@ -109,33 +109,33 @@ void WindowCaptureWebcam::compute() {
     _predator.detect_candidate(gray, motions);
     //   cv::resize(_imgRT, _imgRT, cv::Size(640, 480), 0, 0,
     //   cv::INTER_CUBIC);
-    QPixmap mPixmap = QPixmap::fromImage(
-      QImage(_imgRT.data, _imgRT.cols, _imgRT.rows, static_cast<int>(_imgRT.step), QImage::Format_RGB888));
-    mPainter->begin(&mPixmap);
+    QPixmap pixmap = QPixmap::fromImage(
+      QImage(m_imgRT.data, m_imgRT.cols, m_imgRT.rows, static_cast<int>(m_imgRT.step), QImage::Format_RGB888));
+    mPainter->begin(&pixmap);
     for (const auto &r : motions) {
       // check whether in valid roi
       QRect qr(r.x, r.y, r.width, r.height);
-      for (const auto &roi : roiList) {
+      std::for_each(roiList.begin(), roiList.end(), [&r, &qr, &pixmap, this](const auto &roi) {
         if (roi.contains(r.tl()) || roi.contains(r.br())) {
-          QPixmap pix = mPixmap.copy(qr).scaled(QSize(100, 100), Qt::KeepAspectRatio);
+          QPixmap pix = pixmap.copy(qr).scaled(QSize(100, 100), Qt::KeepAspectRatio);
           cv::Mat mat = QPixmap2Mat(pix, true);
           if (_nm_classifier->classify(mat)) {
             m_pen = QColor::fromRgb(255, 0, 0);
+            m_pen.setWidth(5);
           } else {
             m_pen = QColor::fromRgb(0, 0, 255);
+            m_pen.setWidth(5);
           }
           QString fileName = QString("%1.png").arg(QDateTime::currentDateTime().toString("MMdd_hhmmss"));
           pix.toImage().save(QString("backup/%1").arg(fileName));
-          //          listWidget->addItem(new QListWidgetItem(QIcon(pix), fileName));
-          break; // stop if found
+          //           mListWidget->addItem(new QListWidgetItem(QIcon(pix), fileName));
         }
-        // fill suspicious belt
-      }
+      });
       m_pen.setWidth(5);
       mPainter->setPen(m_pen);
       mPainter->drawRect(qr);
     }
     mPainter->end();
-    uiLabelRealTime->setPixmap(mPixmap);
+    uiLabelRealTime->setPixmap(pixmap);
   }
 }

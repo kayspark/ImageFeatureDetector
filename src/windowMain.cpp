@@ -1,5 +1,5 @@
 /*
- * 2018(C) kayspark , 2010-2015 (C) Antonio Redondo
+ * 2018-2019(C) kayspark , 2010-2015 (C) Antonio Redondo
  *
  * https://github.com/kayspark/ImageFeatureDetector
  *
@@ -10,10 +10,8 @@
 #include "windowMain.hpp"
 
 WindowMain::WindowMain()
-    : 
-     mSettings(std::make_unique<QSettings>("imageFeatureDetectorSettings.ini", QSettings::IniFormat))
-    , 
-     mMenuRecentFiles(std::make_unique<QMenu>(this))
+    : mSettings(std::make_unique<QSettings>("imageFeatureDetectorSettings.ini", QSettings::IniFormat))
+    , mMenuRecentFiles(std::make_unique<QMenu>(this))
     , mToolButtonOpenRecent(std::make_unique<QToolButton>(this))
     , mIconHarris(std::make_unique<QIcon>(":icons/Harris.png"))
     , mIconFAST(std::make_unique<QIcon>(":icons/Fast.png"))
