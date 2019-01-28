@@ -8,6 +8,7 @@
  */
 
 #include "windowFastRealTime.hpp"
+#include "Section.h"
 #include "opencvhelper.hpp"
 
 WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
@@ -25,14 +26,41 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
     , mLocale(std::make_unique<QLocale>(QLocale::English))
     , mPainter(std::make_unique<QPainter>()) {
   setupUi(this);
+
+  auto detectSection = new Section("Detect", 300, this);
+  this->layout()->addWidget(detectSection);
+
+  auto vLayout = new QVBoxLayout();
+  mDetectorWidget = new QListWidget(detectSection);
+  mDetectorWidget->setFixedHeight(100);
+  mDetectorWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+  mDetectorWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+  mDetectorWidget->setViewMode(QListWidget::IconMode);
+  mDetectorWidget->setIconSize(QSize(100, 100));
+  mDetectorWidget->setResizeMode(QListWidget::Adjust);
+
+  vLayout->addWidget(mDetectorWidget);
+  detectSection->setContentLayout(*vLayout);
+
+  auto classifySection = new Section("Classify", 300, this);
+  this->layout()->addWidget(classifySection);
+
+  auto v2Layout = new QVBoxLayout();
+  mClassifyWidget = new QListWidget(classifySection);
+  mClassifyWidget->setFixedHeight(100);
+  mClassifyWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+  mClassifyWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+  mClassifyWidget->setViewMode(QListWidget::IconMode);
+  mClassifyWidget->setIconSize(QSize(100, 100));
+  mClassifyWidget->setResizeMode(QListWidget::Adjust);
+
+  v2Layout->addWidget(mClassifyWidget);
+  classifySection->setContentLayout(*v2Layout);
+
   setAttribute(Qt::WA_DeleteOnClose);
   setContextMenuPolicy(Qt::ActionsContextMenu);
   uiSpinBoxThresholdFAST->setValue(mSettings->value("fastRT/threshold", 25).toInt());
   uiPushButtonNonMaxFAST->setChecked(mSettings->value("fastRT/nonMaxSuppression", true).toBool());
-  mListWidget->setViewMode(QListWidget::IconMode);
-  mListWidget->setIconSize(QSize(100, 100));
-  mListWidget->setResizeMode(QListWidget::Adjust);
-  mListWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
   actAbnormal = std::make_unique<QAction>(tr("&Abnormal"), this);
   actNormal = std::make_unique<QAction>(tr("&Normal"), this);
@@ -42,7 +70,8 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   QObject::connect(actAbnormal.get(), &QAction::triggered, this, &WindowFastRealTime::learnAbnormal);
   QObject::connect(actClear.get(), &QAction::triggered, this, &WindowFastRealTime::clearListWidget);
 
-  QObject::connect(mListWidget, &QListWidget::customContextMenuRequested, this, &WindowFastRealTime::showContextMenu);
+  QObject::connect(mDetectorWidget, &QListWidget::customContextMenuRequested, this,
+                   &WindowFastRealTime::showContextMenu);
   QObject::connect(uiPushButtonNonMaxFAST, &QPushButton::toggled, this, &WindowFastRealTime::saveFastParams);
   QObject::connect(uiSpinBoxThresholdFAST, &QSpinBox::editingFinished, this, &WindowFastRealTime::saveFastParams);
   QObject::connect(uiPushButtonResetFAST, &QAbstractButton::clicked, this, &WindowFastRealTime::resetUI);
@@ -66,7 +95,7 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   show();
 }
 void WindowFastRealTime::showContextMenu(const QPoint &pos) {
-  QPoint globalPos = mListWidget->mapToGlobal(pos);
+  QPoint globalPos = mDetectorWidget->mapToGlobal(pos);
   QMenu menu(this);
   menu.addAction(actAbnormal.get());
   menu.addAction(actNormal.get());
@@ -112,24 +141,24 @@ void WindowFastRealTime::learnNormal() {}
 
 void WindowFastRealTime::learnAbnormal() {
 
-  QListWidgetItem *currentItem = mListWidget->currentItem();
+  QListWidgetItem *currentItem = mDetectorWidget->currentItem();
   QIcon icon = currentItem->icon();
   cv::Mat feature = QPixmap2Mat(icon.pixmap(QSize(100, 100)), true);
   m_nm_classifier->learn(feature);
 }
 
 void WindowFastRealTime::clearListWidget() {
-  QList<QListWidgetItem *> selected = mListWidget->selectedItems();
+  QList<QListWidgetItem *> selected = mDetectorWidget->selectedItems();
   int size = selected.size();
   if (size > 0) {
     for (auto &item : selected) {
       // https://stackoverflow.com/questions/25417348/remove-selected-items-from-listwidget
-      mListWidget->removeItemWidget(item);
+      mDetectorWidget->removeItemWidget(item);
       delete item;
     }
-    mListWidget->clearSelection();
+    mDetectorWidget->clearSelection();
   } else {
-    mListWidget->clear();
+    mDetectorWidget->clear();
   }
 }
 
@@ -151,24 +180,6 @@ void WindowFastRealTime::compute() {
         QImage(imgRT.data, imgRT.cols, imgRT.rows, static_cast<int>(imgRT.step), QImage::Format_RGB888));
       QRect area = uiVideoArea->geometry();
       mPainter->begin(&mPixmap);
-      //      std::for_each(uiLabelRealTime->m_bandList.begin(), uiLabelRealTime->m_bandList.end(), [this](const auto
-      //      &b) {
-      //        b->hide();
-      //        QRect qRect = b->geometry().normalized();
-      //        QString d = QString("tl of b: (%1, %2), labelPos: (%3, %4)  qrect:(%5, %6)")
-      //                      .arg(b->geometry().left())
-      //                      .arg(b->geometry().top())
-      //                      .arg(uiLabelRealTime->pos().x())
-      //                      .arg(uiLabelRealTime->pos().y())
-      //                      .arg(qRect.left())
-      //                      .arg(qRect.top());
-      //        std::cout << d.toStdString() << std::endl;
-      //        m_pen = QColor::fromRgb(255, 255, 255);
-      //        m_pen.setWidth(5);
-      //        mPainter->setPen(m_pen);
-      //        mPainter->drawRect(qRect);
-      //        b->showNormal();
-      //      });
       for (const auto &motion : motions) {
         QRect motionRect(motion.x, motion.y, motion.width, motion.height);
         const auto &band = std::find_if(uiLabelRealTime->getBandList().begin(), uiLabelRealTime->getBandList().end(),
@@ -181,7 +192,7 @@ void WindowFastRealTime::compute() {
           cv::Mat mat = QPixmap2Mat(pix, true);
           QString fileName = QString("%1.png").arg(QDateTime::currentDateTime().toString("MMdd_hhmmss"));
           pix.toImage().save(QString("backup/%1").arg(fileName));
-          mListWidget->addItem(new QListWidgetItem(QIcon(pix), fileName));
+          mDetectorWidget->addItem(new QListWidgetItem(QIcon(pix), fileName));
           if (m_nm_classifier->classify(mat)) {
             m_pen = QColor::fromRgb(255, 0, 0);
           } else {

@@ -44,6 +44,8 @@ private:
   std::unique_ptr<QAction> actAbnormal;
   std::unique_ptr<QAction> actClear;
   QPen m_pen;
+  QListWidget *mDetectorWidget;
+  QListWidget *mClassifyWidget;
 
 protected:
   nm_detector m_predator;

@@ -329,16 +329,6 @@
      </item>
     </layout>
    </item>
-   <item>
-    <widget class="QListWidget" name="mListWidget">
-     <property name="contextMenuPolicy">
-      <enum>Qt::CustomContextMenu</enum>
-     </property>
-     <property name="selectionMode">
-      <enum>QAbstractItemView::MultiSelection</enum>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <customwidgets>
