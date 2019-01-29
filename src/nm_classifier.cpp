@@ -45,7 +45,7 @@ using namespace cv;
 
 nm_classifier::nm_classifier()
     : m_device(std::make_unique<NeuroMem::NeuroMemDevice>()) {
-  m_category_set_.insert(0);
+  m_category_set.insert(0);
 #if defined _WIN32
   NeuroMem::NeuroMemEngine::GetDevices(m_device.get(), 1);
   if (NeuroMem::NeuroMemEngine::Connect(m_device.get()) == 100) {
@@ -53,7 +53,7 @@ nm_classifier::nm_classifier()
     return;
   }
 #endif
-  init(1000, 100);
+  init(7000, 2000);
 }
 
 void nm_classifier::init(const uint16_t maxif, const uint16_t minif) {
@@ -68,10 +68,12 @@ void nm_classifier::init(const uint16_t maxif, const uint16_t minif) {
 }
 
 nm_classifier::~nm_classifier() {
-  if (m_device->handle != nullptr)
+  if (m_device->handle != nullptr) {
     m_device->handle = nullptr;
-  if (m_device)
+  }
+  if (m_device) {
     m_device.release();
+  }
 }
 
 bool nm_classifier::is_loaded_from_file() const { return m_loaded_; }
@@ -154,22 +156,31 @@ bool nm_classifier::classify(NeuroMemClassifyReq &req) {
 
 void nm_classifier::learn(NeuroMemLearnReq &req) {
   req.size = m_neuron_vector_size;
-  req.category = m_category_set_.size();
+  req.category = m_category_set.size();
 #if defined _WIN32
   NeuroMemEngine::Learn(m_device.get(), &req);
 #endif
   if (req.ns > 0) {
-    const auto ret = m_category_set_.insert(req.category);
-    if (!ret.second)
+    const auto ret = m_category_set.insert(req.category);
+    if (!ret.second) {
       std::cout << "cannot be learnd for the category :" << req.category << std::endl;
+    } else {
+    std::cout << "learned as cat: " << req.category << std::endl; 
+    } 
+  } else {
+    std::cout << "ns is less or equal to zero: " << std::endl; 
   }
 }
 
-void nm_classifier::learn(cv::Mat &in) {
+void nm_classifier::learn(cv::Mat &in, int cat) {
   std::vector<uint8_t> feature;
   feature.reserve(m_neuron_vector_size);
   extract_feature_vector(in, feature);
   NeuroMemLearnReq lreq;
+
+  lreq.category = cat < 0 ? m_category_set.size() :  cat;
+  lreq.size = m_neuron_vector_size;
+
   std::move(feature.begin(), feature.end(), lreq.vector);
   learn(lreq);
 }
@@ -183,6 +194,9 @@ bool nm_classifier::classify(cv::Mat &in) {
   NeuroMemClassifyReq req;
   std::move(feature.begin(), feature.end(), req.vector);
   ret = classify(req);
+  std::string s = ret ? "classified" : "unknown";
+  std::cout << "classification: " << req.category[0] << " , " << req.distance[0] << s << std::endl;
+
 #endif //_WIN32
   return ret;
 }
@@ -252,7 +266,7 @@ uint32_t nm_classifier::file_to_neurons() {
       // std::cout << "  eob" << std::endl;
       if (neuron.cat > cat) {
         cat = neuron.cat;
-        m_category_set_.insert(cat);
+        m_category_set.insert(cat);
       }
     }
   }
@@ -356,13 +370,16 @@ void nm_classifier::extract_feature_vector(Mat input, std::vector<uint8_t> &v) {
   // some algorithms need color images , whereas most are needed gray.
   switch (m_algorithm) {
     case enum_feature_algorithm::hog:
-      if (input.channels() != 1)
+      if (input.channels() != 1) {
         cvtColor(input, input, cv::COLOR_BGR2GRAY);
+      }
+
       extract_feature_hog(input, output);
       break;
     case enum_feature_algorithm::sub_sampling:
-      if (input.channels() != 1)
+      if (input.channels() != 1) {
         cvtColor(input, input, cv::COLOR_BGR2GRAY);
+      }
       break;
 
     case enum_feature_algorithm::default_:
