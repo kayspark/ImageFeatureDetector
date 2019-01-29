@@ -63,7 +63,7 @@ private:
   int in_height_ = 300;
   const double in_scale_factor_ = 1.0;
   std::map<uint16_t, std::string> m_names_;
-  std::set<uint16_t> m_category_set_;
+  std::set<uint16_t> m_category_set;
   bool m_loaded_ = false;
 
   bool learning_mode_ = false; // 0: recognize, 1: learn, 90: end-of-program
@@ -90,7 +90,7 @@ public:
   void init(uint16_t maxif, uint16_t minif);
   ~nm_classifier();
   bool classify(cv::Mat &in);
-  void learn(cv::Mat &in);
+  void learn(cv::Mat &in, int cat =-1);
   uint32_t file_to_neurons();
   void neurons_to_file();
 

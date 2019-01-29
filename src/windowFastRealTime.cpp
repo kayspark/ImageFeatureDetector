@@ -78,10 +78,6 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   QObject::connect(uiPushButtonDetect, &QAbstractButton::clicked, this, &WindowFastRealTime::detect);
   QObject::connect(uiPushButtonCancel, &QAbstractButton::clicked, this, &WindowFastRealTime::close);
 
-  //  QObject::connect(uiLabelRealTime, &QLabel::mousePressEvent, this, &WindowFastRealTime::mousePress);
-  //  QObject::connect(uiLabelRealTime, &QLabel::mouseMoveEvent, this, &WindowFastRealTime::mouseMove);
-  //  QObject::connect(uiLabelRealTime, &QLabel::mouseReleaseEvent, this, &WindowFastRealTime::mouseRelease);
-
   m_pen.setWidth(5);
   std::string url = mSettings->value("rtsp/url1").toString().toStdString();
   mCamera.open(url);
@@ -92,6 +88,7 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   } else {
     uiLabelRealTime->setText("There is some problem with the cam.\nCannot get images.");
   }
+
   show();
 }
 void WindowFastRealTime::showContextMenu(const QPoint &pos) {
@@ -145,6 +142,7 @@ void WindowFastRealTime::learnAbnormal() {
   QIcon icon = currentItem->icon();
   cv::Mat feature = QPixmap2Mat(icon.pixmap(QSize(100, 100)), true);
   m_nm_classifier->learn(feature);
+  mClassifyWidget->addItem(new QListWidgetItem(*currentItem));
 }
 
 void WindowFastRealTime::clearListWidget() {
