@@ -166,10 +166,10 @@ void nm_classifier::learn(NeuroMemLearnReq &req) {
     if (!ret.second) {
       std::cout << "cannot be learnd for the category :" << req.category << std::endl;
     } else {
-    std::cout << "learned as cat: " << req.category << std::endl; 
-    } 
+      std::cout << "learned as cat: " << req.category << std::endl;
+    }
   } else {
-    std::cout << "ns is less or equal to zero: " << std::endl; 
+    std::cout << "ns is less or equal to zero: " << std::endl;
   }
 }
 
@@ -179,7 +179,7 @@ void nm_classifier::learn(cv::Mat &in, int cat) {
   extract_feature_vector(in, feature);
   NeuroMemLearnReq lreq;
 
-  lreq.category = cat < 0 ? m_category_set.size() :  cat;
+  lreq.category = cat < 0 ? m_category_set.size() : cat;
   lreq.size = m_neuron_vector_size;
 
   std::move(feature.begin(), feature.end(), lreq.vector);

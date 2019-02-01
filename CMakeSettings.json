@@ -21,14 +21,14 @@
       ]
     },
     {
-      "name" : "x64-Release",
+      "name": "x64-Release",
       "generator": "Ninja",
       "configurationType": "Release",
       "inheritEnvironments": [
         "msvc_x64_x64"
       ],
       "buildRoot": "${workspaceRoot}\\msbuild\\${name}",
-      "intelliSenseMode" : "windows-msvc-x64",
+      "intelliSenseMode": "windows-msvc-x64",
       "installRoot": "${workspaceRoot}\\bin\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
@@ -39,7 +39,6 @@
           "value": "c:\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake"
         }
       ]
-    } 
- 
+    }
   ]
 }
