@@ -67,9 +67,9 @@ void nm_classifier::init(const uint16_t maxif, const uint16_t minif) {
   m_minif = minif;
   set_feature_algorithm(enum_feature_algorithm::sub_sampling);
 #ifdef _WIN32
-  NeuroMemEngine::Reset(m_device.get());
-  NeuroMemEngine::SetNetworkType(m_device.get(), RBF);
-  set_context(1, NeuroMemNormType::L1, minif, maxif);
+  NeuroMem::NeuroMemEngine::Reset(m_device.get());
+  NeuroMem::NeuroMemEngine::SetNetworkType(m_device.get(), NeuroMem::RBF);
+  set_context(1, NeuroMem::NeuroMemNormType::L1, minif, maxif);
 #elif __linux__
   neuromem::reset(m_device.get());
   neuromem::set_network_type(m_device.get(), neuromem::RBF);
@@ -140,14 +140,14 @@ void nm_classifier::set_feature_algorithm(enum_feature_algorithm algorithm) {
 
 void nm_classifier::set_context(uint16_t context, const uint16_t norm, const uint16_t minif, const uint16_t maxif) {
 #ifdef _WIN32
-  NeuroMemContext ctx;
+  NeuroMem::NeuroMemContext ctx;
   ctx.context = context;
   ctx.norm = norm;
   ctx.minif = minif;
   ctx.maxif = maxif;
   m_maxif = maxif;
   m_minif = minif;
-  NeuroMemEngine::SetContext(m_device.get(), &ctx);
+  NeuroMem::NeuroMemEngine::SetContext(m_device.get(), &ctx);
 #elif __linux__
   neuromem::nm_context ctx;
   ctx.context = context;
@@ -193,25 +193,25 @@ void nm_classifier::learn(neuromem::nm_learn_req &req) {
 }
 
 #else // win32 and others
-bool nm_classifier::classify(NeuroMemClassifyReq &req) {
+bool nm_classifier::classify(NeuroMem::NeuroMemClassifyReq &req) {
   req.size = m_neuron_vector_size;
   req.k = 1;
   bool ret = false;
   assert(m_device->handle != nullptr);
 #if defined _WIN32
-  const int t = NeuroMemEngine::Classify(m_device.get(), &req);
-  if (t == NM_CLASSIFY_IDENTIFIED || req.distance[0] < UNKNOWN) {
+  const int t = NeuroMem::NeuroMemEngine::Classify(m_device.get(), &req);
+  if (t == NeuroMem::NM_CLASSIFY_IDENTIFIED || req.distance[0] < UNKNOWN) {
     ret = true;
   }
 #endif
   return ret;
 }
 
-void nm_classifier::learn(NeuroMemLearnReq &req) {
+void nm_classifier::learn(NeuroMem::NeuroMemLearnReq &req) {
   req.size = m_neuron_vector_size;
   req.category = m_category_set.size();
 #if defined _WIN32
-  NeuroMemEngine::Learn(m_device.get(), &req);
+  NeuroMem::NeuroMemEngine::Learn(m_device.get(), &req);
 #endif
   if (req.ns > 0) {
     const auto ret = m_category_set.insert(req.category);
@@ -234,7 +234,7 @@ void nm_classifier::learn(cv::Mat &in, int cat) {
 #ifdef __linux__
   neuromem::nm_learn_req lreq;
 #elif _WIN32
-  NeuroMemLearnReq lreq;
+  NeuroMem::NeuroMemLearnReq lreq;
 #endif
 
   lreq.category = cat < 0 ? m_category_set.size() : cat;
@@ -252,7 +252,7 @@ bool nm_classifier::classify(cv::Mat &in) {
 #ifdef __linux__
   neuromem::nm_classify_req req;
 #elif _WIN32
-  NeuroMemClassifyReq req;
+  NeuroMem::NeuroMemClassifyReq req;
 #endif
   std::move(feature.begin(), feature.end(), req.vector);
   ret = classify(req);
@@ -282,8 +282,8 @@ uint32_t nm_classifier::file_to_neurons() {
     return (0);
   }
 #ifdef _WIN32
-  NeuroMemContext ctx{};
-  NeuroMemEngine::GetContext(m_device.get(), &ctx);
+  NeuroMem::NeuroMemContext ctx{};
+  NeuroMem::NeuroMemEngine::GetContext(m_device.get(), &ctx);
 #elif __linux__
   neuromem::nm_context ctx{};
   neuromem::get_context(m_device.get(), &ctx);
@@ -316,7 +316,7 @@ uint32_t nm_classifier::file_to_neurons() {
   // auto *neurons = new NeuroMemNeuron[neuronCount];
 
 #ifdef _WIN32
-  std::vector<NeuroMemNeuron> neurons(neuron_count);
+  std::vector<NeuroMem::NeuroMemNeuron> neurons(neuron_count);
 #elif __linux__
   std::vector<neuromem::nm_neuron> neurons(neuron_count);
 #endif
@@ -348,8 +348,8 @@ uint32_t nm_classifier::file_to_neurons() {
   assert(m_device->handle != nullptr);
 
 #ifdef _WIN32
-  NeuroMemEngine::WriteNeurons(m_device.get(), neurons.data(), neuron_count);
-  neuron_count = NeuroMemEngine::GetNeuronCount(m_device.get());
+  NeuroMem::NeuroMemEngine::WriteNeurons(m_device.get(), neurons.data(), neuron_count);
+  neuron_count = NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
 #else
   neuromem::write_neurons(m_device.get(), neurons.data(), neuron_count);
   neuron_count = neuromem::get_neuron_count(m_device.get());
