@@ -45,7 +45,7 @@ using namespace cv;
 nm_classifier::nm_classifier() {
   m_category_set.insert(0);
 #if defined _WIN32
-  m_device = std::make_unique<NeuroMem::NeuroMemDevice>() ;
+  m_device = std::make_unique<NeuroMem::NeuroMemDevice>();
   NeuroMem::NeuroMemEngine::GetDevices(m_device.get(), 1);
   if (NeuroMem::NeuroMemEngine::Connect(m_device.get()) == 100) {
     std::cout << "connection error" << std::endl;
@@ -82,7 +82,7 @@ nm_classifier::~nm_classifier() {
     m_device->handle = nullptr;
   }
   if (m_device) {
-    m_device.release();
+    m_device = nullptr;
   }
 }
 
@@ -237,7 +237,7 @@ void nm_classifier::learn(cv::Mat &in, int cat) {
   NeuroMem::NeuroMemLearnReq lreq;
 #endif
 
-  lreq.category = cat < 0 ? m_category_set.size() : cat;
+  lreq.category = static_cast<uint16_t>(cat < 0 ? m_category_set.size() : cat);
   lreq.size = m_neuron_vector_size;
 
   std::move(feature.begin(), feature.end(), lreq.vector);
@@ -375,8 +375,9 @@ uint32_t nm_classifier::file_to_neurons() {
 }
 
 void nm_classifier::neurons_to_file() {
+  uint32_t neuron_count = 0;
 #ifdef _WIN32
-  const uint32_t neuron_count = NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
+  neuron_count = NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
   if (neuron_count <= 0) {
     return;
   }
@@ -385,7 +386,7 @@ void nm_classifier::neurons_to_file() {
   int size = neurons[0].size;
   NeuroMem::NeuroMemEngine::ReadNeurons(m_device.get(), &neurons[0], neuron_count);
 #elif __linux__
-  const uint32_t neuron_count = neuromem::get_neuron_count(m_device.get());
+  neuron_count = neuromem::get_neuron_count(m_device.get());
   if (neuron_count <= 0) {
     return;
   }
@@ -398,11 +399,10 @@ void nm_classifier::neurons_to_file() {
 #endif
 
   std::string filename = "backup/backup.hex";
-  //   QString filename =
   std::ofstream file;
   QDir dir;
   dir.mkdir("backup");
-  file.open("backup/backup.hex", std::ios::out | std::ios::binary);
+  file.open(filename, std::ios::out | std::ios::binary);
   if (file.is_open()) {
     uint16_t header[4] = {0x1704, 0, 0, 0};
     header[1] = 256;

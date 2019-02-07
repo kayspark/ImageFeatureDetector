@@ -8,7 +8,6 @@ project(imagefeaturedetector)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules
         ${CMAKE_MODULE_PATH})
 
-
 SET(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -43,12 +42,12 @@ elseif (NOT WIN32)
         set(LIBVLC_LIBRARY_DIR "/usr/local/lib")
         set(LIBVLC_LIBRARY ${LIBVLC_LIBRARY_DIR}/libvlc.dylib)
         set(LIBVLCCORE_LIBRARY ${LIBVLC_LIBRARY_DIR}/libvlccore.dylib)
-    elseif (NOT APPLE)
+    elseif (NOT APPLE) #linux. sudo apt install libvlc-dev vlc
         set(LIBVLC_INCLUDE_DIR "/usr/include")
         set(LIBVLC_LIBRARY_DIR "/usr/lib/x86_64-linux-gnu")
         set(LIBVLC_LIBRARY ${LIBVLC_LIBRARY_DIR}/libvlc.so)
         set(LIBVLCCORE_LIBRARY ${LIBVLC_LIBRARY_DIR}/libvlccore.so)
-        set(NeuroMemLibs /usr/local/lib/libnmengine.so)
+        set(NeuroMemLibs /usr/local/lib/libnmengine.so) # follow install instruction for nm500 on linux
     endif (APPLE)
 endif (WIN32)
 find_package(OpenCV COMPONENTS opencv_core opencv_imgproc opencv_highgui opencv_objdetect opencv_tracking opencv_xfeatures2d REQUIRED)
@@ -72,7 +71,7 @@ if (WIN32)
 elseif (NOT WIN32)
     if (APPLE)
         target_link_libraries(imagefeaturedetector Qt5::Core Qt5::Widgets ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY})
-    elseif (NOT APPLE)
+    elseif (NOT APPLE) #linux
         target_link_libraries(imagefeaturedetector Qt5::Core Qt5::Widgets ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${NeuroMemLibs})
     endif (APPLE)
 endif (WIN32)

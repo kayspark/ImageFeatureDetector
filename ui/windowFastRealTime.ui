@@ -373,7 +373,7 @@
   <customwidget>
    <class>VideoLabelView</class>
    <extends>QLabel</extends>
-   <header>../../../src/videolabelview.hpp</header>
+   <header>src/videolabelview.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>
