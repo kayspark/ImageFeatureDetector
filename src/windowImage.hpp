@@ -41,7 +41,7 @@ public:
   cv::Mat _imgRT;
   QPixmap mPixmap;
   // vlc_capture _capture;
-  cv::VideoCapture _capture;
+  cv::VideoCapture m_capture;
   std::unique_ptr<QTimer> timer;
   QString mImageZoom;
   QString mImageTime;

@@ -12,7 +12,7 @@
 #include <qstring.h>
 #include <utility>
 WindowImage::WindowImage(const QString &fileName, QString windowTitle, int windowType)
-    : _capture(cv::VideoCapture(fileName.toStdString()))
+    : m_capture(cv::VideoCapture(fileName.toStdString()))
     , mWindowTitle(std::move(windowTitle))
     , mWindowType(windowType)
     , mImageN(0)
@@ -31,10 +31,10 @@ WindowImage::WindowImage(const QString &fileName, QString windowTitle, int windo
 
   uiScrollAreaWidgetContents->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
-  if (_capture.isOpened()) {
+  if (m_capture.isOpened()) {
     // setup default values
-    _capture.set(cv::CAP_PROP_FRAME_WIDTH, 640);
-    _capture.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
+    m_capture.set(cv::CAP_PROP_FRAME_WIDTH, 640);
+    m_capture.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
     compute();
     float sizeInKiB = _image->byteCount() / (float)1024;
     if (sizeInKiB > 1024)
@@ -397,7 +397,7 @@ void WindowImage::mouseDoubleClickEvent(QMouseEvent *event) {
 }
 
 void WindowImage::compute() {
-  _capture.read(_imgRT);
+  m_capture.read(_imgRT);
   if (!_imgRT.empty()) {
 
     cv::resize(_imgRT, _imgRT, cv::Size(800, 600), 0, 0, cv::INTER_CUBIC);
