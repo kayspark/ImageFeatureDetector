@@ -38,6 +38,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/objdetect.hpp>
 #include <set>
+#include <memory>
 
 enum class enum_feature_algorithm { default_, hog, sub_sampling };
 
@@ -50,9 +51,11 @@ private:
   const static int UNKNOWN = 65535;
 
   uint16_t m_neuron_vector_size = 256;
-
+#ifdef __linux__
+  std::unique_ptr<neuromem::nm_device> m_device;
+#else
   std::unique_ptr<NeuroMem::NeuroMemDevice> m_device;
-
+#endif
   std::string m_tracker_net_model_configuration;
   std::string m_tracker_net_model_binary;
 
@@ -74,15 +77,20 @@ private:
 
 private:
   enum_feature_algorithm m_algorithm = enum_feature_algorithm::default_;
-  void learn(NeuroMem::NeuroMemLearnReq &req);
-  void set_context(uint16_t context, uint16_t norm, uint16_t minif, uint16_t maxif);
-  bool classify(NeuroMem::NeuroMemClassifyReq &req);
 
 public:
+ #ifdef __linux__
+    void learn(neuromem::nm_learn_req &req);
+    bool classify(neuromem::nm_classify_req &req);
+ #else
+    void learn(NeuroMem::NeuroMemLearnReq &req);
+    bool classify(NeuroMem::NeuroMemClassifyReq &req);
+#endif
   bool is_loaded_from_file() const;
   enum_feature_algorithm get_feature_algorithm() const;
   uint16_t get_neuron_vector_size() const;
 
+    void set_context(uint16_t context, uint16_t norm, uint16_t minif, uint16_t maxif);
   void pyramid_reduction(cv::Mat &input, cv::Mat &output, int size);
   void set_feature_algorithm(enum_feature_algorithm algorithm);
 
