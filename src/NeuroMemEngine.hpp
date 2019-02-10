@@ -4,19 +4,20 @@
  */
 #pragma once
 
-#if defined __linux__
+#if not defined _WIN32
 #include <nmengine.h>
-#else 
-#if defined _WIN32 || defined __CYGWIN__
-  #if defined __GNUC__ || LLVM
-    #define nm_engine_api __attribute__((dllexport))
-    #define __stdcall
-  #else
-    #define nm_engine_api __declspec(dllexport)
-  #endif
 #else
-  #define nm_engine_api __attribute__((visibility("default")))
-  #define __stdcall
+
+#if defined _WIN32 || defined __CYGWIN__
+#if defined __GNUC__ || LLVM
+#define nm_engine_api __attribute__((dllexport))
+#define __stdcall
+#else
+#define nm_engine_api __declspec(dllexport)
+#endif
+#else
+#define nm_engine_api __attribute__((visibility("default")))
+#define __stdcall
 #endif
 
 #ifdef __cplusplus
@@ -184,4 +185,5 @@ namespace NeuroMem {
 #ifdef __cplusplus
 }
 #endif
+
 #endif // not linux

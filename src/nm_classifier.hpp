@@ -35,10 +35,10 @@
 
 #include "NeuroMemEngine.hpp"
 #include <map>
+#include <memory>
 #include <opencv2/core.hpp>
 #include <opencv2/objdetect.hpp>
 #include <set>
-#include <memory>
 
 enum class enum_feature_algorithm { default_, hog, sub_sampling };
 
@@ -51,10 +51,10 @@ private:
   const static int UNKNOWN = 65535;
 
   uint16_t m_neuron_vector_size = 256;
-#ifdef __linux__
-  std::unique_ptr<neuromem::nm_device> m_device;
-#else
+#ifdef _WIN32
   std::unique_ptr<NeuroMem::NeuroMemDevice> m_device;
+#else
+  std::unique_ptr<nm_device> m_device;
 #endif
   std::string m_tracker_net_model_configuration;
   std::string m_tracker_net_model_binary;
@@ -79,18 +79,18 @@ private:
   enum_feature_algorithm m_algorithm = enum_feature_algorithm::default_;
 
 public:
- #ifdef __linux__
-    void learn(neuromem::nm_learn_req &req);
-    bool classify(neuromem::nm_classify_req &req);
- #else
-    void learn(NeuroMem::NeuroMemLearnReq &req);
-    bool classify(NeuroMem::NeuroMemClassifyReq &req);
+#ifdef _WIN32
+  void learn(NeuroMem::NeuroMemLearnReq &req);
+  bool classify(NeuroMem::NeuroMemClassifyReq &req);
+#else
+  void learn(nm_learn_req &req);
+  bool classify(nm_classify_req &req);
 #endif
   bool is_loaded_from_file() const;
   enum_feature_algorithm get_feature_algorithm() const;
   uint16_t get_neuron_vector_size() const;
 
-    void set_context(uint16_t context, uint16_t norm, uint16_t minif, uint16_t maxif);
+  void set_context(uint16_t context, uint16_t norm, uint16_t minif, uint16_t maxif);
   void pyramid_reduction(cv::Mat &input, cv::Mat &output, int size);
   void set_feature_algorithm(enum_feature_algorithm algorithm);
 
@@ -98,7 +98,7 @@ public:
   void init(uint16_t maxif, uint16_t minif);
   ~nm_classifier();
   bool classify(cv::Mat &in);
-  void learn(cv::Mat &in, int cat =-1);
+  void learn(cv::Mat &in, int cat = -1);
   uint32_t file_to_neurons();
   void neurons_to_file();
 

@@ -45,16 +45,16 @@ using namespace cv;
 nm_classifier::nm_classifier() {
   m_category_set.insert(0);
 #if defined _WIN32
-  m_device = std::make_unique<NeuroMem::NeuroMemDevice>() ;
+  m_device = std::make_unique<NeuroMem::NeuroMemDevice>();
   NeuroMem::NeuroMemEngine::GetDevices(m_device.get(), 1);
   if (NeuroMem::NeuroMemEngine::Connect(m_device.get()) == 100) {
     std::cout << "connection error" << std::endl;
     return;
   }
-#elif __linux__
-  m_device = std::make_unique<neuromem::nm_device>();
-  neuromem::get_devices(m_device.get(), 1);
-  if (neuromem::connect(m_device.get()) == 100) {
+#else
+  m_device = std::make_unique<nm_device>();
+  nm_get_devices(m_device.get(), 1);
+  if (nm_connect(m_device.get()) == 100) {
     std::cout << "connection error" << std::endl;
     return;
   }
@@ -70,10 +70,15 @@ void nm_classifier::init(const uint16_t maxif, const uint16_t minif) {
   NeuroMem::NeuroMemEngine::Reset(m_device.get());
   NeuroMem::NeuroMemEngine::SetNetworkType(m_device.get(), NeuroMem::RBF);
   set_context(1, NeuroMem::NeuroMemNormType::L1, minif, maxif);
-#elif __linux__
-  neuromem::reset(m_device.get());
-  neuromem::set_network_type(m_device.get(), neuromem::RBF);
-  set_context(1, neuromem::L1, minif, maxif);
+#else
+  nm_context ctx;
+  ctx.maxif = maxif;
+  ctx.minif = minif;
+  ctx.norm = nm_norm_type::L1;
+  ctx.context = 1;
+  nm_reset(m_device.get());
+  nm_set_network_type(m_device.get(), RBF);
+  nm_set_context(m_device.get(), &ctx);
 #endif
 }
 
@@ -148,38 +153,36 @@ void nm_classifier::set_context(uint16_t context, const uint16_t norm, const uin
   m_maxif = maxif;
   m_minif = minif;
   NeuroMem::NeuroMemEngine::SetContext(m_device.get(), &ctx);
-#elif __linux__
-  neuromem::nm_context ctx;
+#else
+  nm_context ctx;
   ctx.context = context;
   ctx.norm = norm;
   ctx.minif = minif;
   ctx.maxif = maxif;
   m_maxif = maxif;
   m_minif = minif;
-  neuromem::set_context(m_device.get(), &ctx);
-#
+  nm_set_context(m_device.get(), &ctx);
 
 #endif //_WIN32
 }
 
-#ifdef __linux__
-
-bool nm_classifier::classify(neuromem::nm_classify_req &req) {
+#ifdef _WIN32
+bool nm_classifier::classify(NeuroMem::NeuroMemClassifyReq &req) {
   req.size = m_neuron_vector_size;
   req.k = 1;
   bool ret = false;
   assert(m_device->handle != nullptr);
-  const int t = neuromem::classify(m_device.get(), &req);
-  if (t == neuromem::NM_CLASSIFY_IDENTIFIED || req.distance[0] < neuromem::NM_CLASSIFY_UNKNOWN) {
+  const int t = NeuroMem::NeuroMemEngine::Classify(m_device.get(), &req);
+  if (t == NeuroMem::NM_CLASSIFY_IDENTIFIED || req.distance[0] < UNKNOWN) {
     ret = true;
   }
   return ret;
 }
 
-void nm_classifier::learn(neuromem::nm_learn_req &req) {
+void nm_classifier::learn(NeuroMem::NeuroMemLearnReq &req) {
   req.size = m_neuron_vector_size;
   req.category = m_category_set.size();
-  neuromem::learn(m_device.get(), &req);
+  NeuroMem::NeuroMemEngine::Learn(m_device.get(), &req);
   if (req.ns > 0) {
     const auto ret = m_category_set.insert(req.category);
     if (!ret.second) {
@@ -191,28 +194,23 @@ void nm_classifier::learn(neuromem::nm_learn_req &req) {
     std::cout << "ns is less or equal to zero: " << std::endl;
   }
 }
-
-#else // win32 and others
-bool nm_classifier::classify(NeuroMem::NeuroMemClassifyReq &req) {
+#else //  others
+bool nm_classifier::classify(nm_classify_req &req) {
   req.size = m_neuron_vector_size;
   req.k = 1;
   bool ret = false;
   assert(m_device->handle != nullptr);
-#if defined _WIN32
-  const int t = NeuroMem::NeuroMemEngine::Classify(m_device.get(), &req);
-  if (t == NeuroMem::NM_CLASSIFY_IDENTIFIED || req.distance[0] < UNKNOWN) {
+  const int t = nm_classify(m_device.get(), &req);
+  if (t == NM_CLASSIFY_IDENTIFIED || req.distance[0] < NM_CLASSIFY_UNKNOWN) {
     ret = true;
   }
-#endif
   return ret;
 }
 
-void nm_classifier::learn(NeuroMem::NeuroMemLearnReq &req) {
+void nm_classifier::learn(nm_learn_req &req) {
   req.size = m_neuron_vector_size;
   req.category = m_category_set.size();
-#if defined _WIN32
-  NeuroMem::NeuroMemEngine::Learn(m_device.get(), &req);
-#endif
+  nm_learn(m_device.get(), &req);
   if (req.ns > 0) {
     const auto ret = m_category_set.insert(req.category);
     if (!ret.second) {
@@ -231,10 +229,10 @@ void nm_classifier::learn(cv::Mat &in, int cat) {
   feature.reserve(m_neuron_vector_size);
   extract_feature_vector(in, feature);
 
-#ifdef __linux__
-  neuromem::nm_learn_req lreq;
-#elif _WIN32
+#ifdef _WIN32
   NeuroMem::NeuroMemLearnReq lreq;
+#else
+  nm_learn_req lreq;
 #endif
 
   lreq.category = cat < 0 ? m_category_set.size() : cat;
@@ -249,10 +247,10 @@ bool nm_classifier::classify(cv::Mat &in) {
   std::vector<uint8_t> feature;
   feature.reserve(m_neuron_vector_size);
   extract_feature_vector(in, feature);
-#ifdef __linux__
-  neuromem::nm_classify_req req;
-#elif _WIN32
+#ifdef _WIN32
   NeuroMem::NeuroMemClassifyReq req;
+#else
+  nm_classify_req req;
 #endif
   std::move(feature.begin(), feature.end(), req.vector);
   ret = classify(req);
@@ -284,12 +282,11 @@ uint32_t nm_classifier::file_to_neurons() {
 #ifdef _WIN32
   NeuroMem::NeuroMemContext ctx{};
   NeuroMem::NeuroMemEngine::GetContext(m_device.get(), &ctx);
-#elif __linux__
-  neuromem::nm_context ctx{};
-  neuromem::get_context(m_device.get(), &ctx);
 #else
-  return 0;
+  nm_context ctx;
+  nm_get_context(m_device.get(), &ctx);
 #endif
+
   std::cout << "file to neuron before context:" << ctx.maxif << std::endl;
   std::cout << "Start restore process from backup.hex file" << std::endl;
 
@@ -317,28 +314,28 @@ uint32_t nm_classifier::file_to_neurons() {
 
 #ifdef _WIN32
   std::vector<NeuroMem::NeuroMemNeuron> neurons(neuron_count);
-#elif __linux__
-  std::vector<neuromem::nm_neuron> neurons(neuron_count);
+#else
+  std::vector<nm_neuron> neurons(neuron_count);
 #endif
 
   std::vector<uint16_t> buffer(m_neuron_vector_size + 5);
   uint16_t cat = 1;
-  for (auto &&neuron : neurons) {
+  for (auto &&nr : neurons) {
     file.read(reinterpret_cast<char *>(&buffer[0]), sizeof(uint16_t) * (m_neuron_vector_size + 5));
     if (!file.eof()) {
-      neuron.ncr = buffer[0];
-      neuron.size = m_neuron_vector_size;
-      neuron.aif = buffer[1 + m_neuron_vector_size];
-      neuron.minif = buffer[2 + m_neuron_vector_size];
-      neuron.cat = buffer[3 + m_neuron_vector_size];
-      neuron.nid = buffer[4 + m_neuron_vector_size];
-      std::cout << "nid= " << neuron.nid << " ,ncr= " << neuron.ncr << " ,cat= " << neuron.cat
-                << " ,aif = " << neuron.aif << " , minif = " << neuron.minif << std::endl;
-      std::move(std::begin(buffer) + 1, std::begin(buffer) + 1 + m_neuron_vector_size, std::begin(neuron.model));
+      nr.ncr = buffer[0];
+      nr.size = m_neuron_vector_size;
+      nr.aif = buffer[1 + m_neuron_vector_size];
+      nr.minif = buffer[2 + m_neuron_vector_size];
+      nr.cat = buffer[3 + m_neuron_vector_size];
+      nr.nid = buffer[4 + m_neuron_vector_size];
+      std::cout << "nid= " << nr.nid << " ,ncr= " << nr.ncr << " ,cat= " << nr.cat << " ,aif = " << nr.aif
+                << " , minif = " << nr.minif << std::endl;
+      std::move(std::begin(buffer) + 1, std::begin(buffer) + 1 + m_neuron_vector_size, std::begin(nr.model));
 
       // std::cout << "  eob" << std::endl;
-      if (neuron.cat > cat) {
-        cat = neuron.cat;
+      if (nr.cat > cat) {
+        cat = nr.cat;
         m_category_set.insert(cat);
       }
     }
@@ -351,8 +348,8 @@ uint32_t nm_classifier::file_to_neurons() {
   NeuroMem::NeuroMemEngine::WriteNeurons(m_device.get(), neurons.data(), neuron_count);
   neuron_count = NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
 #else
-  neuromem::write_neurons(m_device.get(), neurons.data(), neuron_count);
-  neuron_count = neuromem::get_neuron_count(m_device.get());
+  nm_write_neurons(m_device.get(), neurons.data(), neuron_count);
+  neuron_count = nm_get_neuron_count(m_device.get());
 #endif
   std::cout << "neurons count after write neurons = " << neuron_count << std::endl;
   std::cout << "Restoring names." << std::endl;
@@ -384,17 +381,15 @@ void nm_classifier::neurons_to_file() {
   neurons[0].size = m_neuron_vector_size;
   int size = neurons[0].size;
   NeuroMem::NeuroMemEngine::ReadNeurons(m_device.get(), &neurons[0], neuron_count);
-#elif __linux__
-  const uint32_t neuron_count = neuromem::get_neuron_count(m_device.get());
+#else
+  const uint32_t neuron_count = nm_get_neuron_count(m_device.get());
   if (neuron_count <= 0) {
     return;
   }
-  std::vector<neuromem::nm_neuron> neurons(neuron_count);
+  std::vector<nm_neuron> neurons(neuron_count);
   neurons[0].size = m_neuron_vector_size;
   int size = neurons[0].size;
-  neuromem::read_neurons(m_device.get(), &neurons[0], neuron_count);
-#else // not windows or linux
-  return;
+  nm_read_neurons(m_device.get(), &neurons[0], neuron_count);
 #endif
 
   std::string filename = "backup/backup.hex";
