@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
 
   if (detected_device < 1) {
     std::cout << "NM devices are not connected. please make sure connection." << std::endl;
-    std::cout << "Please refer http://www.theneuromorphic.com for the device" << std::endl;
+    std::cout << "Please refer http://www.theneuromorphic.com to get the device" << std::endl;
     system("pause");
     return (0);
   }
