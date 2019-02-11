@@ -57,6 +57,7 @@ Makefile*
 # CMake (https://github.com/github/gitignore/blob/master/CMake.gitignore)
 CMakeCache.txt
 CMakeFiles
+CMakeLists.txt.user*
 Makefile
 cmake_install.cmake
 install_manifest.txt
@@ -69,7 +70,6 @@ compile_commands.json
 
 # Clion
 .idea/
-CMakeLists.txt.user
 bin/
 build/
 msbuild/
@@ -79,3 +79,4 @@ msbuild/
 .DS_Store
 .vs/
 /build-release/
+compile_commands.json
