@@ -1,13 +1,12 @@
 ## http://cmake.org/runningcmake
 ## http://doc.qt.io/qt-5/cmake-manual.html
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.8)
 
 project(imagefeaturedetector)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules
         ${CMAKE_MODULE_PATH})
-
 
 SET(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
