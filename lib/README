@@ -1,0 +1,15 @@
+For windows, please download sdk from http://theneuromorphic.com
+
+Installation Steps for linux:
+1. Copy library into /usr/local/lib
+ $ sudo cp lib/linux/libnmengine.so.1 /usr/local/lib
+
+ (MacOS : sudo cp lib/MacOS/libnmengine.1.0.2.dylib /usr/local/lib)
+
+2. Make a link for library
+  $ sudo ln -s /usr/local/lib/libnmengine.so.1 /usr/local/lib/libnmengine.so
+
+  (MacOS : sudo ln -s /usr/local/lib/libnmengine.1.0.2.dylib /usr/local/lib/libnmengine.dylib)
+
+3. Support Devices:
+  -. Brilliant, Prodigy
