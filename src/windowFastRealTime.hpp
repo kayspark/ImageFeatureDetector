@@ -29,7 +29,7 @@ public:
 private:
   QSettings *mSettings = nullptr;
   std::unique_ptr<QLocale> mLocale;
-  vlc_capture mCamera;
+  std::unique_ptr<vlc_capture> mCamera;
   // cv::VideoCapture mCamera;
   std::unique_ptr<QTimer> mTimer;
   QPixmap mPixmap;

@@ -105,8 +105,8 @@ void motionCapture::find(Mat &gray) {
       for (auto &track : m_allTracks) {
         if (!track.empty()) {
           vector<Point2f> tmpVecPoints;
-          const auto &[start, end] = pointsNum.equal_range(static_cast<const int>(trackNumber));
-          for_each(start, end,
+          const auto &point_iter = pointsNum.equal_range(static_cast<const int>(trackNumber));
+          for_each(point_iter.first, point_iter.second,
                    [&tmpVecPoints, &pointsNow](const auto &it) { tmpVecPoints.emplace_back(pointsNow[it.second]); });
           Rect tmpRect = boundingRect(tmpVecPoints);
           milliseconds cur_time = m_currentTime;

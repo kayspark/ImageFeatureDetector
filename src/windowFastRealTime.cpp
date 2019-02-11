@@ -13,7 +13,7 @@
 
 WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
     : QDialog(wmain, Qt::Dialog)
-    , mCamera(vlc_capture(960, 544))
+    , mCamera(std::make_unique<vlc_capture>(960, 544))
     , mTimer(std::make_unique<QTimer>())
     , mDetecting(false)
     , m_nm_classifier(std::make_unique<nm_classifier>())
@@ -80,8 +80,8 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
 
   m_pen.setWidth(5);
   std::string url = mSettings->value("rtsp/url1").toString().toStdString();
-  mCamera.open(url);
-  if (mCamera.isOpened()) {
+  mCamera->open(url);
+  if (mCamera->isOpened()) {
     mTimer->start(40); // 25fps
     QObject::connect(mTimer.get(), &QTimer::timeout, this, &WindowFastRealTime::compute);
     uiPushButtonDetect->setEnabled(true);
@@ -113,7 +113,8 @@ void WindowFastRealTime::detect() {
 void WindowFastRealTime::close() {
   if (mTimer)
     mTimer->stop();
-  mCamera.release();
+  if (mCamera)
+    mCamera.release();
   QWidget::close();
 }
 
@@ -164,7 +165,7 @@ void WindowFastRealTime::compute() {
 
   cv::Mat imgRT;
 
-  mCamera.read(imgRT);
+  mCamera->read(imgRT);
   if (mDetecting) {
     if (!imgRT.empty()) {
       cv::Mat gray;

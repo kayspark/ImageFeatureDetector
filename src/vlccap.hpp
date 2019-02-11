@@ -15,9 +15,9 @@ public:
   bool isOpened();
   bool read(cv::Mat &outFrame);
   cv::Size get_size();
+  vlc_capture();
 
 private:
-  vlc_capture();
   void *lock(void **p_pixels);
   void unlock(void *id, void *const *p_pixels);
 
