@@ -21,7 +21,7 @@ For windows, just download and install latest vlc which contains SDK. It is pack
 
 ## Compilation
 On Unix machines, once you have these two dependencies solved, from the command shell just run:
-$ cd <imagefeaturedetector_root_folder>
+$ cd <imagefeaturedetector>
 $ mkdir build
 $ cd build
 $ cmake ..
@@ -29,7 +29,7 @@ $ make
 
 On windows, For Qt and OpenCV, vcpkg (https://github.com/Microsoft/vcpkg) is the most convenient way.
 
-$ cd <imagefeaturedetector_root_folder>
+$ cd <imagefeaturedetector>
 $ mkdir msbuild
 $ cd msbuild
 $ cmake  .. -G"Visual Studio 15 2017 Win64" "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
