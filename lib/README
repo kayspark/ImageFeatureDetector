@@ -12,5 +12,8 @@ Installation Steps for linux:
 3. copy header file
   $ sudo cp include/nmengine.h /usr/local/include
 
+4. make sure with ldconfig
+  $ sudo ldconfig -v
+
 *. Support Devices:
   -. Brilliant, Prodigy
