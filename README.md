@@ -19,7 +19,7 @@ For installation, please refer readme at lib foler.
 
 For windows, just download and install latest vlc which contains SDK. It is packaged as 7zip file and SDK folders are included. Other zip, exe packages do not contains SDK folder. For Mac, there is no binary package yet. however, you can compile with instructions from https://wiki.videolan.org/OSXCompile/
 
-* Compilation
+## Compilation
 On Unix machines, once you have these two dependencies solved, from the command shell just run:
 $ cd <imagefeaturedetector_root_folder>
 $ mkdir build
