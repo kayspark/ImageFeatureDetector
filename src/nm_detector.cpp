@@ -8,7 +8,7 @@ using namespace std;
 // shamelessly copied from opencv tracker sample codes
 // all of them seems not adaquate for production use for now
 // CNN based tracker like SSD will be merged soon.
-void nm_detector::createTrackerByName(const std::string_view name) {
+void nm_detector::createTrackerByName(const std::string name) {
   if (name == "KCF")
     m_tracker = cv::TrackerKCF::create();
   else if (name == "TLD")
@@ -29,7 +29,7 @@ void nm_detector::createTrackerByName(const std::string_view name) {
     std::cerr << "Invalid tracking algorithm name\n";
 }
 
-nm_detector::nm_detector(std::string_view cascade, std::string_view algorithm)
+nm_detector::nm_detector(std::string cascade, std::string algorithm)
     : m_scale(1.1)
     , m_tracker_algorithm(algorithm)
     , detected_area(cv::Rect2d(0, 0, 0, 0))

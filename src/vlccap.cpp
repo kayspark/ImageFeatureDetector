@@ -1,6 +1,6 @@
 #include "vlccap.hpp"
 #include <cstring>
-#include <string_view>
+#include <string>
 #include <thread>
 
 vlc_capture::vlc_capture()
@@ -21,11 +21,11 @@ vlc_capture::~vlc_capture() {
   }
 }
 
-void vlc_capture::open(std::string_view url) {
+void vlc_capture::open(std::string url) {
   release();
   m_url = url;
-  std::string_view arg_width = " --vmem-width=" + std::to_string(m_size.width);
-  std::string_view arg_height = " --vmem-height=" + std::to_string(m_size.height);
+  std::string arg_width = " --vmem-width=" + std::to_string(m_size.width);
+  std::string arg_height = " --vmem-height=" + std::to_string(m_size.height);
   const char *args[] = {"-I",
                         "dummy",
                         "--no-audio",

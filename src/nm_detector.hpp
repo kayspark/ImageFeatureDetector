@@ -20,9 +20,9 @@ private:
   motionCapture m_motion;
 
 public:
-  explicit nm_detector(std::string_view cascade, std::string_view algorithm);
+  explicit nm_detector(std::string cascade, std::string algorithm);
   ~nm_detector() = default;
-  void createTrackerByName(std::string_view name);
+  void createTrackerByName(std::string name);
   bool update_tracker(cv::Mat &gray);
   void detect_candidate(cv::Mat &gray, std::vector<cv::Rect> &out);
   void detect_objects(const cv::Mat &gray);

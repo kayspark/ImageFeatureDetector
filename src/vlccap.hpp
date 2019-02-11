@@ -10,7 +10,7 @@ public:
   vlc_capture(int width, int height);
   ~vlc_capture();
 
-  void open(std::string_view url);
+  void open(std::string url);
   void release();
   bool isOpened();
   bool read(cv::Mat &outFrame);
@@ -26,7 +26,7 @@ private:
 
 private:
   std::mutex m_mutex;
-  std::string_view m_url;
+  std::string m_url;
   cv::Mat mat_rgb;
   bool is_open{false};
   std::atomic<bool> m_has_frame;
