@@ -1,7 +1,7 @@
 ## http://cmake.org/runningcmake
 ## http://doc.qt.io/qt-5/cmake-manual.html
 
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.7)
 
 project(imagefeaturedetector)
 
@@ -64,5 +64,9 @@ if (CPPCHECK_FOUND)
 endif ()
 
 add_executable(imagefeaturedetector ${ImageFeatureDetector_SRC} ${ImageFeatureDetector_UI} resources.qrc)
-target_link_libraries(imagefeaturedetector nmengine Qt5::Core Qt5::Widgets ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY} )
+if (WIN32)
+  target_link_libraries(imagefeaturedetector ${nmengine} Qt5::Core Qt5::Widgets ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY} )
+elseif (not WIN32)
+  target_link_libraries(imagefeaturedetector nmengine Qt5::Core Qt5::Widgets ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY} )
+endif(WIN32)
 
