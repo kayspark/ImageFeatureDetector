@@ -53,6 +53,11 @@ int main(int argc, char *argv[]) {
   using nm_engine = NeuroMem::NeuroMemEngine;
   nm_device ds{};
   const uint16_t detected_device = nm_engine::GetDevices(&ds, 1);
+#else
+  nm_device ds;
+  uint16_t detected_device = 0;
+  nm_get_devices(&ds, detected_device);
+#endif //_WIN32
 
   if (detected_device < 1) {
     std::cout << "NM devices are not connected. please make sure connection." << std::endl;
@@ -60,7 +65,6 @@ int main(int argc, char *argv[]) {
     system("pause");
     return (0);
   }
-#endif //_WIN32
   // make backup dir to make sure
   QDir dir;
   dir.mkdir("backup");
