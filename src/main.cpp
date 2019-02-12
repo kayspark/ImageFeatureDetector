@@ -55,8 +55,7 @@ int main(int argc, char *argv[]) {
   const uint16_t detected_device = nm_engine::GetDevices(&ds, 1);
 #else
   nm_device ds;
-  uint16_t detected_device = 0;
-  nm_get_devices(&ds, detected_device);
+  uint16_t detected_device = nm_get_devices(&ds, 1);
 #endif //_WIN32
 
   if (detected_device < 1) {
