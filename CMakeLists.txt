@@ -42,6 +42,9 @@ elseif (NOT WIN32)
         set(nmengine /usr/local/lib/libnmengine.dylib)
     elseif (NOT APPLE)
         set(LIBVLC_INCLUDE_DIR "/usr/include")
+        #For Raspberry PI 
+        #set(LIBVLC_LIBRARY_DIR "/usr/lib/arm-linux-gnueabihf")
+        #For Intel
         set(LIBVLC_LIBRARY_DIR "/usr/lib/x86_64-linux-gnu")
         set(LIBVLC_LIBRARY ${LIBVLC_LIBRARY_DIR}/libvlc.so)
         set(LIBVLCCORE_LIBRARY ${LIBVLC_LIBRARY_DIR}/libvlccore.so)
