@@ -39,7 +39,6 @@ and the following disclaimer.
 #include <map>
 #include <opencv2/opencv.hpp>
 #include <qdir.h>
-#include <nmengine.h>
 
 using namespace cv;
 
