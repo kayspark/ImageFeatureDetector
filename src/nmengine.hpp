@@ -1,37 +1,38 @@
 #pragma once
 /*
- * Copyright (c) 2017-2018, nepes corp, All rights reserved.
- * Version 1.0.2
+ * Copyright (c) 2017-2019, nepes corp, All rights reserved.
+ * Version 1.0.2T : for testing purpose.
  */
 
-#include <stdint.h>
+#include <cstdint>
 #ifdef __cplusplus
 extern "C" {
 #endif
+constexpr auto NM_NCR = 0x00;
+constexpr auto NM_COMP = 0x01;
+constexpr auto NM_LCOMP = 0x02;
+constexpr auto NM_DIST = 0x03;
+constexpr auto NM_INDEXCOMP = 0x03;
+constexpr auto NM_CAT = 0x04;
+constexpr auto NM_AIF = 0x05;
+constexpr auto NM_MINIF = 0x06;
+constexpr auto NM_MAXIF = 0x07;
+constexpr auto NM_TESTCOMP = 0x08;
+constexpr auto NM_TESTCAT = 0x09;
+constexpr auto NM_NID = 0x0A;
+constexpr auto NM_GCR = 0x0B;
+constexpr auto NM_RSTCHAIN = 0x0C;
+constexpr auto NM_NSR = 0x0D;
+constexpr auto NM_POWERSAVE = 0x0E;
+constexpr auto NM_NCOUNT = 0x0F;
+constexpr auto NM_FORGET = 0x0F;
 
-#define NM_NCR 0x00
-#define NM_COMP 0x01
-#define NM_LCOMP 0x02
-#define NM_DIST 0x03
-#define NM_INDEXCOMP 0x03
-#define NM_CAT 0x04
-#define NM_AIF 0x05
-#define NM_MINIF 0x06
-#define NM_MAXIF 0x07
-#define NM_TESTCOMP 0x08
-#define NM_TESTCAT 0x09
-#define NM_NID 0x0A
-#define NM_GCR 0x0B
-#define NM_RSTCHAIN 0x0C
-#define NM_NSR 0x0D
-#define NM_POWERSAVE 0x0E
-#define NM_NCOUNT 0x0F
-#define NM_FORGET 0x0F
+constexpr auto NEURON_MEMORY = 256;
+constexpr auto CLASSIFY_MAX_K = 9;
 
-#define NEURON_MEMORY 256
-#define CLASSIFY_MAX_K 9
+constexpr auto CAM_FRAME_BUF = 1843200;
 
-typedef enum _nm_return_status {
+using nm_return_status = enum _nm_return_status {
   NM_SUCCESS = 0,
   NM_ERROR_UNKNOWN = 100,
   NM_ERROR_DEVICE_NOT_FOUND,
@@ -42,10 +43,9 @@ typedef enum _nm_return_status {
   NM_ERROR_NOT_SUPPORT,
   NM_ERROR_IO_TIMEOUT,
   NM_ERROR_IO_FAILED
+} ;
 
-} nm_return_status;
-
-typedef enum _nm_network_result {
+using nm_network_result = enum _nm_network_result {
   NM_LEARN_ALREADY_KNOWN = 0,
   NM_LEARN_SUCCESS = 1,
   NM_LEARN_ADJUSTED = 2,
@@ -53,22 +53,13 @@ typedef enum _nm_network_result {
   NM_CLASSIFY_UNKNOWN = 0,
   NM_CLASSIFY_UNCERTAIN = 4,
   NM_CLASSIFY_IDENTIFIED = 8
+} ;
 
-} nm_network_result;
+using nm_network_type = enum _nm_network_type { RBF = 0, KNN = 1 } ;
 
-typedef enum _nm_network_type {
-  RBF = 0,
-  KNN = 1
+using nm_norm_type = enum _nm_norm_type { L1 = 0, Lsup = 1 } ;
 
-} nm_network_type;
-
-typedef enum _nm_norm_type {
-  L1 = 0,
-  Lsup = 1
-
-} nm_norm_type;
-
-typedef struct _nm_device {
+using nm_device = struct _nm_device {
   void *dev;
   void *handle;
   void *lock;
@@ -78,33 +69,29 @@ typedef struct _nm_device {
   uint16_t pid;
   uint16_t version;
   uint8_t is_open;
+} ;
 
-} nm_device;
-
-typedef struct _nm_network_info {
+using nm_network_info = struct _nm_network_info {
   uint32_t neuron_size;
   uint16_t neuron_memory_size;
   uint16_t version;
+} ;
 
-} nm_network_info;
-
-typedef struct _nm_context {
+using nm_context = struct _nm_context {
   uint16_t context;
   uint16_t norm;
   uint16_t minif;
   uint16_t maxif;
+} ;
 
-} nm_context;
-
-typedef struct _nm_network_status {
+using nm_network_status = struct _nm_network_status {
   uint32_t network_used;
   uint16_t network_type;
   uint16_t context;
   uint16_t norm;
+} ;
 
-} nm_network_status;
-
-typedef struct _nm_neuron {
+using nm_neuron = struct _nm_neuron {
   uint32_t nid;
   uint16_t size;
   uint16_t ncr;
@@ -112,10 +99,9 @@ typedef struct _nm_neuron {
   uint16_t minif;
   uint16_t cat;
   uint8_t model[256];
+} ;
 
-} nm_neuron;
-
-typedef struct _nm_classify_req {
+using nm_classify_req = struct _nm_classify_req {
   nm_network_result status;
   uint16_t size;
   uint16_t k;
@@ -125,10 +111,9 @@ typedef struct _nm_classify_req {
   uint16_t distance[CLASSIFY_MAX_K];
   uint16_t category[CLASSIFY_MAX_K];
   uint8_t vector[256];
+} ;
 
-} nm_classify_req;
-
-typedef struct _nm_learn_req {
+using nm_learn_req = struct _nm_learn_req {
   nm_network_result ns;
   nm_neuron affected_neurons[10];
   uint16_t affected_count;
@@ -136,8 +121,7 @@ typedef struct _nm_learn_req {
   uint16_t size;
   uint8_t vector[256];
   uint8_t query_affected;
-
-} nm_learn_req;
+} ;
 
 /**
  * Returns a list of the NM500 devices.

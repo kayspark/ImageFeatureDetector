@@ -21,7 +21,7 @@ vlc_capture::~vlc_capture() {
   }
 }
 
-void vlc_capture::open(std::string url) {
+void vlc_capture::open(std::string &url) {
   release();
   m_url = url;
   std::string arg_width = " --vmem-width=" + std::to_string(m_size.width);

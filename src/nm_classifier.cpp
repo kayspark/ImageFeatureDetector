@@ -39,6 +39,7 @@ and the following disclaimer.
 #include <map>
 #include <opencv2/opencv.hpp>
 #include <qdir.h>
+#include <nmengine.h>
 
 using namespace cv;
 
@@ -199,10 +200,12 @@ bool nm_classifier::classify(nm_classify_req &req) {
   req.size = m_neuron_vector_size;
   req.k = 1;
   bool ret = false;
-  assert(m_device->handle != nullptr);
-  const int t = nm_classify(m_device.get(), &req);
-  if (t == NM_CLASSIFY_IDENTIFIED || req.distance[0] < NM_CLASSIFY_UNKNOWN) {
-    ret = true;
+  {
+    std::lock_guard<std::mutex> guard(m_mutex);
+    const int t = nm_classify(m_device.get(), &req);
+    if (req.status == nm_network_result::NM_CLASSIFY_IDENTIFIED || req.distance[0] < NM_CLASSIFY_UNKNOWN) {
+      ret = true;
+    }
   }
   return ret;
 }
@@ -210,7 +213,11 @@ bool nm_classifier::classify(nm_classify_req &req) {
 void nm_classifier::learn(nm_learn_req &req) {
   req.size = m_neuron_vector_size;
   req.category = m_category_set.size();
-  nm_learn(m_device.get(), &req);
+  {
+    std::lock_guard<std::mutex> guard(m_mutex);
+    nm_learn(m_device.get(), &req);
+  }
+
   if (req.ns > 0) {
     const auto ret = m_category_set.insert(req.category);
     if (!ret.second) {
@@ -254,7 +261,7 @@ bool nm_classifier::classify(cv::Mat &in) {
 #endif
   std::move(feature.begin(), feature.end(), req.vector);
   ret = classify(req);
-  std::string s = ret ? "classified" : "unknown";
+  std::string s = ret ? " classified" : " unknown";
   std::cout << "classification: " << req.category[0] << " , " << req.distance[0] << s << std::endl;
 
   return ret;

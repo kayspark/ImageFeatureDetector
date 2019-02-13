@@ -10,7 +10,7 @@ public:
   vlc_capture(int width, int height);
   ~vlc_capture();
 
-  void open(std::string url);
+  void open(std::string &url);
   void release();
   bool isOpened();
   bool read(cv::Mat &outFrame);

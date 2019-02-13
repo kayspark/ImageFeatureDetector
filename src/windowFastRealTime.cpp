@@ -82,7 +82,7 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   std::string url = mSettings->value("rtsp/url1").toString().toStdString();
   mCamera->open(url);
   if (mCamera->isOpened()) {
-    mTimer->start(40); // 25fps
+    mTimer->start(33); // 30fps
     QObject::connect(mTimer.get(), &QTimer::timeout, this, &WindowFastRealTime::compute);
     uiPushButtonDetect->setEnabled(true);
   } else {

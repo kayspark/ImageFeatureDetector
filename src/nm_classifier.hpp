@@ -74,6 +74,7 @@ private:
   uint16_t m_maxif = 0;
   uint16_t m_minif = 0;
   std::vector<cv::Mat> m_features;
+  std::mutex m_mutex; // to control learn and classify
 
 private:
   enum_feature_algorithm m_algorithm = enum_feature_algorithm::default_;

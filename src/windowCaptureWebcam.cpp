@@ -21,7 +21,7 @@ WindowCaptureWebcam::WindowCaptureWebcam(WindowMain *main)
   QObject::connect(uiPushButtonCancel, &QAbstractButton::clicked, this, &WindowCaptureWebcam::close);
   if (mCamera.isOpened()) {
     mTimer = std::make_unique<QTimer>();
-    mTimer->start(40); // 25fps
+    mTimer->start(30); // 25fps
     QObject::connect(mTimer.get(), &QTimer::timeout, this, &WindowCaptureWebcam::compute);
     uiPushButtonCapture->setEnabled(true);
     // 		qDebug() << "Frame format: " << mCamera.get(CV_CAP_PROP_FORMAT);
