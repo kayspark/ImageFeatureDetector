@@ -27,11 +27,11 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
     , mPainter(std::make_unique<QPainter>()) {
   setupUi(this);
 
-  auto detectSection = new Section("Detect", 300, this);
-  this->layout()->addWidget(detectSection);
+  auto section = new Section("Detect and Learn", 300, this);
+  this->layout()->addWidget(section);
 
   auto vLayout = new QVBoxLayout();
-  mDetectorWidget = new QListWidget(detectSection);
+  mDetectorWidget = new QListWidget(section);
   mDetectorWidget->setFixedHeight(100);
   mDetectorWidget->setSelectionMode(QAbstractItemView::MultiSelection);
   mDetectorWidget->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -40,13 +40,11 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   mDetectorWidget->setResizeMode(QListWidget::Adjust);
 
   vLayout->addWidget(mDetectorWidget);
-  detectSection->setContentLayout(*vLayout);
 
-  auto classifySection = new Section("Classify", 300, this);
-  this->layout()->addWidget(classifySection);
+  vLayout->addWidget(new QLabel("Learn", section));
 
-  auto v2Layout = new QVBoxLayout();
-  mClassifyWidget = new QListWidget(classifySection);
+  // auto v2Layout = new QVBoxLayout();
+  mClassifyWidget = new QListWidget(section);
   mClassifyWidget->setFixedHeight(100);
   mClassifyWidget->setSelectionMode(QAbstractItemView::MultiSelection);
   mClassifyWidget->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -54,8 +52,8 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   mClassifyWidget->setIconSize(QSize(100, 100));
   mClassifyWidget->setResizeMode(QListWidget::Adjust);
 
-  v2Layout->addWidget(mClassifyWidget);
-  classifySection->setContentLayout(*v2Layout);
+  vLayout->addWidget(mClassifyWidget);
+  section->setContentLayout(*vLayout);
 
   setAttribute(Qt::WA_DeleteOnClose);
   setContextMenuPolicy(Qt::ActionsContextMenu);
