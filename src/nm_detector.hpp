@@ -22,7 +22,7 @@ private:
 public:
   explicit nm_detector(std::string cascade, std::string algorithm);
   ~nm_detector() = default;
-  void createTrackerByName(std::string name);
+  void createTrackerByName(const std::string& name);
   bool update_tracker(cv::Mat &gray);
   void detect_candidate(cv::Mat &gray, std::vector<cv::Rect> &out);
   void detect_objects(const cv::Mat &gray);

@@ -1,5 +1,7 @@
-#include "nm_detector.hpp"
+#include <utility>
+
 #include "motionCapture.hpp"
+#include "nm_detector.hpp"
 #include <opencv2/tracking.hpp>
 
 using namespace cv;
@@ -8,7 +10,7 @@ using namespace std;
 // shamelessly copied from opencv tracker sample codes
 // all of them seems not adaquate for production use for now
 // CNN based tracker like SSD will be merged soon.
-void nm_detector::createTrackerByName(const std::string name) {
+void nm_detector::createTrackerByName(const std::string &name) {
   if (name == "KCF")
     m_tracker = cv::TrackerKCF::create();
   else if (name == "TLD")
@@ -31,7 +33,7 @@ void nm_detector::createTrackerByName(const std::string name) {
 
 nm_detector::nm_detector(std::string cascade, std::string algorithm)
     : m_scale(1.1)
-    , m_tracker_algorithm(algorithm)
+    , m_tracker_algorithm(std::move(algorithm))
     , detected_area(cv::Rect2d(0, 0, 0, 0))
     , initialized_tracker(false)
     , colors(std::array<cv::Scalar, 8>() = {cv::Scalar(255, 0, 0), cv::Scalar(255, 128, 0), cv::Scalar(255, 255, 0),
@@ -42,7 +44,7 @@ nm_detector::nm_detector(std::string cascade, std::string algorithm)
   if (cascade.empty()) {
     cascade = ":/dataset/cascade.xml";
   }
-  if (!m_cascade.load(cascade.data())) {
+  if (!m_cascade.load(cascade)) {
     std::cerr << "ERROR: Could not load classifier cascade" << std::endl;
     return;
   }
