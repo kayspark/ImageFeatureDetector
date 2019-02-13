@@ -39,6 +39,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/objdetect.hpp>
 #include <set>
+#include <mutex>
 
 enum class enum_feature_algorithm { default_, hog, sub_sampling };
 
