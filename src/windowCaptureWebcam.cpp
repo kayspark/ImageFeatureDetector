@@ -119,7 +119,7 @@ void WindowCaptureWebcam::compute() {
         if (roi.contains(r.tl()) || roi.contains(r.br())) {
           QPixmap pix = pixmap.copy(qr).scaled(QSize(100, 100), Qt::KeepAspectRatio);
           cv::Mat mat = QPixmap2Mat(pix, true);
-          if (_nm_classifier->classify(mat)) {
+          if (_nm_classifier->classify(mat) < nm_classifier::UNKNOWN) {
             m_pen = QColor::fromRgb(255, 0, 0);
             m_pen.setWidth(5);
           } else {

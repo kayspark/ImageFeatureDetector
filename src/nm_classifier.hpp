@@ -36,20 +36,22 @@
 #include "NeuroMemEngine.hpp"
 #include <map>
 #include <memory>
+#include <mutex>
 #include <opencv2/core.hpp>
 #include <opencv2/objdetect.hpp>
 #include <set>
-#include <mutex>
 
 enum class enum_feature_algorithm { default_, hog, sub_sampling };
 
 class nm_classifier {
 
+public:
+  const static int UNKNOWN = 65535;
+
 private:
   const static int pca_component = 15;
   const static int NEURON_SIZE = 256;
   const static int MAX_NEURON = 576;
-  const static int UNKNOWN = 65535;
 
   uint16_t m_neuron_vector_size = 256;
 #ifdef _WIN32
@@ -99,7 +101,9 @@ public:
   nm_classifier();
   void init(uint16_t maxif, uint16_t minif);
   ~nm_classifier();
-  bool classify(cv::Mat &in);
+  uint16_t classify(cv::Mat &in);
+
+  uint16_t deleteKnowledge(cv::Mat &in);
   void learn(cv::Mat &in, int cat = -1);
   uint32_t file_to_neurons();
   void neurons_to_file();

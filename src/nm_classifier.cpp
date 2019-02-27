@@ -71,6 +71,7 @@ void nm_classifier::init(const uint16_t maxif, const uint16_t minif) {
   NeuroMem::NeuroMemEngine::SetNetworkType(m_device.get(), NeuroMem::RBF);
   set_context(1, NeuroMem::NeuroMemNormType::L1, minif, maxif);
 #else
+
   nm_context ctx;
   ctx.maxif = maxif;
   ctx.minif = minif;
@@ -172,8 +173,8 @@ bool nm_classifier::classify(NeuroMem::NeuroMemClassifyReq &req) {
   req.k = 1;
   bool ret = false;
   assert(m_device->handle != nullptr);
-  const int t = NeuroMem::NeuroMemEngine::Classify(m_device.get(), &req);
-  if (t == NeuroMem::NM_CLASSIFY_IDENTIFIED || req.distance[0] < UNKNOWN) {
+  NeuroMem::NeuroMemEngine::Classify(m_device.get(), &req);
+  if ((req.status == nm_network_result::NM_CLASSIFY_IDENTIFIED) || (req.distance[0] < NM_CLASSIFY_UNKNOWN)) {
     ret = true;
   }
   return ret;
@@ -201,8 +202,8 @@ bool nm_classifier::classify(nm_classify_req &req) {
   bool ret = false;
   {
     std::lock_guard<std::mutex> guard(m_mutex);
-    const int t = nm_classify(m_device.get(), &req);
-    if (req.status == nm_network_result::NM_CLASSIFY_IDENTIFIED || req.distance[0] < NM_CLASSIFY_UNKNOWN) {
+    nm_classify(m_device.get(), &req);
+    if ((req.status == nm_network_result::NM_CLASSIFY_IDENTIFIED) || (req.distance[0] < NM_CLASSIFY_UNKNOWN)) {
       ret = true;
     }
   }
@@ -211,7 +212,8 @@ bool nm_classifier::classify(nm_classify_req &req) {
 
 void nm_classifier::learn(nm_learn_req &req) {
   req.size = m_neuron_vector_size;
-  req.category = m_category_set.size();
+  if (req.category == 65535)
+    req.category = m_category_set.size();
   {
     std::lock_guard<std::mutex> guard(m_mutex);
     nm_learn(m_device.get(), &req);
@@ -230,6 +232,13 @@ void nm_classifier::learn(nm_learn_req &req) {
 }
 #endif
 
+uint16_t nm_classifier::deleteKnowledge(cv::Mat &in) {
+  uint16_t cat = classify(in);
+  if (cat < UNKNOWN)
+    learn(in, 0); // degenerate manually
+  return cat;
+}
+
 void nm_classifier::learn(cv::Mat &in, int cat) {
   std::vector<uint8_t> feature;
   feature.reserve(m_neuron_vector_size);
@@ -240,16 +249,20 @@ void nm_classifier::learn(cv::Mat &in, int cat) {
 #else
   nm_learn_req lreq;
 #endif
-
-  lreq.category = static_cast<uint16_t>(cat < 0 ? m_category_set.size() : cat);
+  uint16_t tcat = 0;
+  if (cat < 0)
+    tcat = m_category_set.size();
+  else
+    tcat = cat;
+  lreq.category = tcat;
   lreq.size = m_neuron_vector_size;
 
-  std::move(feature.begin(), feature.end(), lreq.vector);
+  std::move(feature.begin(), feature.end(), std::begin(lreq.vector));
   learn(lreq);
 }
 
-bool nm_classifier::classify(cv::Mat &in) {
-  bool ret = false;
+uint16_t nm_classifier::classify(cv::Mat &in) {
+  uint16_t ret = UNKNOWN;
   std::vector<uint8_t> feature;
   feature.reserve(m_neuron_vector_size);
   extract_feature_vector(in, feature);
@@ -258,9 +271,10 @@ bool nm_classifier::classify(cv::Mat &in) {
 #else
   nm_classify_req req;
 #endif
-  std::move(feature.begin(), feature.end(), req.vector);
-  ret = classify(req);
-  std::string s = ret ? " classified" : " unknown";
+  std::move(feature.begin(), feature.end(), std::begin(req.vector));
+  classify(req);
+  ret = req.category[0];
+  std::string s = (ret < UNKNOWN) ? " classified" : " unknown";
   std::cout << "classification: " << req.category[0] << " , " << req.distance[0] << s << std::endl;
 
   return ret;
@@ -296,7 +310,7 @@ uint32_t nm_classifier::file_to_neurons() {
   std::cout << "file to neuron before context:" << ctx.maxif << std::endl;
   std::cout << "Start restore process from backup.hex file" << std::endl;
 
-  file.read(reinterpret_cast<char *>(&header), sizeof(header));
+  file.read((char *)(&header), sizeof(header));
   if (header[0] != 0x1704) {
     std::cout << "Header error 0: " << header[0] << std::endl;
     file.close();
@@ -327,7 +341,7 @@ uint32_t nm_classifier::file_to_neurons() {
   std::vector<uint16_t> buffer(m_neuron_vector_size + 5);
   uint16_t cat = 1;
   for (auto &&nr : neurons) {
-    file.read(reinterpret_cast<char *>(&buffer[0]), sizeof(uint16_t) * (m_neuron_vector_size + 5));
+    file.read((char *)(&buffer[0]), sizeof(uint16_t) * (m_neuron_vector_size + 5));
     if (!file.eof()) {
       nr.ncr = buffer[0];
       nr.size = m_neuron_vector_size;
@@ -338,7 +352,6 @@ uint32_t nm_classifier::file_to_neurons() {
       std::cout << "nid= " << nr.nid << " ,ncr= " << nr.ncr << " ,cat= " << nr.cat << " ,aif = " << nr.aif
                 << " , minif = " << nr.minif << std::endl;
       std::move(std::begin(buffer) + 1, std::begin(buffer) + 1 + m_neuron_vector_size, std::begin(nr.model));
-
       // std::cout << "  eob" << std::endl;
       if (nr.cat > cat) {
         cat = nr.cat;
@@ -347,9 +360,6 @@ uint32_t nm_classifier::file_to_neurons() {
     }
   }
   file.close();
-
-  assert(m_device->handle != nullptr);
-
 #ifdef _WIN32
   NeuroMem::NeuroMemEngine::WriteNeurons(m_device.get(), neurons.data(), neuron_count);
   neuron_count = NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
@@ -359,7 +369,6 @@ uint32_t nm_classifier::file_to_neurons() {
 #endif
   std::cout << "neurons count after write neurons = " << neuron_count << std::endl;
   std::cout << "Restoring names." << std::endl;
-
   if (file_name.is_open()) {
     std::string temp;
     for (uint16_t i = 0; i <= neuron_count; i++) {
@@ -381,7 +390,7 @@ void nm_classifier::neurons_to_file() {
   uint32_t neuron_count = 0;
 #ifdef _WIN32
   neuron_count = NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
-  if (neuron_count <= 0) {
+  if (neuron_count == 0) {
     return;
   }
   std::vector<NeuroMem::NeuroMemNeuron> neurons(neuron_count);
@@ -390,7 +399,7 @@ void nm_classifier::neurons_to_file() {
   NeuroMem::NeuroMemEngine::ReadNeurons(m_device.get(), &neurons[0], neuron_count);
 #else
   neuron_count = nm_get_neuron_count(m_device.get());
-  if (neuron_count <= 0) {
+  if (neuron_count == 0) {
     return;
   }
   std::vector<nm_neuron> neurons(neuron_count);
@@ -409,7 +418,7 @@ void nm_classifier::neurons_to_file() {
     header[1] = 256;
     header[2] = static_cast<uint16_t>(neuron_count);
 
-    file.write(reinterpret_cast<const char *>(&header), sizeof(header));
+    file.write((const char *)(&header), sizeof(header));
     std::vector<uint16_t> buffer(size + 5);
     for (const auto neuron : neurons) {
       buffer[0] = neuron.ncr;
@@ -420,7 +429,7 @@ void nm_classifier::neurons_to_file() {
       buffer[2 + size] = neuron.minif;
       buffer[3 + size] = neuron.cat;
       buffer[4 + size] = static_cast<uint16_t>(neuron.nid);
-      file.write(reinterpret_cast<char *>(&buffer[0]), sizeof(uint16_t) * (size + 5));
+      file.write((char *)(&buffer[0]), sizeof(uint16_t) * (size + 5));
     }
     file.close();
     //	delete[] buffer;
@@ -473,7 +482,6 @@ void nm_classifier::extract_feature_vector(Mat input, std::vector<uint8_t> &v) {
     case enum_feature_algorithm::default_:
       break;
   }
-
   // fill_neuron_vector(output, v);
 
   for (int j = 0; j < m_neuron_vector_size; j++) {

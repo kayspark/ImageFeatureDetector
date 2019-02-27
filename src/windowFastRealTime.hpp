@@ -43,6 +43,10 @@ private:
   std::unique_ptr<QAction> actNormal;
   std::unique_ptr<QAction> actAbnormal;
   std::unique_ptr<QAction> actClear;
+  std::unique_ptr<QAction> actLoadKnowledge;
+  std::unique_ptr<QAction> actSaveKnowledge;
+  std::unique_ptr<QAction> actDeleteKnowledge;
+  std::unique_ptr<QAction> actTestKnowledge;
   QPen m_pen;
   QListWidget *mDetectorWidget;
   QListWidget *mClassifyWidget;
@@ -51,7 +55,8 @@ protected:
   nm_detector m_predator;
 
 protected:
-  void showContextMenu(const QPoint &pos);
+  void showDetectionContextMenu(const QPoint &pos);
+  void showClassifyContextMenu(const QPoint &pos);
 
 private slots:
   void detect();
@@ -62,4 +67,8 @@ private slots:
   void learnNormal();
   void learnAbnormal();
   void clearListWidget();
+  void saveKnowledges();
+  void loadKnowledges();
+  void testKnowledge();
+  void deleteKnowledge();
 };

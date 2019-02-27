@@ -64,12 +64,24 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   actNormal = std::make_unique<QAction>(tr("&Normal"), this);
   actClear = std::make_unique<QAction>(tr("&Clear"), this);
 
+  actLoadKnowledge = std::make_unique<QAction>(tr("&Load Knowledge"), this);
+  actSaveKnowledge = std::make_unique<QAction>(tr("&Save Knowledge"), this);
+  actDeleteKnowledge = std::make_unique<QAction>(tr("&Delete Knowledge"), this);
+  actTestKnowledge = std::make_unique<QAction>(tr("&Test Knowledge"), this);
+
   QObject::connect(actNormal.get(), &QAction::triggered, this, &WindowFastRealTime::learnNormal);
   QObject::connect(actAbnormal.get(), &QAction::triggered, this, &WindowFastRealTime::learnAbnormal);
   QObject::connect(actClear.get(), &QAction::triggered, this, &WindowFastRealTime::clearListWidget);
+  QObject::connect(actLoadKnowledge.get(), &QAction::triggered, this, &WindowFastRealTime::loadKnowledges);
+  QObject::connect(actSaveKnowledge.get(), &QAction::triggered, this, &WindowFastRealTime::saveKnowledges);
+  QObject::connect(actDeleteKnowledge.get(), &QAction::triggered, this, &WindowFastRealTime::deleteKnowledge);
+  QObject::connect(actTestKnowledge.get(), &QAction::triggered, this, &WindowFastRealTime::testKnowledge);
 
   QObject::connect(mDetectorWidget, &QListWidget::customContextMenuRequested, this,
-                   &WindowFastRealTime::showContextMenu);
+                   &WindowFastRealTime::showDetectionContextMenu);
+  QObject::connect(mClassifyWidget, &QListWidget::customContextMenuRequested, this,
+                   &WindowFastRealTime::showClassifyContextMenu);
+
   QObject::connect(uiPushButtonNonMaxFAST, &QPushButton::toggled, this, &WindowFastRealTime::saveFastParams);
   QObject::connect(uiSpinBoxThresholdFAST, &QSpinBox::editingFinished, this, &WindowFastRealTime::saveFastParams);
   QObject::connect(uiPushButtonResetFAST, &QAbstractButton::clicked, this, &WindowFastRealTime::resetUI);
@@ -86,10 +98,33 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   } else {
     uiLabelRealTime->setText("There is some problem with the cam.\nCannot get images.");
   }
-
   show();
 }
-void WindowFastRealTime::showContextMenu(const QPoint &pos) {
+
+void WindowFastRealTime::saveKnowledges() { m_nm_classifier->neurons_to_file(); }
+
+void WindowFastRealTime::loadKnowledges() { m_nm_classifier->file_to_neurons(); }
+
+void WindowFastRealTime::testKnowledge() {
+  QListWidgetItem *currentItem = mClassifyWidget->currentItem();
+  QIcon icon = currentItem->icon();
+  cv::Mat feature = QPixmap2Mat(icon.pixmap(QSize(100, 100)), true);
+  m_nm_classifier->classify(feature);
+}
+
+void WindowFastRealTime::deleteKnowledge() {
+  QListWidgetItem *currentItem = mClassifyWidget->currentItem();
+  if (currentItem) {
+    QIcon icon = currentItem->icon();
+    cv::Mat feature = QPixmap2Mat(icon.pixmap(QSize(100, 100)), true);
+    if (m_nm_classifier->deleteKnowledge(feature) < nm_classifier::UNKNOWN) {
+      mClassifyWidget->removeItemWidget(currentItem);
+      delete currentItem;
+    }
+  }
+}
+
+void WindowFastRealTime::showDetectionContextMenu(const QPoint &pos) {
   QPoint globalPos = mDetectorWidget->mapToGlobal(pos);
   QMenu menu(this);
   menu.addAction(actAbnormal.get());
@@ -97,6 +132,17 @@ void WindowFastRealTime::showContextMenu(const QPoint &pos) {
   menu.addAction(actClear.get());
   menu.exec(globalPos);
 }
+
+void WindowFastRealTime::showClassifyContextMenu(const QPoint &pos) {
+  QPoint globalPos = mDetectorWidget->mapToGlobal(pos);
+  QMenu menu(this);
+  menu.addAction(actLoadKnowledge.get());
+  menu.addAction(actSaveKnowledge.get());
+  menu.addAction(actDeleteKnowledge.get());
+  menu.addAction(actTestKnowledge.get());
+  menu.exec(globalPos);
+}
+
 void WindowFastRealTime::detect() {
   if (!mDetecting) {
     uiPushButtonDetect->setIcon(QIcon(":icons/media-playback-stop.svg"));
@@ -112,7 +158,7 @@ void WindowFastRealTime::close() {
   if (mTimer)
     mTimer->stop();
   if (mCamera)
-    mCamera.release();
+    (void)(mCamera.release()); // cast to void to disable clang-tdy warning - no use of return value
   QWidget::close();
 }
 
@@ -160,7 +206,6 @@ void WindowFastRealTime::clearListWidget() {
 }
 
 void WindowFastRealTime::compute() {
-
   cv::Mat imgRT;
 
   mCamera->read(imgRT);
@@ -175,7 +220,6 @@ void WindowFastRealTime::compute() {
       //   cv::INTER_CUBIC);
       mPixmap = QPixmap::fromImage(
         QImage(imgRT.data, imgRT.cols, imgRT.rows, static_cast<int>(imgRT.step), QImage::Format_RGB888));
-      QRect area = uiVideoArea->geometry();
       mPainter->begin(&mPixmap);
       for (const auto &motion : motions) {
         QRect motionRect(motion.x, motion.y, motion.width, motion.height);
@@ -190,7 +234,7 @@ void WindowFastRealTime::compute() {
           QString fileName = QString("%1.png").arg(QDateTime::currentDateTime().toString("MMdd_hhmmss"));
           pix.toImage().save(QString("backup/%1").arg(fileName));
           mDetectorWidget->addItem(new QListWidgetItem(QIcon(pix), fileName));
-          if (m_nm_classifier->classify(mat)) {
+          if (m_nm_classifier->classify(mat) < nm_classifier::UNKNOWN) {
             m_pen = QColor::fromRgb(255, 0, 0);
           } else {
             m_pen = QColor::fromRgb(0, 0, 255);
