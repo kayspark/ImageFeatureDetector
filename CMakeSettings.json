@@ -7,7 +7,7 @@
       "inheritEnvironments": [
         "msvc_x64_x64"
       ],
-      "buildRoot": "${workspaceRoot}\\msbuild\\${name}",
+      "buildRoot": "${workspaceRoot}\\build\\${name}",
       "intelliSenseMode": "windows-msvc-x64",
       "installRoot": "${workspaceRoot}\\bin\\${name}",
       "cmakeCommandArgs": "",
@@ -27,7 +27,7 @@
       "inheritEnvironments": [
         "msvc_x64_x64"
       ],
-      "buildRoot": "${workspaceRoot}\\msbuild\\${name}",
+      "buildRoot": "${workspaceRoot}\\build\\${name}",
       "intelliSenseMode": "windows-msvc-x64",
       "installRoot": "${workspaceRoot}\\bin\\${name}",
       "cmakeCommandArgs": "",

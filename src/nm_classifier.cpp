@@ -169,12 +169,14 @@ void nm_classifier::set_context(uint16_t context, const uint16_t norm, const uin
 
 #ifdef _WIN32
 bool nm_classifier::classify(NeuroMem::NeuroMemClassifyReq &req) {
+  using nm_network_result = NeuroMem::NeuroMemNetworkResult;
   req.size = m_neuron_vector_size;
   req.k = 1;
   bool ret = false;
   assert(m_device->handle != nullptr);
   NeuroMem::NeuroMemEngine::Classify(m_device.get(), &req);
-  if ((req.status == nm_network_result::NM_CLASSIFY_IDENTIFIED) || (req.distance[0] < NM_CLASSIFY_UNKNOWN)) {
+  if ((req.status == nm_network_result::NM_CLASSIFY_IDENTIFIED) ||
+      (req.distance[0] < nm_network_result::NM_CLASSIFY_UNKNOWN)) {
     ret = true;
   }
   return ret;
