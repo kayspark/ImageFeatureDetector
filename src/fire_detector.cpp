@@ -546,6 +546,7 @@ void fire_detector::detectFire(cv::Mat &maskMotion, fireBehaviorDetection &bgs, 
   assignFeaturePoints();
   matchCentroid(imgSrc, imgDisplay);
 }
+
 void fire_detector::setup_motion_model(const cv::Mat &maskMotion, cv::Mat &imgDisplay) {
   imgDisplay.copyTo(_imgRGB);
   checkByRGB(imgDisplay, maskMotion, _maskRGB);

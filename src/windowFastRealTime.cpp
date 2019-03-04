@@ -38,9 +38,7 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   mDetectorWidget->setViewMode(QListWidget::IconMode);
   mDetectorWidget->setIconSize(QSize(100, 100));
   mDetectorWidget->setResizeMode(QListWidget::Adjust);
-
   vLayout->addWidget(mDetectorWidget);
-
   vLayout->addWidget(new QLabel("Learn", section));
 
   // auto v2Layout = new QVBoxLayout();
@@ -54,7 +52,6 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
 
   vLayout->addWidget(mClassifyWidget);
   section->setContentLayout(*vLayout);
-
   setAttribute(Qt::WA_DeleteOnClose);
   setContextMenuPolicy(Qt::ActionsContextMenu);
   uiSpinBoxThresholdFAST->setValue(mSettings->value("fastRT/threshold", 25).toInt());
@@ -76,7 +73,6 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   QObject::connect(actSaveKnowledge.get(), &QAction::triggered, this, &WindowFastRealTime::saveKnowledges);
   QObject::connect(actDeleteKnowledge.get(), &QAction::triggered, this, &WindowFastRealTime::deleteKnowledge);
   QObject::connect(actTestKnowledge.get(), &QAction::triggered, this, &WindowFastRealTime::testKnowledge);
-
   QObject::connect(mDetectorWidget, &QListWidget::customContextMenuRequested, this,
                    &WindowFastRealTime::showDetectionContextMenu);
   QObject::connect(mClassifyWidget, &QListWidget::customContextMenuRequested, this,
@@ -216,8 +212,6 @@ void WindowFastRealTime::compute() {
 
       std::vector<cv::Rect> motions;
       m_predator.detect_candidate(gray, motions);
-      //   cv::resize(_imgRT, _imgRT, cv::Size(640, 480), 0, 0,
-      //   cv::INTER_CUBIC);
       mPixmap = QPixmap::fromImage(
         QImage(imgRT.data, imgRT.cols, imgRT.rows, static_cast<int>(imgRT.step), QImage::Format_RGB888));
       mPainter->begin(&mPixmap);

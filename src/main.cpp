@@ -44,7 +44,6 @@ void applyDarkTheme(QApplication &app) {
 }
 
 int main(int argc, char *argv[]) {
-
   QApplication app(argc, argv);
   QStringList argList = QCoreApplication::arguments();
 
@@ -57,13 +56,13 @@ int main(int argc, char *argv[]) {
   nm_device ds;
   uint16_t detected_device = nm_get_devices(&ds, 1);
 #endif //_WIN32
-
   if (detected_device < 1) {
     std::cout << "NM devices are not connected. please make sure connection." << std::endl;
     std::cout << "Please refer http://www.theneuromorphic.com to get the device" << std::endl;
     system("pause");
     return (0);
   }
+
   // make backup dir to make sure
   QDir dir;
   dir.mkdir("backup");
@@ -78,12 +77,10 @@ int main(int argc, char *argv[]) {
     std::cout << "Parameters:\n\t"
                  "--fullscreen:\tOpen Screen in mode FullScreen\n\t"
                  "--maximized:\tOpen Screen in mode Maximized"
-                 ""
               << std::endl;
     exit(0);
   } else {
     w.show();
   }
-
   return app.exec();
 }

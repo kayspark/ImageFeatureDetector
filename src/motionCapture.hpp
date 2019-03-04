@@ -14,7 +14,6 @@ class motionCapture {
   std::vector<cv::Vec4i> m_hierarchy;
   cv::TermCriteria m_criteria;
   cv::Size m_winSize;
-  //  cv::Mat gray;
   cv::Mat m_prevGray;
   cv::Mat m_saved_mask;
 

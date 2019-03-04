@@ -23,9 +23,9 @@
 
 #include "Section.h"
 
-Section::Section(const QString &title, const int animationDuration,
-                 QWidget *parent)
-    : QWidget(parent), animationDuration(animationDuration) {
+Section::Section(const QString &title, const int animationDuration, QWidget *parent)
+    : QWidget(parent)
+    , animationDuration(animationDuration) {
   toggleButton = new QToolButton(this);
   headerLine = new QFrame(this);
   toggleAnimation = new QParallelAnimationGroup(this);
@@ -42,7 +42,6 @@ Section::Section(const QString &title, const int animationDuration,
   headerLine->setFrameShape(QFrame::HLine);
   headerLine->setFrameShadow(QFrame::Sunken);
   headerLine->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
-
   contentArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
   // start out collapsed
@@ -52,8 +51,7 @@ Section::Section(const QString &title, const int animationDuration,
   // let the entire widget grow and shrink with its content
   toggleAnimation->addAnimation(new QPropertyAnimation(this, "minimumHeight"));
   toggleAnimation->addAnimation(new QPropertyAnimation(this, "maximumHeight"));
-  toggleAnimation->addAnimation(
-      new QPropertyAnimation(contentArea, "maximumHeight"));
+  toggleAnimation->addAnimation(new QPropertyAnimation(contentArea, "maximumHeight"));
 
   mainLayout->setVerticalSpacing(0);
   mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -64,33 +62,27 @@ Section::Section(const QString &title, const int animationDuration,
   mainLayout->addWidget(contentArea, row, 0, 1, 3);
   setLayout(mainLayout);
 
-  QObject::connect(
-      toggleButton, &QToolButton::clicked, [this](const bool checked) {
-        toggleButton->setArrowType(checked ? Qt::ArrowType::DownArrow
-                                           : Qt::ArrowType::RightArrow);
-        toggleAnimation->setDirection(checked ? QAbstractAnimation::Forward
-                                              : QAbstractAnimation::Backward);
-        toggleAnimation->start();
-      });
+  QObject::connect(toggleButton, &QToolButton::clicked, [this](const bool checked) {
+    toggleButton->setArrowType(checked ? Qt::ArrowType::DownArrow : Qt::ArrowType::RightArrow);
+    toggleAnimation->setDirection(checked ? QAbstractAnimation::Forward : QAbstractAnimation::Backward);
+    toggleAnimation->start();
+  });
 }
 
 void Section::setContentLayout(QLayout &contentLayout) {
   delete contentArea->layout();
   contentArea->setLayout(&contentLayout);
-  const auto collapsedHeight =
-      sizeHint().height() - contentArea->maximumHeight();
+  const auto collapsedHeight = sizeHint().height() - contentArea->maximumHeight();
   auto contentHeight = contentLayout.sizeHint().height();
-
   for (int i = 0; i < toggleAnimation->animationCount() - 1; ++i) {
-    auto SectionAnimation =
-        dynamic_cast<QPropertyAnimation *>(toggleAnimation->animationAt(i));
+    auto SectionAnimation = dynamic_cast<QPropertyAnimation *>(toggleAnimation->animationAt(i));
     SectionAnimation->setDuration(animationDuration);
     SectionAnimation->setStartValue(collapsedHeight);
     SectionAnimation->setEndValue(collapsedHeight + contentHeight);
   }
 
-  auto contentAnimation = dynamic_cast<QPropertyAnimation *>(
-      toggleAnimation->animationAt(toggleAnimation->animationCount() - 1));
+  auto contentAnimation =
+    dynamic_cast<QPropertyAnimation *>(toggleAnimation->animationAt(toggleAnimation->animationCount() - 1));
   contentAnimation->setDuration(animationDuration);
   contentAnimation->setStartValue(0);
   contentAnimation->setEndValue(contentHeight);

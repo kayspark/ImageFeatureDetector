@@ -1,4 +1,5 @@
 #include "fireBehaviorDetection.hpp"
+
 /* Create buffer for image */
 fireBehaviorDetection::fireBehaviorDetection(const int &frame_count, cv::Size frameSize)
     : _frameno(frame_count)
@@ -19,6 +20,7 @@ fireBehaviorDetection::~fireBehaviorDetection() {
     _vec_frame[i].release();
   }
 }
+
 /* Calculate Background Model */
 void fireBehaviorDetection::getBackgroundModel(cv::VideoCapture &cap, cv::Mat &out) {
   // accumulate frame from video

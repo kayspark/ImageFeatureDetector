@@ -19,8 +19,7 @@
    <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SECTION_H
-#define SECTION_H
+#pragma once
 
 #include <QFrame>
 #include <QGridLayout>
@@ -40,10 +39,7 @@ private:
   int animationDuration;
 
 public:
-  explicit Section(const QString &title = "", int animationDuration = 100,
-                   QWidget *parent = nullptr);
-
+  explicit Section(const QString &title = "", int animationDuration = 100, QWidget *parent = nullptr);
   void setContentLayout(QLayout &contentLayout);
 };
 
-#endif // SECTION_H

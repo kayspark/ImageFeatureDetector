@@ -39,7 +39,6 @@ nm_detector::nm_detector(std::string cascade, std::string algorithm)
     , colors(std::array<cv::Scalar, 8>() = {cv::Scalar(255, 0, 0), cv::Scalar(255, 128, 0), cv::Scalar(255, 255, 0),
                                             cv::Scalar(0, 255, 0), cv::Scalar(0, 128, 255), cv::Scalar(0, 255, 255),
                                             cv::Scalar(0, 0, 255), cv::Scalar(255, 0, 255)}
-
       ) {
   if (cascade.empty()) {
     cascade = ":/dataset/cascade.xml";
@@ -59,7 +58,6 @@ bool nm_detector::validate_roi(cv::Mat &roi) {
   double fx = 1.1;
   resize(roi, smallImg, cv::Size(), fx, fx, cv::INTER_LINEAR_EXACT);
   // equalizeHist(smallImg, smallImg);
-
   m_cascade.detectMultiScale(smallImg, t_objects, 1.1, 3,
                              0
                                //|CASCADE_FIND_BIGGEST_OBJECT
@@ -71,7 +69,6 @@ bool nm_detector::validate_roi(cv::Mat &roi) {
     ret = true;
   }
   return ret;
-  // draw_objects(display, color_code);
   // imshow( "result", img );
 } // detect roi
 
@@ -84,12 +81,10 @@ void nm_detector::detect_candidate(Mat &gray, std::vector<cv::Rect> &out) {
 
 void nm_detector::detect_objects(const cv::Mat &gray) {
   auto timer = static_cast<double>(cv::getTickCount());
-  // for (const auto &r : candidate_objects) {
   cv::Mat smallImg; // = gray;//(r);
   // cvtColor(img, gray, COLOR_BGR2GRAY);
   double fx = 1 / m_scale;
   resize(gray, smallImg, cv::Size(), fx, fx, cv::INTER_LINEAR_EXACT);
-  // equalizeHist(smallImg, smallImg);
   m_cascade.detectMultiScale(smallImg, objects, m_scale, 3,
                              0
                                //|CASCADE_FIND_BIGGEST_OBJECT

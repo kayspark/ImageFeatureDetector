@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2017-2018, nepes corp, All rights reserved.
- *
+ * kspark @ nepes.co.kr
  */
 #pragma once
 
@@ -74,7 +74,6 @@ namespace NeuroMem {
   };
 
   using NeuroMemNetworkType = enum _NeuroMemNetworkType { RBF = 0, KNN = 1 };
-
   using NeuroMemNormType = enum _NeuroMemNormType { L1 = 0, Lsup = 1 };
 
   using NeuroMemDevice = struct _NeuroMemDevice {

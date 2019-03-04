@@ -16,7 +16,6 @@ inline RectThresh rectThrd(const int rectWidth, const int rectHeight, const int 
   rt.rectWidth = rectWidth;
   rt.rectHeight = rectHeight;
   rt.cntrArea = cntrArea;
-
   return rt;
 }
 

@@ -41,7 +41,6 @@ and the following disclaimer.
 #include <qdir.h>
 
 using namespace cv;
-
 nm_classifier::nm_classifier() {
   m_category_set.insert(0);
 #if defined _WIN32
