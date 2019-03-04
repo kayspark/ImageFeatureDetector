@@ -353,7 +353,7 @@ uint32_t nm_classifier::file_to_neurons() {
       std::cout << "nid= " << nr.nid << " ,ncr= " << nr.ncr << " ,cat= " << nr.cat << " ,aif = " << nr.aif
                 << " , minif = " << nr.minif << std::endl;
       std::move(std::begin(buffer) + 1, std::begin(buffer) + 1 + m_neuron_vector_size, std::begin(nr.model));
-      // std::cout << "  eob" << std::endl;
+
       if (nr.cat > cat) {
         cat = nr.cat;
         m_category_set.insert(cat);
@@ -433,7 +433,6 @@ void nm_classifier::neurons_to_file() {
       file.write((char *)(&buffer[0]), sizeof(uint16_t) * (size + 5));
     }
     file.close();
-    //	delete[] buffer;
   }
 }
 
