@@ -34,6 +34,7 @@
 #pragma once
 
 #include "NeuroMemEngine.hpp"
+#include <QListWidget>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -107,7 +108,7 @@ public:
   void learn(cv::Mat &in, int cat = -1);
   uint32_t file_to_neurons();
   void neurons_to_file();
-
+  int neuron_count();
   void extract_feature_vector(cv::Mat input, std::vector<uint8_t> &v);
   void extract_feature_hog(cv::Mat &input, cv::Mat &output);
 
@@ -116,4 +117,6 @@ public:
   uint16_t minif() const;
   void set_maxif(uint16_t max);
   void set_minif(uint16_t min);
+
+  void read_neurons(QListWidget *ql);
 };

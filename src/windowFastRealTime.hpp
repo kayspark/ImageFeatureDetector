@@ -52,7 +52,7 @@ private:
   QListWidget *mClassifyWidget;
 
 protected:
-  nm_detector m_predator;
+  nm_detector m_detector;
 
 protected:
   void showDetectionContextMenu(const QPoint &pos);

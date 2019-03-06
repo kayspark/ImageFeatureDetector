@@ -20,7 +20,7 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
     , mTime(0.0)
     , m_data_file(":/dataset/cascade.xml")
     , m_tracking_algorithm("CSRT")
-    , m_predator(nm_detector(this->m_data_file, this->m_tracking_algorithm))
+    , m_detector(nm_detector(this->m_data_file, this->m_tracking_algorithm))
     , m_pen(QColor::fromRgb(0, 255, 0))
     , mSettings(wmain->getMSettings())
     , mLocale(std::make_unique<QLocale>(QLocale::English))
@@ -41,7 +41,6 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
   vLayout->addWidget(mDetectorWidget);
   vLayout->addWidget(new QLabel("Learn", section));
 
-  // auto v2Layout = new QVBoxLayout();
   mClassifyWidget = new QListWidget(section);
   mClassifyWidget->setFixedHeight(100);
   mClassifyWidget->setSelectionMode(QAbstractItemView::MultiSelection);
@@ -77,7 +76,6 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
                    &WindowFastRealTime::showDetectionContextMenu);
   QObject::connect(mClassifyWidget, &QListWidget::customContextMenuRequested, this,
                    &WindowFastRealTime::showClassifyContextMenu);
-
   QObject::connect(uiPushButtonNonMaxFAST, &QPushButton::toggled, this, &WindowFastRealTime::saveFastParams);
   QObject::connect(uiSpinBoxThresholdFAST, &QSpinBox::editingFinished, this, &WindowFastRealTime::saveFastParams);
   QObject::connect(uiPushButtonResetFAST, &QAbstractButton::clicked, this, &WindowFastRealTime::resetUI);
@@ -99,7 +97,16 @@ WindowFastRealTime::WindowFastRealTime(WindowMain *wmain)
 
 void WindowFastRealTime::saveKnowledges() { m_nm_classifier->neurons_to_file(); }
 
-void WindowFastRealTime::loadKnowledges() { m_nm_classifier->file_to_neurons(); }
+void WindowFastRealTime::loadKnowledges() {
+  // clear widget first
+  while (mClassifyWidget->count() > 0) {
+    QListWidgetItem *item = mClassifyWidget->takeItem(0);
+    delete item;
+  }
+  int cnt = m_nm_classifier->file_to_neurons();
+  if (cnt > 0)
+    m_nm_classifier->read_neurons(mClassifyWidget);
+}
 
 void WindowFastRealTime::testKnowledge() {
   QListWidgetItem *currentItem = mClassifyWidget->currentItem();
@@ -191,8 +198,8 @@ void WindowFastRealTime::clearListWidget() {
   int size = selected.size();
   if (size > 0) {
     for (auto &item : selected) {
+      mDetectorWidget->removeItemWidget(item); 
       // https://stackoverflow.com/questions/25417348/remove-selected-items-from-listwidget
-      mDetectorWidget->removeItemWidget(item);
       delete item;
     }
     mDetectorWidget->clearSelection();
@@ -203,7 +210,6 @@ void WindowFastRealTime::clearListWidget() {
 
 void WindowFastRealTime::compute() {
   cv::Mat imgRT;
-
   mCamera->read(imgRT);
   if (mDetecting) {
     if (!imgRT.empty()) {
@@ -211,10 +217,11 @@ void WindowFastRealTime::compute() {
       cv::cvtColor(imgRT, gray, cv::COLOR_BGR2GRAY);
 
       std::vector<cv::Rect> motions;
-      m_predator.detect_candidate(gray, motions);
+      m_detector.detect_candidate(gray, motions);
       mPixmap = QPixmap::fromImage(
         QImage(imgRT.data, imgRT.cols, imgRT.rows, static_cast<int>(imgRT.step), QImage::Format_RGB888));
       mPainter->begin(&mPixmap);
+
       for (const auto &motion : motions) {
         QRect motionRect(motion.x, motion.y, motion.width, motion.height);
         const auto &band = std::find_if(uiLabelRealTime->getBandList().begin(), uiLabelRealTime->getBandList().end(),
@@ -222,12 +229,14 @@ void WindowFastRealTime::compute() {
                                           QRect qRect = b->geometry().normalized();
                                           return motionRect.intersects(qRect);
                                         });
+
         if (band != uiLabelRealTime->getBandList().end()) {
           QPixmap pix = mPixmap.copy(motionRect).scaled(QSize(100, 100), Qt::KeepAspectRatio);
           cv::Mat mat = QPixmap2Mat(pix, true);
           QString fileName = QString("%1.png").arg(QDateTime::currentDateTime().toString("MMdd_hhmmss"));
           pix.toImage().save(QString("backup/%1").arg(fileName));
           mDetectorWidget->addItem(new QListWidgetItem(QIcon(pix), fileName));
+
           if (m_nm_classifier->classify(mat) < nm_classifier::UNKNOWN) {
             m_pen = QColor::fromRgb(255, 0, 0);
           } else {
@@ -242,7 +251,7 @@ void WindowFastRealTime::compute() {
       }
       mPainter->end();
       uiLabelRealTime->setPixmap(mPixmap);
-      uiLabelTime->setText("Detecting Time: " + QString("%1").arg(m_predator.get_detection_time()));
+      uiLabelTime->setText("Detecting Time: " + QString("%1").arg(m_detector.get_detection_time()));
       uiLabelKeypoints->setText("Key points: -" + QString("%1").arg(1));
     }
   } else {

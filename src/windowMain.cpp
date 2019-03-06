@@ -18,8 +18,7 @@ WindowMain::WindowMain()
     , mIconSIFT(std::make_unique<QIcon>(":icons/Sift.png"))
     , mIconSURF(std::make_unique<QIcon>(":icons/Surf.png"))
     , mSignalMapper(std::make_unique<QSignalMapper>(this))
-    , // for the Open Windows menu entries
-    mHarrisToolBar(std::make_unique<QWidget>())
+    , mHarrisToolBar(std::make_unique<QWidget>()) // for the Open Windows menu entries
     , mSiftToolBar(std::make_unique<QWidget>())
     , mSurfToolBar(std::make_unique<QWidget>())
     , mFastToolBar(std::make_unique<QWidget>())

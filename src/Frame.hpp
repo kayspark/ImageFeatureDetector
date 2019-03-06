@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FRAME_HPP
+#define FRAME_HPP
 #include <chrono>
 #include <opencv2/opencv.hpp>
 #include <utility>
@@ -15,3 +16,4 @@ public:
   ~Frame() = default;
   cv::Mat getImg() const { return img; }
 };
+#endif // FRAME_HPP

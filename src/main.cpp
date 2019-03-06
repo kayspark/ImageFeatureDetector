@@ -44,6 +44,7 @@ void applyDarkTheme(QApplication &app) {
 }
 
 int main(int argc, char *argv[]) {
+
   QApplication app(argc, argv);
   QStringList argList = QCoreApplication::arguments();
 
@@ -62,7 +63,6 @@ int main(int argc, char *argv[]) {
     system("pause");
     return (0);
   }
-
   // make backup dir to make sure
   QDir dir;
   dir.mkdir("backup");

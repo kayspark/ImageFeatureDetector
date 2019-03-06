@@ -35,10 +35,13 @@ and the following disclaimer.
 */
 
 #include "nm_classifier.hpp"
+#include "opencvhelper.hpp"
 #include <algorithm>
+#include <iostream>
 #include <map>
 #include <opencv2/opencv.hpp>
 #include <qdir.h>
+#include <string>
 
 using namespace cv;
 nm_classifier::nm_classifier() {
@@ -141,6 +144,16 @@ void nm_classifier::set_feature_algorithm(enum_feature_algorithm algorithm) {
   }
 
   m_algorithm = algorithm;
+}
+
+int nm_classifier::neuron_count() {
+  int ret = 0;
+#ifdef _WIN32
+  ret = NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
+#else
+  ret = nm_get_neuron_count(m_device.get());
+#endif
+  return ret;
 }
 
 void nm_classifier::set_context(uint16_t context, const uint16_t norm, const uint16_t minif, const uint16_t maxif) {
@@ -298,8 +311,8 @@ uint32_t nm_classifier::file_to_neurons() {
   file_name.open("backup/name.txt", std::ios::in);
   if (!file_name.is_open()) {
     std::cout << "Skip the restore process because there isn't backup.hex file" << std::endl;
-    return (0);
   }
+
 #ifdef _WIN32
   NeuroMem::NeuroMemContext ctx{};
   NeuroMem::NeuroMemEngine::GetContext(m_device.get(), &ctx);
@@ -320,13 +333,11 @@ uint32_t nm_classifier::file_to_neurons() {
   if (header[1] != NEURON_SIZE) {
     std::cout << "Neuron size error 1" << std::endl;
     file.close();
-    file_name.close();
     return (0);
   }
   if (header[2] > MAX_NEURON) {
     std::cout << "Ncount error" << std::endl;
     file.close();
-    file_name.close();
     return (0);
   }
   neuron_count = header[2];
@@ -370,19 +381,13 @@ uint32_t nm_classifier::file_to_neurons() {
 #endif
   std::cout << "neurons count after write neurons = " << neuron_count << std::endl;
   std::cout << "Restoring names." << std::endl;
-  if (file_name.is_open()) {
-    std::string temp;
-    for (uint16_t i = 0; i <= neuron_count; i++) {
-      getline(file_name, temp);
-      m_names_[i] = temp;
-      if (m_names_[i].length() > 0) {
-        std::cout << "user name  " << i << " " << m_names_[i] << std::endl;
-      }
+  for (uint16_t i = 0; i <= neuron_count; i++) {
+    m_names_[i] = std::to_string(i);
+    if (m_names_[i].length() > 0) {
+      std::cout << "user name  " << i << " " << m_names_[i] << std::endl;
     }
-    file_name.close();
   }
   std::cout << "Restore process is finished." << std::endl;
-
   m_loaded_ = true;
   return neuron_count;
 }
@@ -488,4 +493,37 @@ void nm_classifier::extract_feature_vector(Mat input, std::vector<uint8_t> &v) {
     v.push_back(*output.data++);
   }
   // std::cout << "Mat: " << output << std::endl;
+}
+
+void nm_classifier::read_neurons(QListWidget *ql) {
+
+  uint32_t neuron_count = 0;
+#ifdef _WIN32
+  neuron_count = NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
+  if (neuron_count == 0) {
+    return;
+  }
+  std::vector<NeuroMem::NeuroMemNeuron> neurons(neuron_count);
+  neurons[0].size = m_neuron_vector_size;
+  NeuroMem::NeuroMemEngine::ReadNeurons(m_device.get(), &neurons[0], neuron_count);
+#else
+  neuron_count = nm_get_neuron_count(m_device.get());
+  if (neuron_count == 0) {
+    return;
+  }
+  std::vector<nm_neuron> neurons(neuron_count);
+  neurons[0].size = m_neuron_vector_size;
+  nm_read_neurons(m_device.get(), &neurons[0], neuron_count);
+#endif
+  for (const auto &neuron : neurons) {
+      cv::Mat r = cv::Mat(*neuron.model).reshape(0, 16);     
+      r.convertTo(r, cv::CV_8UC1);
+//    cv::Mat r(16,16, CV_8UC1);
+//    cv::Mat r(*neuron.model, CV_8UC1);
+//    cv::resize(r,r, cv::Size(16,16));
+//    memcpy(r.data, neuron.model, neuron.size*sizeof(uchar));
+    QImage img = Mat2QImage(r);
+    QPixmap pix = QPixmap::fromImage(img).scaled(QSize(100, 100), Qt::KeepAspectRatio);
+    ql->addItem(new QListWidgetItem(QIcon(pix), QString(neuron.cat)));
+  }
 }
