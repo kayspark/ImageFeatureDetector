@@ -296,9 +296,7 @@ uint16_t nm_classifier::classify(cv::Mat &in) {
 
 uint32_t nm_classifier::file_to_neurons() {
   uint32_t neuron_count = 0; // NeuroMemEngine::GetNeuronCount(&hnn);
-
   std::cout << "neuron count: " << neuron_count << std::endl;
-
   uint16_t header[4];
   std::ifstream file, file_name;
 
@@ -474,7 +472,6 @@ void nm_classifier::extract_feature_vector(Mat input, std::vector<uint8_t> &v) {
       if (input.channels() != 1) {
         cvtColor(input, input, cv::COLOR_BGR2GRAY);
       }
-
       extract_feature_hog(input, output);
       break;
     case enum_feature_algorithm::sub_sampling:
@@ -516,12 +513,8 @@ void nm_classifier::read_neurons(QListWidget *ql) {
   nm_read_neurons(m_device.get(), &neurons[0], neuron_count);
 #endif
   for (const auto &neuron : neurons) {
-      cv::Mat r = cv::Mat(*neuron.model).reshape(0, 16);     
-      r.convertTo(r, cv::CV_8UC1);
-//    cv::Mat r(16,16, CV_8UC1);
-//    cv::Mat r(*neuron.model, CV_8UC1);
-//    cv::resize(r,r, cv::Size(16,16));
-//    memcpy(r.data, neuron.model, neuron.size*sizeof(uchar));
+    cv::Mat r(16,16, CV_8UC1);
+    memcpy(r.data, neuron.model, neuron.size*sizeof(uchar));
     QImage img = Mat2QImage(r);
     QPixmap pix = QPixmap::fromImage(img).scaled(QSize(100, 100), Qt::KeepAspectRatio);
     ql->addItem(new QListWidgetItem(QIcon(pix), QString(neuron.cat)));

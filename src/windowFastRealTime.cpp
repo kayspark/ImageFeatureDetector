@@ -185,7 +185,6 @@ void WindowFastRealTime::resetUI() {
 void WindowFastRealTime::learnNormal() {}
 
 void WindowFastRealTime::learnAbnormal() {
-
   QListWidgetItem *currentItem = mDetectorWidget->currentItem();
   QIcon icon = currentItem->icon();
   cv::Mat feature = QPixmap2Mat(icon.pixmap(QSize(100, 100)), true);
@@ -195,8 +194,7 @@ void WindowFastRealTime::learnAbnormal() {
 
 void WindowFastRealTime::clearListWidget() {
   QList<QListWidgetItem *> selected = mDetectorWidget->selectedItems();
-  int size = selected.size();
-  if (size > 0) {
+  if (selected.size()> 0) {
     for (auto &item : selected) {
       mDetectorWidget->removeItemWidget(item); 
       // https://stackoverflow.com/questions/25417348/remove-selected-items-from-listwidget
@@ -215,8 +213,8 @@ void WindowFastRealTime::compute() {
     if (!imgRT.empty()) {
       cv::Mat gray;
       cv::cvtColor(imgRT, gray, cv::COLOR_BGR2GRAY);
-
       std::vector<cv::Rect> motions;
+      
       m_detector.detect_candidate(gray, motions);
       mPixmap = QPixmap::fromImage(
         QImage(imgRT.data, imgRT.cols, imgRT.rows, static_cast<int>(imgRT.step), QImage::Format_RGB888));
@@ -236,7 +234,6 @@ void WindowFastRealTime::compute() {
           QString fileName = QString("%1.png").arg(QDateTime::currentDateTime().toString("MMdd_hhmmss"));
           pix.toImage().save(QString("backup/%1").arg(fileName));
           mDetectorWidget->addItem(new QListWidgetItem(QIcon(pix), fileName));
-
           if (m_nm_classifier->classify(mat) < nm_classifier::UNKNOWN) {
             m_pen = QColor::fromRgb(255, 0, 0);
           } else {
