@@ -87,11 +87,14 @@ void nm_classifier::init(const uint16_t maxif, const uint16_t minif) {
 
 nm_classifier::~nm_classifier() {
   if (m_device->handle != nullptr) {
+#ifdef _WIN32
     m_device->handle = nullptr;
+#else
+    nm_close(m_device.get());
+#endif
   }
-  if (m_device) {
-    m_device = nullptr;
-  }
+  if (m_device)
+    m_device.release();
 }
 
 bool nm_classifier::is_loaded_from_file() const { return m_loaded_; }
@@ -276,7 +279,6 @@ void nm_classifier::learn(cv::Mat &in, int cat) {
 }
 
 uint16_t nm_classifier::classify(cv::Mat &in) {
-  uint16_t ret = UNKNOWN;
   std::vector<uint8_t> feature;
   feature.reserve(m_neuron_vector_size);
   extract_feature_vector(in, feature);
@@ -287,7 +289,7 @@ uint16_t nm_classifier::classify(cv::Mat &in) {
 #endif
   std::move(feature.begin(), feature.end(), std::begin(req.vector));
   classify(req);
-  ret = req.category[0];
+  uint16_t ret = req.category[0];
   std::string s = (ret < UNKNOWN) ? " classified" : " unknown";
   std::cout << "classification: " << req.category[0] << " , " << req.distance[0] << s << std::endl;
 
@@ -484,8 +486,8 @@ void nm_classifier::extract_feature_vector(Mat input, std::vector<uint8_t> &v) {
     case enum_feature_algorithm::default_:
       break;
   }
-  // fill_neuron_vector(output, v);
 
+  // fill_neuron_vector(output, v);
   for (int j = 0; j < m_neuron_vector_size; j++) {
     v.push_back(*output.data++);
   }
@@ -513,8 +515,9 @@ void nm_classifier::read_neurons(QListWidget *ql) {
   nm_read_neurons(m_device.get(), &neurons[0], neuron_count);
 #endif
   for (const auto &neuron : neurons) {
-    cv::Mat r(16,16, CV_8UC1);
-    memcpy(r.data, neuron.model, neuron.size*sizeof(uchar));
+    cv::Mat r(16, 16, CV_8UC1);
+    std::copy(neuron.model, neuron.model + neuron.size,
+              r.data); //    memcpy(r.data, neuron.model, neuron.size*sizeof(uchar));
     QImage img = Mat2QImage(r);
     QPixmap pix = QPixmap::fromImage(img).scaled(QSize(100, 100), Qt::KeepAspectRatio);
     ql->addItem(new QListWidgetItem(QIcon(pix), QString(neuron.cat)));

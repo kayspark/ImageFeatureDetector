@@ -1,2 +1,0 @@
-      clangd -compile-commands-dir='./build' -completion-style=detailed -header-insertion-decorators -include-ineligible-results -index=clangd.dex -input-style=standard -j=12 -pch-storage=disk -static-func-full-module-prefix -use-dbg-addr -view-background
- 

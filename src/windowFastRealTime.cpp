@@ -194,9 +194,9 @@ void WindowFastRealTime::learnAbnormal() {
 
 void WindowFastRealTime::clearListWidget() {
   QList<QListWidgetItem *> selected = mDetectorWidget->selectedItems();
-  if (selected.size()> 0) {
+  if (selected.size() > 0) {
     for (auto &item : selected) {
-      mDetectorWidget->removeItemWidget(item); 
+      mDetectorWidget->removeItemWidget(item);
       // https://stackoverflow.com/questions/25417348/remove-selected-items-from-listwidget
       delete item;
     }
@@ -214,7 +214,7 @@ void WindowFastRealTime::compute() {
       cv::Mat gray;
       cv::cvtColor(imgRT, gray, cv::COLOR_BGR2GRAY);
       std::vector<cv::Rect> motions;
-      
+
       m_detector.detect_candidate(gray, motions);
       mPixmap = QPixmap::fromImage(
         QImage(imgRT.data, imgRT.cols, imgRT.rows, static_cast<int>(imgRT.step), QImage::Format_RGB888));

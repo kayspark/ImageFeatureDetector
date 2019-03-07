@@ -66,7 +66,6 @@ using Centroid = struct Centroid {
 /* for initailize the new centroid node */
 inline Centroid centroid(const OFRect &ofRect) {
   Centroid centroid1;
-
   centroid1.countFrame = 1; // first node
   centroid1.centroid = cv::Point(ofRect.rect.x + (ofRect.rect.width >> 1),
                                  ofRect.rect.y + (ofRect.rect.height >> 1)); // centroid position
