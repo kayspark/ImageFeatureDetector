@@ -86,15 +86,14 @@ void nm_classifier::init(const uint16_t maxif, const uint16_t minif) {
 }
 
 nm_classifier::~nm_classifier() {
-  if (m_device->handle != nullptr) {
+  if (m_device != nullptr && m_device->handle != nullptr) {
 #ifdef _WIN32
     m_device->handle = nullptr;
 #else
     nm_close(m_device.get());
 #endif
-  }
-  if (m_device)
     m_device.release();
+  }
 }
 
 bool nm_classifier::is_loaded_from_file() const { return m_loaded_; }
@@ -118,9 +117,7 @@ void nm_classifier::set_feature_algorithm(enum_feature_algorithm algorithm) {
     return;
   }
   switch (algorithm) {
-
     case enum_feature_algorithm::hog:
-
       if (m_hog.empty()) {
         std::cout << "new hog instance created" << std::endl;
         m_hog = cv::makePtr<HOGDescriptor>(Size(32, 32),                   // winSize
