@@ -490,7 +490,9 @@ void nm_classifier::extract_feature_vector(Mat input, std::vector<uint8_t> &v) {
   }
   // std::cout << "Mat: " << output << std::endl;
 }
-
+//
+// get neurons an put it into QListWidget as widget items
+// 
 void nm_classifier::read_neurons(QListWidget *ql) {
 
   uint32_t neuron_count = 0;
