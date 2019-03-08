@@ -361,10 +361,10 @@ uint32_t nm_classifier::file_to_neurons() {
       std::cout << "nid= " << nr.nid << " ,ncr= " << nr.ncr << " ,cat= " << nr.cat << " ,aif = " << nr.aif
                 << " , minif = " << nr.minif << std::endl;
       std::move(std::begin(buffer) + 1, std::begin(buffer) + 1 + m_neuron_vector_size, std::begin(nr.model));
-
-      if (nr.cat > cat) {
+    const auto ret = m_category_set.insert(nr.cat);
+    if (ret.second) {
         cat = nr.cat;
-        m_category_set.insert(cat);
+        std::cout << "DEBUG: cat= " << cat << " , size= " << m_category_set.size() << std::endl; 
       }
     }
   }
