@@ -240,7 +240,7 @@ void WindowFastRealTime::compute() {
             m_pen = QColor::fromRgb(0, 255, 0);
           }
         } else {
-          m_pen = QColor::fromRgb(0, 0, 255);
+          m_pen = QColor::fromRgb(255, 255, 0);
         }
         m_pen.setWidth(5);
         mPainter->setPen(m_pen);
