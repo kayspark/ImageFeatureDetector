@@ -11,16 +11,16 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules
 SET(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
+#set(CMAKE_AUTOMOC ON)
+#set(CMAKE_AUTORCC ON)
+#set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 #set(AUTOUIC_OPTIONS - include ${CMAKE_CURRENT_SOURCE_DIR} / src / videolabelview.hpp)
-set(CMAKE_AUTOUIC ON)
+#set(CMAKE_AUTOUIC ON)
 #set(AUTOGEN_BUILD_DIR ${CMAKE_CURRENT_SOURCE_DIR} / autogen)
 #set(CMAKE_CXX_CLANG_TIDY clang - tidy - checks = -*, modernize - *)
 #include(cppcheck.cmake)
 ## http://www.cmake.org/Wiki/CMake:How_To_Find_Libraries
-find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+#find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 if (WIN32)
     set(OpenCV_STATIC OFF)
     set(OpenCV SHARED ON)
@@ -55,7 +55,7 @@ find_package(OpenCV COMPONENTS opencv_core opencv_imgproc opencv_highgui opencv_
 include_directories(${LIBVLC_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
 
 file(GLOB ImageFeatureDetector_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
-file(GLOB ImageFeatureDetector_UI ${CMAKE_CURRENT_SOURCE_DIR}/ui/*)
+#file(GLOB ImageFeatureDetector_UI ${CMAKE_CURRENT_SOURCE_DIR}/ui/*)
 
 #find_package(CppCheck)
 # Add the "make analysis" target
@@ -66,10 +66,20 @@ if (CPPCHECK_FOUND)
     message("analysis analysis targets are ${ALL_ANALYSIS_TARGETS}")
 endif ()
 
-add_executable(imagefeaturedetector ${ImageFeatureDetector_SRC} ${ImageFeatureDetector_UI} resources.qrc)
+add_executable(imagefeaturedetector ${CMAKE_CURRENT_SOURCE_DIR}/src/ocv_main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/vlccap.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/vlccap.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/nm_detector.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/nm_detector.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/nm_classifier.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/nm_classifier.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/motionCapture.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/motionCapture.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/NeuroMemEngine.hpp
+        )
 if (WIN32)
-  target_link_libraries(imagefeaturedetector ${nmengine} Qt5::Core Qt5::Widgets ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY} )
+    target_link_libraries(imagefeaturedetector ${nmengine} ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY})
 elseif (NOT WIN32)
-  target_link_libraries(imagefeaturedetector nmengine Qt5::Core Qt5::Widgets ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY} )
+    target_link_libraries(imagefeaturedetector nmengine ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY})
 endif(WIN32)
 

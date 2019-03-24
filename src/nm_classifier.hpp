@@ -34,7 +34,7 @@
 #pragma once
 
 #include "NeuroMemEngine.hpp"
-#include <QListWidget>
+//#include <QListWidget>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -118,5 +118,6 @@ public:
   void set_maxif(uint16_t max);
   void set_minif(uint16_t min);
 
-  void read_neurons(QListWidget *ql);
+  void read_neurons(std::vector<cv::Mat> &vl);
+//  void read_neurons(QListWidget *ql);
 };

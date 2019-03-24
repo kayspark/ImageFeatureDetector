@@ -61,6 +61,7 @@ int main(int argc, char *argv[]) {
     std::cout << "NM devices are not connected. please make sure connection." << std::endl;
     std::cout << "Please refer http://www.theneuromorphic.com to get the device" << std::endl;
     system("pause");
+    std::cout << "test" << std::endl;
     return (0);
   }
   // make backup dir to make sure
