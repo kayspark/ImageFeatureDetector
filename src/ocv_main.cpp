@@ -6,8 +6,6 @@
 #include "nm_detector.hpp"
 #include "nm_classifier.hpp"
 
-void compute(vlc_capture &cap, std::vector<cv::Rect> &rois, nm_detector &detector, nm_classifier &classifier) {}
-
 int main(int argc, char const *argv[]) {
 
 #ifdef _WIN32
@@ -25,6 +23,7 @@ int main(int argc, char const *argv[]) {
     system("pause");
     return (0);
   }
+
   vlc_capture cap(960, 544);
   nm_detector detector("dataset/cascade.xml", "CSRT");
   nm_classifier classifier;
@@ -36,19 +35,21 @@ int main(int argc, char const *argv[]) {
     return 0;
   }
   std::vector<cv::Rect> rois;
-  rois.push_back(cv::Rect(100, 100, 300, 300));
-
+  //  rois.push_back(cv::Rect(100, 100, 300, 300));
+  std::string window_name = "test";
   cap.open(url);
+
+  cv::Mat imgRT;
+  cap.read(imgRT);
+  rois.push_back(cv::selectROI(window_name, imgRT));
+  if (rois.empty())
+    return 0;
+
   while (cap.isOpened()) {
-    cv::Mat imgRT;
     cap.read(imgRT);
     if (!imgRT.empty()) {
-      if (!rois.empty()) {
-        for_each(rois.begin(), rois.end(), [&imgRT](const auto &r) {
-          cv::rectangle(imgRT, r, cv::Scalar(255, 255, 255));
-        });
-        //cv::selectROIs("test", imgRT, rois);
-      }
+      for_each(rois.begin(), rois.end(),
+               [&imgRT](const auto &r) { cv::rectangle(imgRT, r, cv::Scalar(128, 0, 0)); });
       cv::Mat gray;
       cv::cvtColor(imgRT, gray, cv::COLOR_BGR2GRAY);
       std::vector<cv::Rect> motions;
@@ -57,18 +58,18 @@ int main(int argc, char const *argv[]) {
         cv::Mat mat = gray(motion);
 
         const auto &band =
-            std::find_if(rois.begin(), rois.end(), [&motion](const auto &b) { return (motion & b).area() > 0; });
+          std::find_if(rois.begin(), rois.end(), [&motion](const auto &b) { return (motion & b).area() > 0; });
         if (band != rois.end()) {
           if (classifier.classify(mat) < nm_classifier::UNKNOWN) {
-            cv::rectangle(imgRT, motion, cv::Scalar(255, 0, 0));
+            cv::rectangle(imgRT, motion, cv::Scalar(0, 0, 255));
           } else {
             cv::rectangle(imgRT, motion, cv::Scalar(0, 255, 0));
           }
         } else {
-          cv::rectangle(imgRT, motion, cv::Scalar(255, 255, 0));
+          cv::rectangle(imgRT, motion, cv::Scalar(0, 255, 255));
         }
       }
-      cv::imshow("test", imgRT);
+      cv::imshow(window_name, imgRT);
       if (cv::waitKey(5) == 27)
         break;
     }
