@@ -14,18 +14,23 @@ void loadKnowledges(nm_classifier &classifier) {
     std::cout << "loaded neuron count: " << cnt << std::endl;
 }
 
-void testKnowledge(nm_classifier &classifier, cv::Mat& feature) {
-  uint16_t cat = classifier.classify(feature);  
-  if (cat < nm_classifier::UNKNOWN)
-    cv::imshow("test Knowledge", feature);
-  else 
-    std::cout << "test result is unknown" << std:: endl;
+void saveKnowledges(nm_classifier &classifier) {
+  classifier.neurons_to_file();
 }
 
-void deleteKnowledge(nm_classifier &classifier, cv::Mat& feature) {
-  if (classifier.deleteKnowledge(feature)  < nm_classifier::UNKNOWN)
+void testKnowledge(nm_classifier &classifier, cv::Mat &feature) {
+  uint16_t cat = classifier.classify(feature);
+  if (cat < nm_classifier::UNKNOWN)
+    cv::imshow("test Knowledge", feature);
+  else
+    std::cout << "test result is unknown" << std::endl;
+}
+
+void deleteKnowledge(nm_classifier &classifier, cv::Mat &feature) {
+  if (classifier.deleteKnowledge(feature) < nm_classifier::UNKNOWN)
     std::cout << "delete best matched knowlege" << std::endl;
 }
+
 int main(int argc, char const *argv[]) {
 
 #ifdef _WIN32
@@ -55,7 +60,6 @@ int main(int argc, char const *argv[]) {
     return 0;
   }
   std::vector<cv::Rect> rois;
-  //  rois.push_back(cv::Rect(100, 100, 300, 300));
   std::string window_name = "test";
   cap.open(url);
 
