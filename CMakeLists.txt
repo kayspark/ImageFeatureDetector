@@ -77,9 +77,6 @@ add_executable(imagefeaturedetector ${CMAKE_CURRENT_SOURCE_DIR}/src/ocv_main.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/motionCapture.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/NeuroMemEngine.hpp
         )
-if (WIN32)
-    target_link_libraries(imagefeaturedetector ${nmengine} ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY})
-elseif (NOT WIN32)
-    target_link_libraries(imagefeaturedetector ${nmengine} ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY})
-endif(WIN32)
+
+target_link_libraries(imagefeaturedetector ${nmengine} ${OpenCV_LIBS} ${LIBVLC_LIBRARY} ${LIBVLCCORE_LIBRARY})
 
