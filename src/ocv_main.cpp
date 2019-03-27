@@ -14,9 +14,7 @@ void loadKnowledges(nm_classifier &classifier) {
     std::cout << "loaded neuron count: " << cnt << std::endl;
 }
 
-void saveKnowledges(nm_classifier &classifier) {
-  classifier.neurons_to_file();
-}
+void saveKnowledges(nm_classifier &classifier) { classifier.neurons_to_file(); }
 
 void testKnowledge(nm_classifier &classifier, cv::Mat &feature) {
   uint16_t cat = classifier.classify(feature);
