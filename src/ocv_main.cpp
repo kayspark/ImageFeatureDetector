@@ -65,8 +65,8 @@ int main(int argc, char const *argv[]) {
   cap.read(imgRT);
   cvtColor(imgRT, imgRT, cv::COLOR_BGR2RGB);
   rois.push_back(cv::selectROI(window_name, imgRT));
-  if (rois.empty())
-    return 0;
+  if (rois.empty()) 
+    return 0; // if no ROI , quit
 
   while (cap.isOpened()) {
     cap.read(imgRT);
