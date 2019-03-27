@@ -6,6 +6,26 @@
 #include "nm_detector.hpp"
 #include "nm_classifier.hpp"
 
+void learnAbnormal(nm_classifier &classifier, cv::Mat &feature) { classifier.learn(feature); }
+
+void loadKnowledges(nm_classifier &classifier) {
+  int cnt = classifier.file_to_neurons();
+  if (cnt > 0)
+    std::cout << "loaded neuron count: " << cnt << std::endl;
+}
+
+void testKnowledge(nm_classifier &classifier, cv::Mat& feature) {
+  uint16_t cat = classifier.classify(feature);  
+  if (cat < nm_classifier::UNKNOWN)
+    cv::imshow("test Knowledge", feature);
+  else 
+    std::cout << "test result is unknown" << std:: endl;
+}
+
+void deleteKnowledge(nm_classifier &classifier, cv::Mat& feature) {
+  if (classifier.deleteKnowledge(feature)  < nm_classifier::UNKNOWN)
+    std::cout << "delete best matched knowlege" << std::endl;
+}
 int main(int argc, char const *argv[]) {
 
 #ifdef _WIN32
@@ -41,6 +61,7 @@ int main(int argc, char const *argv[]) {
 
   cv::Mat imgRT;
   cap.read(imgRT);
+  cvtColor(imgRT, imgRT, cv::COLOR_BGR2RGB);
   rois.push_back(cv::selectROI(window_name, imgRT));
   if (rois.empty())
     return 0;
@@ -48,8 +69,8 @@ int main(int argc, char const *argv[]) {
   while (cap.isOpened()) {
     cap.read(imgRT);
     if (!imgRT.empty()) {
-      for_each(rois.begin(), rois.end(),
-               [&imgRT](const auto &r) { cv::rectangle(imgRT, r, cv::Scalar(128, 0, 0)); });
+      cvtColor(imgRT, imgRT, cv::COLOR_BGR2RGB);
+      for_each(rois.begin(), rois.end(), [&imgRT](const auto &r) { cv::rectangle(imgRT, r, cv::Scalar(128, 0, 0)); });
       cv::Mat gray;
       cv::cvtColor(imgRT, gray, cv::COLOR_BGR2GRAY);
       std::vector<cv::Rect> motions;
