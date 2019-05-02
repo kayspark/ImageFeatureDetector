@@ -14,6 +14,8 @@ void loadKnowledges(nm_classifier &classifier) {
         std::cout << "loaded neuron count: " << cnt << std::endl;
 }
 
+void saveKnowledges(nm_classifier &classifier) { classifier.neurons_to_file(); }
+
 void testKnowledge(nm_classifier &classifier, cv::Mat &feature) {
     uint16_t cat = classifier.classify(feature);
     if (cat < nm_classifier::UNKNOWN)
@@ -26,6 +28,7 @@ void deleteKnowledge(nm_classifier &classifier, cv::Mat &feature) {
     if (classifier.deleteKnowledge(feature) < nm_classifier::UNKNOWN)
         std::cout << "delete best matched knowlege" << std::endl;
 }
+
 int main(int argc, char const *argv[]) {
 
 #ifdef _WIN32
