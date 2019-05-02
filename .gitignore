@@ -63,7 +63,8 @@ cmake_install.cmake
 install_manifest.txt
 compile_commands.json
 
-
+#cache
+.ccls-cache/
 # KDevelop (https://github.com/github/gitignore/blob/master/Global/KDevelop4.gitignore)
 *.kdev4
 .kdev4/

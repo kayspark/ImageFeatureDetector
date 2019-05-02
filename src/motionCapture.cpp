@@ -127,8 +127,6 @@ void motionCapture::find(Mat &gray) {
       fill_tracks(m_allTracks, allContours);
     }
   }
-  auto endtime = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch());
-  m_fps = static_cast<int>(1000.0 / (endtime - m_currentTime).count());
   swap(m_prevGray, gray);
   //   display();
 }
