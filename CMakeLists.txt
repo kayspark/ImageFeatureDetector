@@ -13,7 +13,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 #set(CMAKE_AUTOMOC ON)
 #set(CMAKE_AUTORCC ON)
-#set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
+#set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR} / ui)
 #set(AUTOUIC_OPTIONS - include ${CMAKE_CURRENT_SOURCE_DIR} / src / videolabelview.hpp)
 #set(CMAKE_AUTOUIC ON)
 #set(AUTOGEN_BUILD_DIR ${CMAKE_CURRENT_SOURCE_DIR} / autogen)
@@ -26,7 +26,7 @@ if (WIN32)
     set(OpenCV SHARED ON)
 
     set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin/win) # http://stackoverflow.com/questions/18826789/cmake-output-build-directory
-    #set(OpenCV_DIR "C:/Users/kspark/opencv")
+#set(OpenCV_DIR "C:/Users/kspark/opencv")
     set(LIBVLC_INCLUDE_DIR "C:/vlc-winsdk/sdk/include")
     set(LIBVLC_LIBRARY_DIR "C:/vlc-winsdk/sdk/lib")
     set(LIBVLC_LIBRARY "C:/vlc-winsdk/sdk/lib/libvlc.lib")
@@ -42,9 +42,9 @@ elseif (NOT WIN32)
         set(nmengine /usr/local/lib/libnmengine.dylib)
     elseif (NOT APPLE)
         set(LIBVLC_INCLUDE_DIR "/usr/include")
-        #For Raspberry PI 
-        #set(LIBVLC_LIBRARY_DIR "/usr/lib/arm-linux-gnueabihf")
-        #For Intel
+#For Raspberry PI
+#set(LIBVLC_LIBRARY_DIR "/usr/lib/arm-linux-gnueabihf")
+#For Intel
         set(LIBVLC_LIBRARY_DIR "/usr/lib/x86_64-linux-gnu")
         set(LIBVLC_LIBRARY ${LIBVLC_LIBRARY_DIR}/libvlc.so)
         set(LIBVLCCORE_LIBRARY ${LIBVLC_LIBRARY_DIR}/libvlccore.so)
