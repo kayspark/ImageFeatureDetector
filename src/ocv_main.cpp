@@ -59,7 +59,6 @@ int main(int argc, char const *argv[]) {
         return 0;
     }
     std::vector<cv::Rect> rois;
-    //  rois.push_back(cv::Rect(100, 100, 300, 300));
     std::string window_name = "test";
     cap.open(url);
 
@@ -74,8 +73,7 @@ int main(int argc, char const *argv[]) {
         cap.read(imgRT);
         if (!imgRT.empty()) {
             cvtColor(imgRT, imgRT, cv::COLOR_BGR2RGB);
-            for_each(rois.begin(), rois.end(),
-                     [&imgRT](const auto &r) { cv::rectangle(imgRT, r, cv::Scalar(128, 0, 0)); });
+            for_each(rois.begin(), rois.end(), [&](const auto &r) { cv::rectangle(imgRT, r, cv::Scalar(128, 0, 0)); });
             cv::Mat gray;
             cv::cvtColor(imgRT, gray, cv::COLOR_BGR2GRAY);
             std::vector<cv::Rect> motions;
