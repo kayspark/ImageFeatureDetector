@@ -151,7 +151,6 @@ void nm_classifier::set_feature_algorithm(enum_feature_algorithm algorithm) {
 
 int nm_classifier::neuron_count() {
     int ret = 0;
-    uint32_t neuron_count;
 #ifdef _WIN32
     ret = NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
 #else
@@ -275,7 +274,7 @@ void nm_classifier::learn(cv::Mat &in, int cat) {
     else
         tcat = cat;
     lreq.category = tcat;
-    lreq.vector_size = m_neuron_vector_size;
+    lreq.size = m_neuron_vector_size;
 
     std::move(feature.begin(), feature.end(), std::begin(lreq.vector));
     learn(lreq);

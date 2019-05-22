@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#if not defined _WIN32
+#ifndef _WIN32
 #include <nmengine.h>
 #else
 

@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
     using nm_device = NeuroMem::NeuroMemDevice;
     using nm_engine = NeuroMem::NeuroMemEngine;
     nm_device ds{};
-    const uint16_t detected_device = nm_engine::GetDevices(&ds, 1);
+    const uint16_t detected_count = nm_engine::GetDevices(&ds, 1);
 #else
     nm_device ds;
     uint8_t detected_count = 10;
