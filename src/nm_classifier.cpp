@@ -151,6 +151,8 @@ void nm_classifier::set_feature_algorithm(enum_feature_algorithm algorithm) {
 
 int nm_classifier::neuron_count() {
     int ret = 0;
+
+    uint32_t neuron_count = 10;
 #ifdef _WIN32
     ret = NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
 #else
@@ -265,8 +267,10 @@ void nm_classifier::learn(cv::Mat &in, int cat) {
 
 #ifdef _WIN32
     NeuroMem::NeuroMemLearnReq lreq;
+    lreq.size = m_neuron_vector_size;
 #else
     nm_learn_req lreq;
+    lreq.vector_size = m_neuron_vector_size;
 #endif
     uint16_t tcat = 0;
     if (cat < 0)
@@ -274,7 +278,6 @@ void nm_classifier::learn(cv::Mat &in, int cat) {
     else
         tcat = cat;
     lreq.category = tcat;
-    lreq.size = m_neuron_vector_size;
 
     std::move(feature.begin(), feature.end(), std::begin(lreq.vector));
     learn(lreq);
@@ -530,7 +533,7 @@ void nm_classifier::read_neurons(std::vector<Mat> &vl) {
 //
 void nm_classifier::read_neurons(QListWidget *ql) {
 
-  uint16_t r = 0;
+    uint16_t r = 0;
     uint32_t neuron_count = 0;
 #ifdef _WIN32
     neuron_count = NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
