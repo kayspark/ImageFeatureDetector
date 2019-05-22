@@ -34,7 +34,7 @@
 #pragma once
 
 #include "NeuroMemEngine.hpp"
-//#include <QListWidget>
+#include <QListWidget>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -46,78 +46,78 @@ enum class enum_feature_algorithm { default_, hog, sub_sampling };
 
 class nm_classifier {
 
-public:
-  const static int UNKNOWN = 65535;
+  public:
+    const static int UNKNOWN = 65535;
 
-private:
-  const static int pca_component = 15;
-  const static int NEURON_SIZE = 256;
-  const static int MAX_NEURON = 576;
+  private:
+    const static int pca_component = 15;
+    const static int NEURON_SIZE = 256;
+    const static int MAX_NEURON = 576;
 
-  uint16_t m_neuron_vector_size = 256;
+    uint16_t m_neuron_vector_size = 256;
 #ifdef _WIN32
-  std::unique_ptr<NeuroMem::NeuroMemDevice> m_device;
+    std::unique_ptr<NeuroMem::NeuroMemDevice> m_device;
 #else
-  std::unique_ptr<nm_device> m_device;
+    std::unique_ptr<nm_device> m_device;
 #endif
-  std::string m_tracker_net_model_configuration;
-  std::string m_tracker_net_model_binary;
+    std::string m_tracker_net_model_configuration;
+    std::string m_tracker_net_model_binary;
 
-  cv::Ptr<cv::HOGDescriptor> m_hog;
+    cv::Ptr<cv::HOGDescriptor> m_hog;
 
-  // dnn params
-  int in_width_ = 300;
-  int in_height_ = 300;
-  const double in_scale_factor_ = 1.0;
-  std::map<uint16_t, std::string> m_names_;
-  std::set<uint16_t> m_category_set;
-  bool m_loaded_ = false;
+    // dnn params
+    int in_width_ = 300;
+    int in_height_ = 300;
+    const double in_scale_factor_ = 1.0;
+    std::map<uint16_t, std::string> m_names_;
+    std::set<uint16_t> m_category_set;
+    bool m_loaded_ = false;
 
-  bool learning_mode_ = false; // 0: recognize, 1: learn, 90: end-of-program
-  uint16_t m_menu = 0;
-  uint16_t m_maxif = 0;
-  uint16_t m_minif = 0;
-  std::vector<cv::Mat> m_features;
-  std::mutex m_mutex; // to control learn and classify
+    bool learning_mode_ = false; // 0: recognize, 1: learn, 90: end-of-program
+    uint16_t m_menu = 0;
+    uint16_t m_maxif = 0;
+    uint16_t m_minif = 0;
+    std::vector<cv::Mat> m_features;
+    std::mutex m_mutex; // to control learn and classify
 
-private:
-  enum_feature_algorithm m_algorithm = enum_feature_algorithm::default_;
+  private:
+    enum_feature_algorithm m_algorithm = enum_feature_algorithm::default_;
 
-public:
+  public:
 #ifdef _WIN32
-  void learn(NeuroMem::NeuroMemLearnReq &req);
-  bool classify(NeuroMem::NeuroMemClassifyReq &req);
+    void learn(NeuroMem::NeuroMemLearnReq &req);
+    bool classify(NeuroMem::NeuroMemClassifyReq &req);
 #else
-  void learn(nm_learn_req &req);
-  bool classify(nm_classify_req &req);
+    void learn(nm_learn_req &req);
+    bool classify(nm_classify_req &req);
 #endif
-  bool is_loaded_from_file() const;
-  enum_feature_algorithm get_feature_algorithm() const;
-  uint16_t get_neuron_vector_size() const;
+    bool is_loaded_from_file() const;
+    enum_feature_algorithm get_feature_algorithm() const;
+    uint16_t get_neuron_vector_size() const;
 
-  void set_context(uint16_t context, uint16_t norm, uint16_t minif, uint16_t maxif);
-  void pyramid_reduction(cv::Mat &input, cv::Mat &output, int size);
-  void set_feature_algorithm(enum_feature_algorithm algorithm);
+    void set_context(uint16_t context, uint16_t norm, uint16_t minif, uint16_t maxif);
+    void pyramid_reduction(cv::Mat &input, cv::Mat &output, int size);
+    void set_feature_algorithm(enum_feature_algorithm algorithm);
 
-  nm_classifier();
-  void init(uint16_t maxif, uint16_t minif);
-  ~nm_classifier();
-  uint16_t classify(cv::Mat &in);
+    nm_classifier();
+    void init(uint16_t maxif, uint16_t minif);
+    ~nm_classifier();
+    uint16_t classify(cv::Mat &in);
 
-  uint16_t deleteKnowledge(cv::Mat &in);
-  void learn(cv::Mat &in, int cat = -1);
-  uint32_t file_to_neurons();
-  void neurons_to_file();
-  int neuron_count();
-  void extract_feature_vector(cv::Mat input, std::vector<uint8_t> &v);
-  void extract_feature_hog(cv::Mat &input, cv::Mat &output);
+    uint16_t deleteKnowledge(cv::Mat &in);
+    void learn(cv::Mat &in, int cat = -1);
+    uint32_t file_to_neurons();
+    void neurons_to_file();
+    int neuron_count();
+    void extract_feature_vector(cv::Mat input, std::vector<uint8_t> &v);
+    void extract_feature_hog(cv::Mat &input, cv::Mat &output);
 
-  void set_learning_mode(bool mode);
-  uint16_t maxif() const;
-  uint16_t minif() const;
-  void set_maxif(uint16_t max);
-  void set_minif(uint16_t min);
+    void set_learning_mode(bool mode);
+    uint16_t maxif() const;
+    uint16_t minif() const;
+    void set_maxif(uint16_t max);
+    void set_minif(uint16_t min);
 
-  void read_neurons(std::vector<cv::Mat> &vl);
-//  void read_neurons(QListWidget *ql);
+    void read_neurons(std::vector<cv::Mat> &vl);
+    void read_neurons(QListWidget *ql);
 };

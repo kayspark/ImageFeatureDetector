@@ -32,10 +32,10 @@ void nm_detector::createTrackerByName(const std::string &name) {
 }
 
 nm_detector::nm_detector(std::string cascade, std::string algorithm)
-    : m_scale(1.1)
-    , m_tracker_algorithm(std::move(algorithm))
+    : m_tracker_algorithm(std::move(algorithm))
     , detected_area(cv::Rect2d(0, 0, 0, 0))
     , initialized_tracker(false)
+    , m_scale(1.1)
     , colors(std::array<cv::Scalar, 8>() = {cv::Scalar(255, 0, 0), cv::Scalar(255, 128, 0), cv::Scalar(255, 255, 0),
                                             cv::Scalar(0, 255, 0), cv::Scalar(0, 128, 255), cv::Scalar(0, 255, 255),
                                             cv::Scalar(0, 0, 255), cv::Scalar(255, 0, 255)}) {

@@ -28,7 +28,7 @@ void deleteKnowledge(nm_classifier &classifier, cv::Mat &feature) {
     if (classifier.deleteKnowledge(feature) < nm_classifier::UNKNOWN)
         std::cout << "delete best matched knowlege" << std::endl;
 }
-
+/*
 int main(int argc, char const *argv[]) {
 
 #ifdef _WIN32
@@ -100,3 +100,4 @@ int main(int argc, char const *argv[]) {
     }
     return 0;
 }
+*/

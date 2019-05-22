@@ -35,13 +35,13 @@ and the following disclaimer.
 */
 
 #include "nm_classifier.hpp"
-//#include "opencvhelper.hpp"
+#include "opencvhelper.hpp"
 #include <algorithm>
 #include <iostream>
 #include <map>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/utils/filesystem.hpp>
-//#include <qdir.h>
+#include <qdir.h>
 #include <string>
 
 using namespace cv;
@@ -529,32 +529,33 @@ void nm_classifier::read_neurons(std::vector<Mat> &vl) {
 //
 // get neurons an put it into QListWidget as widget items
 //
-// void nm_classifier::read_neurons(QListWidget *ql) {
-//
-//  uint32_t neuron_count = 0;
-//#ifdef _WIN32
-//  neuron_count = NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
-//  if (neuron_count == 0) {
-//    return;
-//  }
-//  std::vector<NeuroMem::NeuroMemNeuron> neurons(neuron_count);
-//  neurons[0].size = m_neuron_vector_size;
-//  NeuroMem::NeuroMemEngine::ReadNeurons(m_device.get(), &neurons[0], neuron_count);
-//#else
-//  neuron_count = nm_get_neuron_count(m_device.get());
-//  if (neuron_count == 0) {
-//    return;
-//  }
-//  std::vector<nm_neuron> neurons(neuron_count);
-//  neurons[0].size = m_neuron_vector_size;
-//  nm_read_neurons(m_device.get(), &neurons[0], neuron_count);
-//#endif
-//  for (const auto &neuron : neurons) {
-//    cv::Mat r(16, 16, CV_8UC1);
-//    std::copy(neuron.model, neuron.model + neuron.size,
-//              r.data); //    memcpy(r.data, neuron.model, neuron.size*sizeof(uchar));
-//    QImage img = Mat2QImage(r);
-//    QPixmap pix = QPixmap::fromImage(img).scaled(QSize(100, 100), Qt::KeepAspectRatio);
-//    ql->addItem(new QListWidgetItem(QIcon(pix), QString(neuron.cat)));
-//  }
-//}
+void nm_classifier::read_neurons(QListWidget *ql) {
+
+  uint16_t r = 0;
+    uint32_t neuron_count = 0;
+#ifdef _WIN32
+    neuron_count = NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
+    if (neuron_count == 0) {
+        return;
+    }
+    std::vector<NeuroMem::NeuroMemNeuron> neurons(neuron_count);
+    neurons[0].size = m_neuron_vector_size;
+    NeuroMem::NeuroMemEngine::ReadNeurons(m_device.get(), &neurons[0], neuron_count);
+#else
+    r = nm_get_neuron_count(m_device.get(), &neuron_count);
+    if (neuron_count == 0) {
+        return;
+    }
+    std::vector<nm_neuron> neurons(neuron_count);
+    neurons[0].size = m_neuron_vector_size;
+    r = nm_read_neurons(m_device.get(), &neurons[0], &neuron_count);
+#endif
+    for (const auto &neuron : neurons) {
+        cv::Mat r(16, 16, CV_8UC1);
+        std::copy(neuron.model, neuron.model + neuron.size,
+                  r.data); //    memcpy(r.data, neuron.model, neuron.size*sizeof(uchar));
+        QImage img = Mat2QImage(r);
+        QPixmap pix = QPixmap::fromImage(img).scaled(QSize(100, 100), Qt::KeepAspectRatio);
+        ql->addItem(new QListWidgetItem(QIcon(pix), QString(neuron.cat)));
+    }
+}
