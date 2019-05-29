@@ -313,11 +313,6 @@ uint32_t nm_classifier::file_to_neurons() {
         return (0);
     }
 
-    file_name.open("backup/name.txt", std::ios::in);
-    if (!file_name.is_open()) {
-        std::cout << "Skip the restore process because there isn't backup.hex file" << std::endl;
-    }
-
 #ifdef _WIN32
     NeuroMem::NeuroMemContext ctx{};
     NeuroMem::NeuroMemEngine::GetContext(m_device.get(), &ctx);
@@ -329,69 +324,24 @@ uint32_t nm_classifier::file_to_neurons() {
     std::cout << "file to neuron before context:" << ctx.maxif << std::endl;
     std::cout << "Start restore process from backup.hex file" << std::endl;
 
-    file.read((char *)(&header), sizeof(header));
-    if (header[0] != 0x1704) {
-        std::cout << "Header error 0: " << header[0] << std::endl;
-        file.close();
-        return (0);
-    }
-    if (header[1] != NEURON_SIZE) {
-        std::cout << "Neuron size error 1" << std::endl;
-        file.close();
-        return (0);
-    }
-    if (header[2] > MAX_NEURON) {
-        std::cout << "Ncount error" << std::endl;
-        file.close();
-        return (0);
-    }
-    neuron_count = header[2];
-    std::cout << "neuronCount: " << neuron_count << std::endl;
-    // auto *neurons = new NeuroMemNeuron[neuronCount];
+    const char *path = "backup/backup.hex";
+    nm_neuron *neurons = (nm_neuron *)malloc(sizeof(nm_neuron) * neuron_count);
+    neurons[0].size = NEURON_MEMORY;
 
-#ifdef _WIN32
-    std::vector<NeuroMem::NeuroMemNeuron> neurons(neuron_count);
-#else
-    std::vector<nm_neuron> neurons(neuron_count);
-#endif
+    nm_load_model(m_device.get(), neurons, &neuron_count, path);
 
-    std::vector<uint16_t> buffer(m_neuron_vector_size + 5);
-    uint16_t cat = 1;
-    for (auto &&nr : neurons) {
-        file.read((char *)(&buffer[0]), sizeof(uint16_t) * (m_neuron_vector_size + 5));
-        if (!file.eof()) {
-            nr.ncr = buffer[0];
-            nr.size = m_neuron_vector_size;
-            nr.aif = buffer[1 + m_neuron_vector_size];
-            nr.minif = buffer[2 + m_neuron_vector_size];
-            nr.cat = buffer[3 + m_neuron_vector_size];
-            nr.nid = buffer[4 + m_neuron_vector_size];
-            std::cout << "nid= " << nr.nid << " ,ncr= " << nr.ncr << " ,cat= " << nr.cat << " ,aif = " << nr.aif
-                      << " , minif = " << nr.minif << std::endl;
-            std::move(std::begin(buffer) + 1, std::begin(buffer) + 1 + m_neuron_vector_size, std::begin(nr.model));
-            const auto ret = m_category_set.insert(nr.cat);
-            if (ret.second) {
-                cat = nr.cat;
-                std::cout << "DEBUG: cat= " << cat << " , size= " << m_category_set.size() << std::endl;
-            }
+    printf("[tc_load_model] neuron count: %d\n", neuron_count);
+    for (int i = 0; i < neuron_count; i++) {
+        printf("[tc_load_model] nid: %-5d ncr: %-5d cat: %-5d aif: %-5d minif: %-5d\n", neurons[i].nid, neurons[i].ncr,
+               neurons[i].cat, neurons[i].aif, neurons[i].minif);
+        for (int j = 0; j < NEURON_MEMORY; j++) {
+            printf("%-3d ", neurons[i].model[j]);
         }
+        printf("\n");
     }
-    file.close();
-#ifdef _WIN32
-    NeuroMem::NeuroMemEngine::WriteNeurons(m_device.get(), neurons.data(), neuron_count);
-    neuron_count = NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
-#else
-    nm_write_neurons(m_device.get(), neurons.data(), &neuron_count);
-    uint16_t r = nm_get_neuron_count(m_device.get(), &neuron_count);
-#endif
-    std::cout << "neurons count after write neurons = " << neuron_count << std::endl;
-    std::cout << "Restoring names." << std::endl;
-    for (uint16_t i = 0; i <= neuron_count; i++) {
-        m_names_[i] = std::to_string(i);
-        if (m_names_[i].length() > 0) {
-            std::cout << "user name  " << i << " " << m_names_[i] << std::endl;
-        }
-    }
+
+    free(neurons);
+
     std::cout << "Restore process is finished." << std::endl;
     m_loaded_ = true;
     return neuron_count;
@@ -399,52 +349,34 @@ uint32_t nm_classifier::file_to_neurons() {
 
 void nm_classifier::neurons_to_file() {
     uint32_t neuron_count = 0;
+    uint16_t r = NM_SUCCESS;
 #ifdef _WIN32
     neuron_count = NeuroMem::NeuroMemEngine::GetNeuronCount(m_device.get());
     if (neuron_count == 0) {
         return;
     }
-    std::vector<NeuroMem::NeuroMemNeuron> neurons(neuron_count);
-    neurons[0].size = m_neuron_vector_size;
-    int size = neurons[0].size;
-    NeuroMem::NeuroMemEngine::ReadNeurons(m_device.get(), &neurons[0], neuron_count);
 #else
-    uint16_t r = nm_get_neuron_count(m_device.get(), &neuron_count);
+    r = nm_get_neuron_count(m_device.get(), &neuron_count);
     if (neuron_count == 0) {
         return;
     }
-    std::vector<nm_neuron> neurons(neuron_count);
-    neurons[0].size = m_neuron_vector_size;
-    int size = neurons[0].size;
-    r = nm_read_neurons(m_device.get(), &neurons[0], &neuron_count);
 #endif
 
-    std::string filename = "backup/backup.hex";
-    std::ofstream file;
+    const char *filename = "backup/backup.hex";
     cv::utils::fs::createDirectory("backup");
-    // QDir dir;
-    // dir.mkdir("backup");
-    file.open(filename, std::ios::out | std::ios::binary);
-    if (file.is_open()) {
-        uint16_t header[4] = {0x1704, 0, 0, 0};
-        header[1] = 256;
-        header[2] = static_cast<uint16_t>(neuron_count);
 
-        file.write((const char *)(&header), sizeof(header));
-        std::vector<uint16_t> buffer(size + 5);
-        for (const auto neuron : neurons) {
-            buffer[0] = neuron.ncr;
-            std::move(std::begin(neuron.model), std::end(neuron.model), std::begin(buffer) + 1);
-            //	for (int j = 0; j < size; j++)
-            //		buffer[1 + j] = neuron.model[j];
-            buffer[1 + size] = neuron.aif;
-            buffer[2 + size] = neuron.minif;
-            buffer[3 + size] = neuron.cat;
-            buffer[4 + size] = static_cast<uint16_t>(neuron.nid);
-            file.write((char *)(&buffer[0]), sizeof(uint16_t) * (size + 5));
-        }
-        file.close();
-    }
+    r = nm_get_neuron_count(m_device.get(), &neuron_count);
+    printf("[tc_save_model] neuron count: %d\n", neuron_count);
+
+    nm_neuron *neurons = (nm_neuron *)malloc(sizeof(nm_neuron) * neuron_count);
+    neurons[0].size = NEURON_MEMORY;
+
+    r = nm_read_neurons(m_device.get(), neurons, &neuron_count);
+
+    r = nm_save_model(m_device.get(), neurons, neuron_count, filename);
+    printf("[tc_save_model] save neurons to '%s' ... %d\n", filename, r);
+
+    free(neurons);
 }
 
 void nm_classifier::pyramid_reduction(Mat &input, Mat &output, int size) {
